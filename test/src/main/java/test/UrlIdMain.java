@@ -6,8 +6,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -116,16 +114,17 @@ public class UrlIdMain {
 		 * 
 		 */
 		private static final long serialVersionUID = -2605999282979633805L;
-		private long max = 0;
-		private ExecutorService executorService = null;
+		// private ExecutorService executorService = null;
 		Configuration conf;
 		HConnection connection;
 		HTableInterface table;
+		private final static String tableName = "urlid";
 		byte[] key = Bytes.toBytes("id");
+		private long max = 0;
 
 		@Override
 		public void destroy() {
-			executorService.shutdown();
+			// executorService.shutdown();
 			try {
 				table.close();
 				connection.close();
@@ -138,13 +137,12 @@ public class UrlIdMain {
 
 		@Override
 		public void init() throws ServletException {
-			executorService = Executors.newCachedThreadPool();
-
+			// executorService = Executors.newCachedThreadPool();
 			conf = HBaseConfiguration.create();
 			try {
-				max = getMaxFromHbase();
 				connection = HConnectionManager.createConnection(conf);
-				table = connection.getTable("urlid");
+				table = connection.getTable(tableName);
+				max = getMaxFromHbase();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -198,12 +196,12 @@ public class UrlIdMain {
 			columnDescriptor.setMaxVersions(1);
 			HBaseAdmin admin = new HBaseAdmin(conf);
 
-			HbaseClient.createTable(admin, "urlid", columnDescriptor, -1, false, null);
+			HbaseClient.createTable(admin, tableName, columnDescriptor, -1, false, null);
 
 			admin.close();
 
 			HConnection connection = HConnectionManager.createConnection(conf);
-			HTableInterface table = connection.getTable("urlid");
+			HTableInterface table = connection.getTable(tableName);
 			System.out.println(table.getTableDescriptor().toString());
 			table.close();
 			connection.close();
@@ -227,10 +225,8 @@ public class UrlIdMain {
 	public static class JettyTest {
 		public static void main(String[] args) throws Exception {
 			HttpClient httpClient = new DefaultHttpClient();
-			// Get请求
-			HttpGet httpget = new HttpGet();
-			// 设置参数
-			List<NameValuePair> qparams = new ArrayList<NameValuePair>();
+			HttpGet httpget = new HttpGet();// Get请求
+			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// 设置参数
 			qparams.add(new BasicNameValuePair("cnt", "10"));
 
 			try {
@@ -239,7 +235,6 @@ public class UrlIdMain {
 				httpget.setURI(uri);
 				// 发送请求
 				HttpResponse httpresponse = httpClient.execute(httpget);
-
 				// 获取返回数据
 				HttpEntity entity = httpresponse.getEntity();
 				String value = EntityUtils.toString(entity);
@@ -300,8 +295,6 @@ public class UrlIdMain {
 			connector1.setName("/admin");
 
 			SslSelectChannelConnector ssl_connector = new SslSelectChannelConnector();
-			// String jetty_home = System.getProperty("jetty.home",
-			// "../jetty-distribution/target/distribution");
 			String jetty_home = System.getProperty("jetty.home",
 					"F:\\book\\开源项目\\jetty-hightide-8.1.6.v20120903\\jetty-hightide-8.1.6.v20120903");
 			System.setProperty("jetty.home", jetty_home);
