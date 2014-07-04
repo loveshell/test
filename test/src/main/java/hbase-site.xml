@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<configuration>
+	<property>
+		<name>hbase.rootdir</name>
+		<value>hdfs://10.200.6.47:49000/hbase</value>
+	</property>
+	<property>
+		<name>hbase.tmp.dir</name>
+		<value>${HBASE_HOME}/hbase-${user.name}</value>
+	</property>
+	<property>
+		<name>hbase.cluster.distributed</name>
+		<value>true</value>
+	</property>
+	<property>
+		<name>hbase.zookeeper.quorum</name>
+		<value>10.200.6.56,10.200.5.83,10.200.6.72</value>
+	</property>
+  <property>
+    <name>hbase.zookeeper.property.maxClientCnxns</name>
+    <value>1000</value>
+  </property>
+
+</configuration>

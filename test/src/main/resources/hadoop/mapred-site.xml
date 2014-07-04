@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+
+<configuration>
+	<property>
+		<name>mapred.job.tracker</name>
+		<value>imsrvtest2:49001</value>
+	</property>
+	<property>
+		<name>mapred.local.dir</name>
+		<value>/data/hadoop-1.2.1/temp</value>
+	</property>
+	<property>
+		<name>mapred.child.java.opts</name>
+		<value>-Xmx2048m</value>
+	</property>
+	
+	<property>
+		<name>mapred.tasktracker.map.tasks.maximum</name>
+		<value>3</value>
+	</property>
+	<property>
+		<name>mapred.tasktracker.reduce.tasks.maximum</name>
+		<value>2</value>
+	</property>
+	<property>
+		<name>mapred.map.tasks</name>
+		<value>1</value>
+	</property>
+	<property>
+		<name>mapred.reduce.tasks</name>
+		<value>2</value>
+	</property>
+	<property>
+		<name>mapred.min.split.size</name>
+		<value>67108864</value>
+	</property>
+<property>
+  <name>mapred.job.shuffle.merge.percent</name>
+  <value>0.7</value>
+</property>
+<property>
+  <name>mapred.compress.map.output</name>
+  <value>true</value>
+</property>
+<property>
+  <name>mapred.reduce.slowstart.completed.maps</name>
+  <value>0.6</value>
+</property>
+  <!-- 	
+	<property>
+		<name>mapred.hosts.exclude</name>
+		<value>/data/hadoop-1.2.1/conf/excludes</value>
+		<final>true</final>
+	</property>
+ -->
+</configuration>
