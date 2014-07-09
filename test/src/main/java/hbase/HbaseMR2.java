@@ -1,9 +1,12 @@
 package hbase;
 
 import java.io.IOException;
+import java.net.URI;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
@@ -28,6 +31,17 @@ import org.apache.hadoop.mapred.SequenceFileInputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.util.EntityUtils;
 import org.apache.nutch.crawl.CrawlDatum;
 
 public class HbaseMR2 extends Configured implements Tool {
@@ -44,8 +58,11 @@ public class HbaseMR2 extends Configured implements Tool {
 		HConnection connection = null;
 		HTableInterface idxTable = null;
 		private boolean wal = false;
-		static long count = 0;
 		private Map tableMap = new HashMap();
+
+		private long totalCount = 0;
+		private long idCount = 0;
+		private long idStart = 0;
 		private long mapStart = 0;
 
 		public void configure(JobConf job) {
@@ -73,32 +90,71 @@ public class HbaseMR2 extends Configured implements Tool {
 			connection.close();
 			long mapend = System.currentTimeMillis();
 			System.out.println("hdfstotable: 这个map耗时毫秒=" + (mapend - mapStart));
-			System.out.println("hdfstotable: 这个map共处理记录条数是=" + count + "记录/每秒=" + count * 1000 / (mapend - mapStart));
+			System.out.println("hdfstotable: 这个map共处理记录条数是=" + totalCount + "记录/每秒=" + totalCount * 1000
+					/ (mapend - mapStart));
 			System.out.println("hdfstotable: 这个map启动时间=" + getDate(mapStart) + "结束时间=" + getDate(mapend));
 		}
 
 		public void map(Text key, CrawlDatum value, OutputCollector<Text, CrawlDatum> output, Reporter reporter)
 				throws IOException {
-			++count;
-			// long tmp = (++count) % 5;
-			value.setScore(1);
-			// if (tmp == 0)
-			// value.setScore(5);
+			long tmp = (++totalCount) % 2;
+			value.setScore(tmp);
+			if (tmp == 0)
+				value.setScore(2);
 
-			String shortKey = ShortUrlGenerator.shortBy62(key.toString());
-			idxTable.put(getIdxPut(shortKey, value));
-			insertUrls(shortKey, key.toString(), value);
+			String url = key.toString();
+			String id = shortById(url);
+			idxTable.put(getIdxPut(url, id, value));
+			insertUrls(id, url, value);
 
-			if ((count % 10000) == 0) {
-				reporter.setStatus(count + " urls done!");
+			if ((totalCount % 10000) == 0) {
+				reporter.setStatus(totalCount + " urls done!");
 				reporter.progress();
-				System.out.println("hdfstotable: " + count + " urls done!");
+				System.out.println("hdfstotable: " + totalCount + " urls done!");
 			}
-			if ((count % 200000) == 0) {
+			if ((totalCount % 200000) == 0) {
 				idxTable.flushCommits();
 				commitTable();
 			}
 			reporter.incrCounter("hdfstotable", "urlNum", 1);
+		}
+
+		private String shortById(String url) {
+			if (idCount++ % 10000 == 0) {
+				idStart = Long.valueOf(getStartId("10000")).longValue();
+			}
+
+			return String.valueOf(idStart++);
+		}
+
+		private String getStartId(String count) {
+			String start = null;
+			HttpClient httpClient = new DefaultHttpClient();
+			httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000);
+			httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
+			HttpGet httpget = new HttpGet();// Get请求
+			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// 设置参数
+			qparams.add(new BasicNameValuePair("cnt", count));
+
+			try {
+				URI uri = URIUtils.createURI("http", "10.200.6.47", 8080, "/",
+						URLEncodedUtils.format(qparams, "UTF-8"), null);
+				httpget.setURI(uri);
+				// 发送请求
+				HttpResponse httpresponse = httpClient.execute(httpget);
+				// 获取返回数据
+				HttpEntity entity = httpresponse.getEntity();
+				String value = EntityUtils.toString(entity);
+				if (value != null && !"error".equals(value))
+					start = value;
+				EntityUtils.consume(entity);
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				httpClient.getConnectionManager().shutdown();
+			}
+
+			return start;
 		}
 
 		private void commitTable() throws IOException {
@@ -113,10 +169,10 @@ public class HbaseMR2 extends Configured implements Tool {
 			}
 		}
 
-		private Put getIdxPut(String shortKey, CrawlDatum value) throws IOException {
-			Put put = new Put(Bytes.toBytes(shortKey));
+		private Put getIdxPut(String url, String id, CrawlDatum value) throws IOException {
+			Put put = new Put(Bytes.toBytes(url));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("id"), Bytes.toBytes(id));
 			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("score"), Bytes.toBytes(value.getScore()));
-
 			if (!wal) {
 				put.setDurability(Durability.SKIP_WAL);
 			}

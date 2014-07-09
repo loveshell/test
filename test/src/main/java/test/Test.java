@@ -43,6 +43,8 @@ public class Test {
 	}
 
 	private static void testComp() {
+		int j = 0;
+		System.out.println(j++);
 
 		System.out.println(123 % 2);
 		System.out.println(123 / 2);

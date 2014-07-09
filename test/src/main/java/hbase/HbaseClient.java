@@ -181,9 +181,10 @@ public class HbaseClient {
 
 	public static void main(String[] args) throws Exception {
 		// createCrawldbIdx();
-		// createCrawldbs();
+		createCrawldbs();
+		// regionTest();
 		// showUrls();
-		getTopnUrls();
+		// getTopnUrls();
 	}
 
 	public static void showTableProps() throws IOException {
@@ -315,13 +316,10 @@ public class HbaseClient {
 	}
 
 	public static void createCrawldbIdx() throws Exception {
-		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1").setInMemory(true);
+		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
-		// 新建一个数据库管理员
 		HBaseAdmin admin = new HBaseAdmin(conf);
-		// createTable(admin, T_CRAWLDBIDX, columnDescriptor, 1073741824l, true,
-		// getUrlSplits());
-		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 1073741824l, true, get62Splits("0", "7fffffffffffffff", 100));
+		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 1073741824l, true, getUrlSplits());
 		admin.close();
 	}
 
@@ -330,12 +328,32 @@ public class HbaseClient {
 		columnDescriptor.setMaxVersions(1);
 
 		HBaseAdmin admin = new HBaseAdmin(conf);
-		for (int i = 18; i < 101; i++) {
-			// createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true,
-			// getUrlSplits());
-			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, get62Splits("0", "7fffffffffffffff", 100));
+		// for (int i = 3; i < 101; i++) {
+		// deleteTable(admin, T_CRAWLDBPRE + i);
+		// }
+		for (int i = 1; i < 2; i++) {
+			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
 		}
 		admin.close();
+	}
+
+	public static void regionTest() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 2);
+		table.setAutoFlush(false, true);
+		for (int j = 0; j < 12; j++) {
+			addRow(table, Bytes.toBytes(String.valueOf(j)), Bytes.toBytes("cf1"), Bytes.toBytes("url"),
+					Bytes.toBytes("http://www.sina.com/" + j));
+			// System.out.println(Bytes.toHex(Bytes.toBytes(Long.valueOf(j))));
+		}
+		table.flushCommits();
+		for (int j = 0; j < 12; j++) {
+			System.out.println("region="
+					+ connection.getRegionLocation(Bytes.toBytes(T_CRAWLDBPRE + 2), Bytes.toBytes(String.valueOf(j)),
+							false));
+		}
+		table.close();
+		connection.close();
 	}
 
 	// 创建数据库表
@@ -363,7 +381,7 @@ public class HbaseClient {
 		else
 			admin.createTable(tableDescriptor);
 
-		System.out.println("创建表成功" + tableName);
+		System.out.println("创建表成功:" + tableName);
 	}
 
 	// 创建数据库表
@@ -389,7 +407,7 @@ public class HbaseClient {
 				tableDescriptor.addFamily(columnDescriptor); // 在描述里添加列族
 			}
 			admin.createTable(tableDescriptor);
-			System.out.println("创建表成功" + tableName);
+			System.out.println("创建表成功:" + tableName);
 		}
 		admin.close();
 	}
@@ -414,15 +432,15 @@ public class HbaseClient {
 			tableDescriptor.setMaxFileSize(maxFileSize);
 		tableDescriptor.addFamily(columnDescriptor); // 在描述里添加列族
 		admin.createTable(tableDescriptor, startKey, endKey, numRegions);
-		System.out.println("创建表成功" + tableName);
+		System.out.println("创建表成功:" + tableName);
 	}
 
 	// 添加一条数据 /更新
-	public static void addRow(HConnection connection, HTableInterface table, String rowId, String cf, String column,
-			String value) throws Exception {
-		Put put = new Put(Bytes.toBytes(rowId));
+	public static void addRow(HTableInterface table, byte[] rowId, byte[] cf, byte[] column, byte[] value)
+			throws Exception {
+		Put put = new Put(rowId);
 		// 参数分别：列族、列、值
-		put.add(Bytes.toBytes(cf), Bytes.toBytes(column), Bytes.toBytes(value));
+		put.add(cf, column, value);
 		table.put(put);
 
 		// table.setAutoFlushTo(false);
@@ -467,17 +485,14 @@ public class HbaseClient {
 	}
 
 	// 删除数据库表
-	public static void deleteTable(String tableName) throws Exception {
-		HBaseAdmin hAdmin = new HBaseAdmin(conf);
-
+	public static void deleteTable(HBaseAdmin hAdmin, String tableName) throws Exception {
 		if (hAdmin.tableExists(tableName)) {
 			hAdmin.disableTable(tableName);// 关闭一个表
 			hAdmin.deleteTable(tableName); // 删除一个表
-			System.out.println("删除表成功");
+			System.out.println("删除表成功:" + tableName);
 		} else {
-			System.out.println("删除的表不存在");
+			System.out.println("删除的表不存在:" + tableName);
 		}
-		hAdmin.close();
 	}
 
 	/**
@@ -586,6 +601,37 @@ public class HbaseClient {
 			byte[] b = sb.toString().getBytes();
 			splits[i] = b;
 			// System.out.println(sb.toString());
+		}
+		return splits;
+	}
+
+	public static byte[][] getCharSplits(String startKey, String endKey, int numRegions) {
+		byte[][] splits = new byte[numRegions - 1][];
+		BigInteger lowestKey = new BigInteger(startKey, 10);
+		BigInteger highestKey = new BigInteger(endKey, 10);
+		BigInteger range = highestKey.subtract(lowestKey);
+		BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
+		lowestKey = lowestKey.add(regionIncrement);
+		for (int i = 0; i < numRegions - 1; i++) {
+			BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
+			byte[] b = String.format("%010d", key).getBytes();
+			splits[i] = b;
+		}
+		return splits;
+	}
+
+	public static byte[][] getLongSplits(String startKey, String endKey, int numRegions) {
+		byte[][] splits = new byte[numRegions - 1][];
+		BigInteger lowestKey = new BigInteger(startKey, 10);
+		BigInteger highestKey = new BigInteger(endKey, 10);
+		BigInteger range = highestKey.subtract(lowestKey);
+		BigInteger regionIncrement = range.divide(BigInteger.valueOf(numRegions));
+		lowestKey = lowestKey.add(regionIncrement);
+		for (int i = 0; i < numRegions - 1; i++) {
+			BigInteger key = lowestKey.add(regionIncrement.multiply(BigInteger.valueOf(i)));
+			// byte[] b = String.format("%010d", key).getBytes();
+			byte[] b = Bytes.toBytes(Long.valueOf(key.longValue()));
+			splits[i] = b;
 		}
 		return splits;
 	}

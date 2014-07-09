@@ -1,11 +1,12 @@
 package test;
 
-import hbase.HbaseClient;
-
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -23,6 +24,8 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HConnection;
@@ -114,7 +117,10 @@ public class UrlIdMain {
 		 * 
 		 */
 		private static final long serialVersionUID = -2605999282979633805L;
-		// private ExecutorService executorService = null;
+		private ExecutorService executorService = null;
+		private AtomicInteger saving;
+		private ThreadLocal threadLocal;
+
 		Configuration conf;
 		HConnection connection;
 		HTableInterface table;
@@ -124,7 +130,7 @@ public class UrlIdMain {
 
 		@Override
 		public void destroy() {
-			// executorService.shutdown();
+			executorService.shutdown();
 			try {
 				table.close();
 				connection.close();
@@ -137,7 +143,10 @@ public class UrlIdMain {
 
 		@Override
 		public void init() throws ServletException {
-			// executorService = Executors.newCachedThreadPool();
+			executorService = Executors.newFixedThreadPool(1);
+			saving = new AtomicInteger(0);
+			threadLocal = new ThreadLocal();
+
 			conf = HBaseConfiguration.create();
 			try {
 				connection = HConnectionManager.createConnection(conf);
@@ -153,7 +162,12 @@ public class UrlIdMain {
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			String count = req.getParameter("cnt");
-			if (count == null || count.isEmpty() || !NumberUtils.isDigits(count) || count.length() > 9) {
+			if (count == null || count.isEmpty()) {
+				resp.getWriter().print(max);
+				resp.flushBuffer();
+				return;
+			}
+			if (!NumberUtils.isDigits(count) || count.length() > 9) {
 				resp.getWriter().print("error");
 				resp.flushBuffer();
 				return;
@@ -161,23 +175,36 @@ public class UrlIdMain {
 			int icount = Integer.parseInt(count);
 			if (icount < 10)
 				icount = 10;
-			max += icount;
+			synchronized (this) {
+				max += icount;
+				threadLocal.set(Long.valueOf(max));
+			}
 			// save max
 			saveMax2Hbase();
 
-			resp.getWriter().print((max + 1));
+			resp.getWriter().print(((Long) threadLocal.get()).longValue() + 1);
 			resp.flushBuffer();
 		}
 
 		private void saveMax2Hbase() throws IOException {
-			// Future<ParseResult> task = executorService.submit();
-
-			// get HBase configuration
-			LOG.info("save max id to hbase");
-			Put put = new Put(key);
-			// 参数分别：列族、列、值
-			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("cur"), Bytes.toBytes(max));
-			table.put(put);
+			if (saving.getAndIncrement() == 0) {
+				executorService.submit(new Runnable() {
+					public void run() {
+						// get HBase configuration
+						LOG.info("save max id to hbase");
+						Put put = new Put(key);
+						// 参数分别：列族、列、值
+						put.add(Bytes.toBytes("cf1"), Bytes.toBytes("cur"), Bytes.toBytes(max));
+						try {
+							table.put(put);
+						} catch (Exception e) {
+							e.printStackTrace();
+						} finally {
+							saving.set(0);
+						}
+					}
+				});
+			}
 		}
 
 		private long getMaxFromHbase() throws IOException {
@@ -196,7 +223,7 @@ public class UrlIdMain {
 			columnDescriptor.setMaxVersions(1);
 			HBaseAdmin admin = new HBaseAdmin(conf);
 
-			HbaseClient.createTable(admin, tableName, columnDescriptor, -1, false, null);
+			createTable(admin, tableName, columnDescriptor, -1, false, null);
 
 			admin.close();
 
@@ -205,6 +232,34 @@ public class UrlIdMain {
 			System.out.println(table.getTableDescriptor().toString());
 			table.close();
 			connection.close();
+		}
+
+		// 创建数据库表
+		public static void createTable(HBaseAdmin admin, String tableName, HColumnDescriptor columnDescriptor,
+				long maxFileSize, boolean del, byte[][] splitKeys) throws Exception {
+			if (admin.tableExists(tableName)) {
+				System.out.println("表已经存在:" + tableName);
+				if (del) {
+					if (admin.isTableAvailable(tableName))
+						admin.disableTable(tableName);
+					admin.deleteTable(tableName);
+					System.out.println("表已del:" + tableName);
+				} else {
+					admin.close();
+					return;
+				}
+			}
+			// 新建一个 表的描述
+			HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
+			if (maxFileSize != -1)
+				tableDescriptor.setMaxFileSize(maxFileSize);
+			tableDescriptor.addFamily(columnDescriptor); // 在描述里添加列族
+			if (splitKeys != null)
+				admin.createTable(tableDescriptor, splitKeys);
+			else
+				admin.createTable(tableDescriptor);
+
+			System.out.println("创建表成功:" + tableName);
 		}
 	}
 
