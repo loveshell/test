@@ -1,2 +1,3 @@
 /target
 /${HBASE_HOME}
+/.settings
