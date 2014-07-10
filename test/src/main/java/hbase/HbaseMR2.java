@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -22,6 +23,7 @@ import org.apache.hadoop.hbase.client.HTableInterface;
 import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.JobClient;
 import org.apache.hadoop.mapred.JobConf;
@@ -97,15 +99,15 @@ public class HbaseMR2 extends Configured implements Tool {
 
 		public void map(Text key, CrawlDatum value, OutputCollector<Text, CrawlDatum> output, Reporter reporter)
 				throws IOException {
-			long tmp = (++totalCount) % 2;
-			value.setScore(tmp);
+			int tmp = Long.valueOf((++totalCount) % 2).intValue();
+			int scoreIdx = tmp;
 			if (tmp == 0)
-				value.setScore(2);
+				scoreIdx = 2;
 
 			String url = key.toString();
 			String id = shortById(url);
-			idxTable.put(getIdxPut(url, id, value));
-			insertUrls(id, url, value);
+			idxTable.put(getIdxPut(url, id, value, scoreIdx));
+			insertUrls(id, url, value, scoreIdx);
 
 			if ((totalCount % 10000) == 0) {
 				reporter.setStatus(totalCount + " urls done!");
@@ -169,40 +171,40 @@ public class HbaseMR2 extends Configured implements Tool {
 			}
 		}
 
-		private Put getIdxPut(String url, String id, CrawlDatum value) throws IOException {
+		private Put getIdxPut(String url, String id, CrawlDatum value, int scoreIdx) throws IOException {
 			Put put = new Put(Bytes.toBytes(url));
 			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("id"), Bytes.toBytes(id));
-			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("score"), Bytes.toBytes(value.getScore()));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(value.getScore()));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("ScoreIdx"), Bytes.toBytes(scoreIdx));
 			if (!wal) {
 				put.setDurability(Durability.SKIP_WAL);
 			}
 			return put;
 		}
 
-		private void insertUrls(String shortKey, String url, CrawlDatum value) throws IOException {
-			HTableInterface htable = getHtable(Float.valueOf(value.getScore()).longValue());
+		private void insertUrls(String shortKey, String url, CrawlDatum value, int scoreIdx) throws IOException {
+			HTableInterface htable = getHtable(scoreIdx);
 			Put put = new Put(Bytes.toBytes(shortKey));
 
 			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("url"), Bytes.toBytes(url));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(value.getScore()));
 			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Status"), new byte[] { value.getStatus() });
 			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Fetchtime"), Bytes.toBytes(value.getFetchTime()));
-			// put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Modifiedtime"),
-			// Bytes.toBytes(value.getModifiedTime()));
-			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("RetriesSinceFetch"),
-					new byte[] { value.getRetriesSinceFetch() });
-			// put.add(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"),
-			// Bytes.toBytes(value.getFetchInterval()));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Retries"), new byte[] { value.getRetriesSinceFetch() });
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"), Bytes.toBytes(value.getFetchInterval()));
+			put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Modifiedtime"), Bytes.toBytes(value.getModifiedTime()));
 			if (value.getSignature() != null && value.getSignature().length != 0)
 				put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Signature"), value.getSignature());
 
-			// org.apache.hadoop.io.MapWritable metaData = value.getMetaData();
-			// if (metaData != null) {
-			// for (Entry<Writable, Writable> e : metaData.entrySet()) {
-			// put.add(Bytes.toBytes("cf1"),
-			// Bytes.toBytes(e.getKey().toString()),
-			// Bytes.toBytes(e.getValue().toString()));
-			// }
-			// }
+			org.apache.hadoop.io.MapWritable meta = value.getMetaData();
+			if (meta != null) {
+				for (Entry<Writable, Writable> e : meta.entrySet()) {
+					if (!"urlid".equals(((Text) e.getKey()).toString()))
+						put.add(Bytes.toBytes("cf1"), Bytes.toBytes(e.getKey().toString()),
+								Bytes.toBytes(e.getValue().toString()));
+				}
+
+			}
 
 			if (!wal) {
 				put.setDurability(Durability.SKIP_WAL);
@@ -211,7 +213,7 @@ public class HbaseMR2 extends Configured implements Tool {
 			htable.put(put);
 		}
 
-		private HTableInterface getHtable(long score) throws IOException {
+		private HTableInterface getHtable(int score) throws IOException {
 			Long lscore = Long.valueOf(score);
 			if (!tableMap.containsKey(lscore)) {
 				tableMap.put(lscore, connection.getTable("crawldb" + score));

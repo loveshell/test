@@ -8,9 +8,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapred.InputFormat;
 import org.apache.hadoop.mapred.InputSplit;
@@ -18,6 +21,8 @@ import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.hadoop.mapred.Reporter;
 import org.apache.nutch.crawl.CrawlDatum;
+import org.apache.nutch.crawl.Generator;
+import org.apache.nutch.metadata.Nutch;
 
 public class TableTopInputFormat implements InputFormat<Text, CrawlDatum> {
 
@@ -56,16 +61,42 @@ public class TableTopInputFormat implements InputFormat<Text, CrawlDatum> {
 
 	public RecordReader<Text, CrawlDatum> getRecordReader(InputSplit split, JobConf job, Reporter reporter)
 			throws IOException {
-		int topn = 10000;
+		if (table == null)
+			table = job.get("generate.table");
+
+		long topn = job.getLong(Generator.GENERATOR_TOP_N, 10000);
 		int hostn = 50;
+		int intervalThreshold = job.getInt(Generator.GENERATOR_MIN_INTERVAL, -1);
+		long curTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
 
 		List<Filter> tmp = new ArrayList<Filter>();
-		Filter filter1 = new PageFilter(Integer.valueOf(topn).longValue());
-		tmp.add(filter1);
-		Filter filter2 = new HostFilter(hostn);
-		tmp.add(filter2);
-		FilterList filters = new FilterList(tmp);
+		// 记录数限�?
+		Filter filter = new PageFilter(topn);
+		tmp.add(filter);
+		// topn限制
+		filter = new HostFilter(hostn);
+		tmp.add(filter);
 
-		return new TableReader(job, table, topn, hostn, filters);
+		// 抓取时间限制 // check fetch schedule
+		SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
+				Bytes.toBytes("Fetchtime"), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime));
+		columnFilter.setFilterIfMissing(true);
+		tmp.add(columnFilter);
+		// generate时间限制
+		columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes(Nutch.GENERATE_TIME_KEY),
+				CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime - job.getLong(Generator.GENERATOR_DELAY, 1L) * 3600L
+						* 24L * 1000L));
+		tmp.add(columnFilter);
+
+		if (intervalThreshold > 0) {
+			// 抓取间隔限制 // consider only entries with a
+			// retry (or fetch) interval lower than threshold
+			columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"),
+					CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
+			tmp.add(columnFilter);
+		}
+
+		FilterList filters = new FilterList(tmp);
+		return new TableReader(job, table, topn, filters);
 	}
 }
