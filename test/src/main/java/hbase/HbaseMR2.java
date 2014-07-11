@@ -123,16 +123,16 @@ public class HbaseMR2 extends Configured implements Tool {
 
 		private String shortById(String url) {
 			if (idCount++ % 10000 == 0) {
-				idStart = Long.valueOf(getStartId("10000")).longValue();
+				idStart = Long.valueOf(getStartId("10000", 3)).longValue();
 			}
 
 			return String.valueOf(idStart++);
 		}
 
-		private String getStartId(String count) {
+		private String getStartId(String count, int retry) {
 			String start = null;
 			HttpClient httpClient = new DefaultHttpClient();
-			httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000);
+			httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
 			httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
 			HttpGet httpget = new HttpGet();// Get请求
 			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// 设置参数
@@ -152,6 +152,8 @@ public class HbaseMR2 extends Configured implements Tool {
 				EntityUtils.consume(entity);
 			} catch (Exception e) {
 				e.printStackTrace();
+				if (retry-- > 0)
+					return getStartId(count, retry);
 			} finally {
 				httpClient.getConnectionManager().shutdown();
 			}
@@ -225,8 +227,10 @@ public class HbaseMR2 extends Configured implements Tool {
 
 	public int run(String[] args) throws Exception {
 		Path current = new Path("/nutch/entitydata/crawldb/current");
+		if (args[0] != null)
+			current = new Path(args[0]);
 		JobConf job = new JobConf(conf);
-		job.setJobName("crawldb: hdfs to htable");
+		job.setJobName("crawldb: hdfs to htable =" + current);
 		job.setJarByClass(HbaseMR2.class);
 
 		job.setMapperClass(FileToTableMap.class);

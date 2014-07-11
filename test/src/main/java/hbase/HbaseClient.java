@@ -5,6 +5,7 @@ import hbase.ShortUrlGenerator.IDShorter;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.conf.Configuration;
@@ -29,6 +31,7 @@ import org.apache.hadoop.hbase.KeyValue;
 import org.apache.hadoop.hbase.KeyValueUtil;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Delete;
+import org.apache.hadoop.hbase.client.Durability;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HConnection;
@@ -47,6 +50,18 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.ParseFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIUtils;
+import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.params.CoreConnectionPNames;
+import org.apache.http.util.EntityUtils;
+import org.apache.nutch.crawl.CrawlDatum;
 
 import com.google.common.base.Preconditions;
 import com.google.protobuf.InvalidProtocolBufferException;
@@ -181,10 +196,138 @@ public class HbaseClient {
 
 	public static void main(String[] args) throws Exception {
 		// createCrawldbIdx();
-		createCrawldbs();
+		// createCrawldbs();
 		// regionTest();
 		// showUrls();
 		// getTopnUrls();
+		// getUrl();
+		threadInsertData();
+	}
+
+	public static void threadInsertData() throws IOException {
+		for (int i = 0; i < 5; i++) {
+			new Thread(new Runnable() {
+				private long totalCount = 0;
+				private long idCount = 0;
+				private long idStart = 0;
+
+				public void run() {
+					try {
+						insertData();
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+
+				public void insertData() throws IOException {
+					HConnection connection = HConnectionManager.createConnection(conf);
+					HTableInterface idx = connection.getTable(T_CRAWLDBIDX);
+					HTableInterface data = connection.getTable(T_CRAWLDBPRE + 1);
+					idx.setAutoFlush(false, true);
+					idx.setWriteBufferSize(12 * 1024 * 1024);
+					data.setAutoFlush(false, true);
+					data.setWriteBufferSize(12 * 1024 * 1024);
+
+					long start = System.currentTimeMillis();
+					for (int i = 0; i < 10000000; i++) {
+
+						int tmp = Long.valueOf((++totalCount) % 2).intValue();
+						int scoreIdx = 1;
+
+						String url = "http://www."
+								+ ShortUrlGenerator.IDShorter.toShort(RandomUtils.nextLong(), ShortUrlGenerator.chars62)
+								+ i + ".com/index.html" + i;
+						String id = shortById(url);
+						idx.put(getIdxPut(url, id, scoreIdx));
+						insertUrls(data, id, url, scoreIdx);
+
+						if ((totalCount % 10000) == 0) {
+							System.out.println(Thread.currentThread() + "hdfstotable: " + totalCount + " urls done!");
+						}
+						if ((totalCount % 200000) == 0) {
+							idx.flushCommits();
+							data.flushCommits();
+							System.out.println("hdfstotable: " + totalCount + " commits.");
+						}
+					}
+					long end = System.currentTimeMillis();
+					System.out.println(Thread.currentThread() + "hdfstotable: use=" + (end - start));
+
+					idx.close();
+					data.close();
+					connection.close();
+				}
+
+				private String shortById(String url) {
+					if (idCount++ % 10000 == 0) {
+						idStart = Long.valueOf(getStartId("10000", 3)).longValue();
+					}
+
+					return String.valueOf(idStart++);
+				}
+
+				private String getStartId(String count, int retry) {
+					String start = null;
+					HttpClient httpClient = new DefaultHttpClient();
+					httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
+					httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
+					HttpGet httpget = new HttpGet();// Get请求
+					List<NameValuePair> qparams = new ArrayList<NameValuePair>();// 设置参数
+					qparams.add(new BasicNameValuePair("cnt", count));
+
+					try {
+						URI uri = URIUtils.createURI("http", "10.200.6.47", 8080, "/",
+								URLEncodedUtils.format(qparams, "UTF-8"), null);
+						httpget.setURI(uri);
+						// 发送请求
+						HttpResponse httpresponse = httpClient.execute(httpget);
+						// 获取返回数据
+						HttpEntity entity = httpresponse.getEntity();
+						String value = EntityUtils.toString(entity);
+						if (value != null && !"error".equals(value))
+							start = value;
+						EntityUtils.consume(entity);
+					} catch (Exception e) {
+						e.printStackTrace();
+						if (retry-- > 0)
+							return getStartId(count, retry);
+					} finally {
+						httpClient.getConnectionManager().shutdown();
+					}
+
+					return start;
+				}
+
+				private Put getIdxPut(String url, String id, int scoreIdx) throws IOException {
+					Put put = new Put(Bytes.toBytes(url));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("id"), Bytes.toBytes(id));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(1f));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("ScoreIdx"), Bytes.toBytes(scoreIdx));
+
+					put.setDurability(Durability.SKIP_WAL);
+
+					return put;
+				}
+
+				private void insertUrls(HTableInterface htable, String shortKey, String url, int scoreIdx)
+						throws IOException {
+					Put put = new Put(Bytes.toBytes(shortKey));
+
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("url"), Bytes.toBytes(url));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(1f));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Status"), new byte[] { CrawlDatum.STATUS_DB_FETCHED });
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Fetchtime"),
+							Bytes.toBytes(System.currentTimeMillis() - 360000000));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Retries"),
+							new byte[] { CrawlDatum.STATUS_DB_UNFETCHED });
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"), Bytes.toBytes(360000000l));
+
+					put.setDurability(Durability.SKIP_WAL);
+
+					htable.put(put);
+				}
+			}).start();
+		}
 	}
 
 	public static void showTableProps() throws IOException {
@@ -197,6 +340,27 @@ public class HbaseClient {
 		System.out.println(table.getTableDescriptor().toString());
 		table.close();
 
+		connection.close();
+	}
+
+	public static void getUrl() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 1);
+
+		Get get = new Get("20250021".getBytes());// 根据rowkey查询
+		Result r = table.get(get);
+		System.out.println("获得到rowkey:" + new String(r.getRow()));
+		for (Cell cell : r.rawCells()) {
+			// System.out.println("时间戳:  " + cell.getTimestamp());
+			System.out.println("列簇:  "
+					+ Bytes.toString(cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength()));
+			System.out.println("列:  "
+					+ Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()));
+			System.out.println("值:  "
+					+ Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
+		}
+
+		table.close();
 		connection.close();
 	}
 

@@ -31,6 +31,10 @@ public class TableTopInputFormat implements InputFormat<Text, CrawlDatum> {
 	public static class CustomInputSplit extends org.apache.hadoop.mapreduce.InputSplit implements InputSplit {
 		private String tableName = null;
 
+		public CustomInputSplit() {
+			super();
+		}
+
 		public CustomInputSplit(String table) {
 			super();
 			this.tableName = table;
@@ -70,33 +74,36 @@ public class TableTopInputFormat implements InputFormat<Text, CrawlDatum> {
 		long curTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
 
 		List<Filter> tmp = new ArrayList<Filter>();
-		// 璁板綍鏁伴檺鍒?
-		Filter filter = new PageFilter(topn);
-		tmp.add(filter);
-		// topn闄愬埗
-		filter = new HostFilter(hostn);
-		tmp.add(filter);
-
-		// 鎶撳彇鏃堕棿闄愬埗 // check fetch schedule
+		// 抓取时间限制 // check fetch schedule
 		SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
 				Bytes.toBytes("Fetchtime"), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime));
 		columnFilter.setFilterIfMissing(true);
 		tmp.add(columnFilter);
-		// generate鏃堕棿闄愬埗
+		// generate时间限制
 		columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes(Nutch.GENERATE_TIME_KEY),
 				CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime - job.getLong(Generator.GENERATOR_DELAY, 1L) * 3600L
 						* 24L * 1000L));
 		tmp.add(columnFilter);
-
+		// 抓取间隔限制 // consider only entries with a
 		if (intervalThreshold > 0) {
-			// 鎶撳彇闂撮殧闄愬埗 // consider only entries with a
 			// retry (or fetch) interval lower than threshold
 			columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"),
 					CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
 			tmp.add(columnFilter);
 		}
+		//
+		columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Score"),
+				CompareOp.GREATER_OR_EQUAL, Bytes.toBytes(0f));
+		columnFilter.setFilterIfMissing(true);
+		tmp.add(columnFilter);
+		// topn限制
+		Filter filter = new HostFilter(hostn);
+		tmp.add(filter);
+		// 记录数限制
+		filter = new PageFilter(topn);
+		tmp.add(filter);
 
-		FilterList filters = new FilterList(tmp);
+		FilterList filters = new FilterList(tmp);// 有序
 		return new TableReader(job, table, topn, filters);
 	}
 }
