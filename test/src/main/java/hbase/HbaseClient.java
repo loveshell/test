@@ -46,6 +46,7 @@ import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterBase;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.ParseFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
@@ -195,13 +196,35 @@ public class HbaseClient {
 	}
 
 	public static void main(String[] args) throws Exception {
-		// createCrawldbIdx();
+		createCrawldbIdx();
 		// createCrawldbs();
 		// regionTest();
 		// showUrls();
 		// getTopnUrls();
 		// getUrl();
-		threadInsertData();
+		// threadInsertData();
+		// countTable1();
+	}
+
+	public static void countTable1() throws IOException {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 1);
+		Scan scan = new Scan();
+		scan.setCaching(10000);
+		List<Filter> filters = new ArrayList<Filter>();
+		Filter filter = new FirstKeyOnlyFilter();
+		filters.add(filter);
+		FilterList filterList = new FilterList(filters);
+		scan.setFilter(filterList);
+		ResultScanner rs = table.getScanner(scan);
+		long cnt = 0;
+		for (Result r : rs) {
+			cnt++;
+		}
+		rs.close();
+		table.close();
+		connection.close();
+		System.out.println("crawldb1 count=" + cnt);
 	}
 
 	public static void threadInsertData() throws IOException {
@@ -483,7 +506,7 @@ public class HbaseClient {
 		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
 		HBaseAdmin admin = new HBaseAdmin(conf);
-		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 1073741824l, true, getUrlSplits());
+		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 10737418240l, true, getUrlSplits());
 		admin.close();
 	}
 
@@ -492,10 +515,10 @@ public class HbaseClient {
 		columnDescriptor.setMaxVersions(1);
 
 		HBaseAdmin admin = new HBaseAdmin(conf);
-		// for (int i = 3; i < 101; i++) {
-		// deleteTable(admin, T_CRAWLDBPRE + i);
-		// }
-		for (int i = 1; i < 2; i++) {
+		for (int i = 1; i < 4; i++) {
+			deleteTable(admin, T_CRAWLDBPRE + i);
+		}
+		for (int i = 1; i < 3; i++) {
 			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
 		}
 		admin.close();

@@ -6,8 +6,13 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Test {
 	private static Lock dbLock = new ReentrantLock();
 
-	public static void main(String[] args) throws InterruptedException {
-		testComp();
+	public static void main(String[] args) throws Exception {
+		testWrite();
+	}
+
+	public static void testWrite() throws Exception {
+
+		System.out.println(Float.intBitsToFloat(Float.floatToIntBits(11.25f)));
 	}
 
 	public static void testLock() throws InterruptedException {
