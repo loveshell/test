@@ -1,6 +1,4 @@
-package hadoop;
-
-import hbase.HbaseClient.HostFilter;
+package org.hadoop;
 
 import java.io.DataInput;
 import java.io.DataOutput;
@@ -23,6 +21,7 @@ import org.apache.hadoop.mapred.Reporter;
 import org.apache.nutch.crawl.CrawlDatum;
 import org.apache.nutch.crawl.Generator;
 import org.apache.nutch.metadata.Nutch;
+import org.test.hbase.HostFilter;
 
 public class TableTopInputFormat implements InputFormat<Text, CrawlDatum> {
 

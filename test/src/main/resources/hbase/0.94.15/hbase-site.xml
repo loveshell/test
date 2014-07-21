@@ -48,14 +48,10 @@
   </property>
   <property>
     <name>hbase.zookeeper.quorum</name>
-    <value>imsrvtest1,10.200.5.83,10.200.6.72</value>
+    <value>imsrvtest1,skytest1.site,skytest2.site</value>
   </property>
   <property>
     <name>hbase.zookeeper.property.clientPort</name>
     <value>2181</value>
-  </property>
-  <property>
-    <name>hbase.zookeeper.property.maxClientCnxns</name>
-    <value>500</value>
   </property>
 </configuration>

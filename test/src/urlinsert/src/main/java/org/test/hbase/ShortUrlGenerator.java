@@ -1,4 +1,4 @@
-package hbase;
+package org.test.hbase;
 
 import java.security.MessageDigest;
 import java.util.HashMap;

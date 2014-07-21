@@ -1,4 +1,4 @@
-package test;
+package org.test.test;
 
 import java.io.IOException;
 import java.net.URI;
@@ -25,7 +25,6 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.HColumnDescriptor;
 import org.apache.hadoop.hbase.HTableDescriptor;
-import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.Get;
 import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HConnection;
@@ -154,6 +153,7 @@ public class UrlIdMain {
 				max = getMaxFromHbase();
 			} catch (IOException e) {
 				e.printStackTrace();
+				throw new ServletException(e);
 			}
 
 			super.init();
@@ -199,6 +199,15 @@ public class UrlIdMain {
 							table.put(put);
 						} catch (Exception e) {
 							e.printStackTrace();
+							try {
+								Thread.sleep(10000);
+								connection = HConnectionManager.createConnection(conf);
+								table = connection.getTable(tableName);
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
 						} finally {
 							saving.set(0);
 						}
@@ -250,7 +259,7 @@ public class UrlIdMain {
 				}
 			}
 			// 新建一个 表的描述
-			HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
+			HTableDescriptor tableDescriptor = new HTableDescriptor(tableName);
 			if (maxFileSize != -1)
 				tableDescriptor.setMaxFileSize(maxFileSize);
 			tableDescriptor.addFamily(columnDescriptor); // 在描述里添加列族

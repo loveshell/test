@@ -1,7 +1,7 @@
 // This file contains protocol buffers that are used for filters
-// protoc  --java_out=../   ./HostFilter.proto
+// protoc  --java_out=../../../   ./HostFilter.proto
 
-option java_package = "hbase";
+option java_package = "org.test.hbase";
 option java_outer_classname = "HostFilterProtos";
 option java_generic_services = true;
 option java_generate_equals_and_hash = true;
