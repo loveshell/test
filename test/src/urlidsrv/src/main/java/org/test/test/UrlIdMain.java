@@ -190,6 +190,11 @@ public class UrlIdMain {
 			if (saving.getAndIncrement() == 0) {
 				executorService.submit(new Runnable() {
 					public void run() {
+						try {
+							Thread.sleep(3000);
+						} catch (InterruptedException e2) {
+							e2.printStackTrace();
+						}
 						// get HBase configuration
 						LOG.info("save max id to hbase");
 						Put put = new Put(key);

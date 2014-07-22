@@ -59,14 +59,60 @@ public class HbaseClient {
 	public static String T_CRAWLDBPRE = "crawldb";
 
 	public static void main(String[] args) throws Exception {
+		if (args.length < 1) {
+			threadInsertData();
+		}
+		for (int i = 0; i < args.length; i++) {
+			if ("--createUrlid".equals(args[i])) {
+				createUrlid();
+			} else if ("--createCrawldbIdx".equals(args[i])) {
+				createCrawldbIdx();
+			} else if ("--createCrawldb".equals(args[i])) {
+				i++;
+				createCrawldb(Integer.parseInt(args[i]));
+			} else if ("--createCrawldbs".equals(args[i])) {
+				i++;
+				createCrawldbs(Integer.parseInt(args[i]));
+			} else if ("--threadInsertData".equals(args[i])) {
+				threadInsertData();
+			} else if ("--tableInit".equals(args[i])) {
+				createUrlid();
+				createCrawldbIdx();
+				createCrawldbs(2);
+			} else if ("--countTable1".equals(args[i])) {
+				countTable1();
+			} else {
+				threadInsertData();
+			}
+		}
+
+		// createUrlid();
 		// createCrawldbIdx();
 		// createCrawldbs();
 		// regionTest();
 		// showUrls();
 		// getTopnUrls();
 		// getUrl();
-		threadInsertData();
+		// threadInsertData();
 		// countTable1();
+	}
+
+	// 创建数据库表
+	public static void createUrlid() throws Exception {
+		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1").setInMemory(true);
+		columnDescriptor.setMaxVersions(1);
+
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		createTable(admin, "urlid", columnDescriptor, -1, true, null);
+		admin.close();
+
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable("urlid");
+		System.out.println(table.getTableDescriptor().toString());
+		table.close();
+		connection.close();
+
+		System.out.println("createUrlid: end.");
 	}
 
 	public static void countTable1() throws IOException {
@@ -91,32 +137,43 @@ public class HbaseClient {
 	}
 
 	public static void threadInsertData() throws IOException {
-		for (int i = 0; i < 20; i++) {
+		for (int i = 0; i < 3; i++) {
 			new Thread(new Runnable() {
 				private long totalCount = 0;
 				private long idCount = 0;
 				private long idStart = 0;
+				private int retry = 0;
 
 				public void run() {
 					try {
 						insertData();
-					} catch (IOException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
+						if (retry++ < 10) {
+							try {
+								Thread.sleep(10000 * retry);
+								insertData();
+							} catch (InterruptedException e1) {
+								e1.printStackTrace();
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+						}
 					}
 				}
 
 				public void insertData() throws IOException {
 					HConnection connection = HConnectionManager.createConnection(conf);
 					HTableInterface idx = connection.getTable(T_CRAWLDBIDX);
-					HTableInterface data = connection.getTable(T_CRAWLDBPRE + 1);
+					HTableInterface data = connection.getTable(T_CRAWLDBPRE + 2);
 					idx.setAutoFlush(false, true);
 					idx.setWriteBufferSize(12 * 1024 * 1024);
 					data.setAutoFlush(false, true);
 					data.setWriteBufferSize(12 * 1024 * 1024);
 
 					long start = System.currentTimeMillis();
-					for (int i = 0; i < 10000000; i++) {
-
+					long i = 0;
+					while (i < Long.MAX_VALUE) {
 						int tmp = Long.valueOf((++totalCount) % 2).intValue();
 						int scoreIdx = 1;
 
@@ -135,9 +192,12 @@ public class HbaseClient {
 							data.flushCommits();
 							System.out.println("hdfstotable: " + totalCount + " commits.");
 						}
+
+						i++;
 					}
 					long end = System.currentTimeMillis();
-					System.out.println(Thread.currentThread() + "hdfstotable: use=" + (end - start));
+					System.out.println(Thread.currentThread() + "hdfstotable: insert=" + i + " timeUsed="
+							+ (end - start));
 
 					idx.close();
 					data.close();
@@ -187,7 +247,7 @@ public class HbaseClient {
 				private Put getIdxPut(String url, String id, int scoreIdx) throws IOException {
 					Put put = new Put(Bytes.toBytes(url));
 					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("id"), Bytes.toBytes(id));
-					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(1f));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(0.1f));
 					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("ScoreIdx"), Bytes.toBytes(scoreIdx));
 
 					put.setDurability(Durability.SKIP_WAL);
@@ -200,7 +260,7 @@ public class HbaseClient {
 					Put put = new Put(Bytes.toBytes(shortKey));
 
 					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("url"), Bytes.toBytes(url));
-					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(1f));
+					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(0.1f));
 					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Status"), new byte[] { CrawlDatum.STATUS_DB_FETCHED });
 					put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Fetchtime"),
 							Bytes.toBytes(System.currentTimeMillis() - 360000000));
@@ -407,9 +467,22 @@ public class HbaseClient {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 10737418240l, true, getUrlSplits());
 		admin.close();
+
+		System.out.println("createCrawldbIdx: end.");
 	}
 
-	public static void createCrawldbs() throws Exception {
+	public static void createCrawldb(int idx) throws Exception {
+		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
+		columnDescriptor.setMaxVersions(1);
+
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		createTable(admin, T_CRAWLDBPRE + idx, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
+		admin.close();
+
+		System.out.println("createCrawldbs: end.");
+	}
+
+	public static void createCrawldbs(int max) throws Exception {
 		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
 
@@ -417,10 +490,12 @@ public class HbaseClient {
 		// for (int i = 1; i < 4; i++) {
 		// deleteTable(admin, T_CRAWLDBPRE + i);
 		// }
-		for (int i = 1; i < 2; i++) {
+		for (int i = 1; i < (++max); i++) {
 			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
 		}
 		admin.close();
+
+		System.out.println("createCrawldbs: end.");
 	}
 
 	public static void regionTest() throws Exception {
