@@ -1,4 +1,4 @@
-package org.hadoop;
+package org.test.hadoop;
 
 import java.io.DataInput;
 import java.io.DataOutput;
