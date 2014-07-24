@@ -59,8 +59,24 @@ public class HbaseClient {
 	public static String T_CRAWLDBPRE = "crawldb";
 
 	public static void main(String[] args) throws Exception {
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		deleteTable(admin, T_CRAWLDBPRE + 3);
+		deleteTable(admin, T_CRAWLDBPRE + 4);
+		deleteTable(admin, T_CRAWLDBPRE + 5);
+		admin.close();
+
+		// createUrlid();
+		// createCrawldbIdx();
+		// createCrawldbs(2);
+		// regionTest();
+		// showUrls();
+		// getTopnUrls();
+		// getUrl();
+		// threadInsertData();
+		// countTable1();
+
 		if (args.length < 1) {
-			threadInsertData();
+			return;
 		}
 		for (int i = 0; i < args.length; i++) {
 			if ("--createUrlid".equals(args[i])) {
@@ -85,16 +101,6 @@ public class HbaseClient {
 				threadInsertData();
 			}
 		}
-
-		// createUrlid();
-		// createCrawldbIdx();
-		// createCrawldbs();
-		// regionTest();
-		// showUrls();
-		// getTopnUrls();
-		// getUrl();
-		// threadInsertData();
-		// countTable1();
 	}
 
 	// 创建数据库表
@@ -490,7 +496,7 @@ public class HbaseClient {
 		// for (int i = 1; i < 4; i++) {
 		// deleteTable(admin, T_CRAWLDBPRE + i);
 		// }
-		for (int i = 1; i < (++max); i++) {
+		for (int i = 1; i < (max + 1); i++) {
 			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
 		}
 		admin.close();
