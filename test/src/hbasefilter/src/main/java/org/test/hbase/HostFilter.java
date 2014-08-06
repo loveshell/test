@@ -103,7 +103,7 @@ public class HostFilter extends FilterBase {
 			return false;
 		if (hostMap.containsKey(host)) {
 			AtomicInteger count = (AtomicInteger) hostMap.get(host);
-			if (count.getAndIncrement() <= hostLimit) {
+			if (count.incrementAndGet() <= hostLimit) {
 				return true;
 			} else
 				return false;

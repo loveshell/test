@@ -49,7 +49,6 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.apache.nutch.crawl.CrawlDatum;
-import org.test.hbase.ShortUrlGenerator;
 import org.test.hbase.ShortUrlGenerator.IDShorter;
 
 public class HbaseClient98 {
@@ -155,17 +154,17 @@ public class HbaseClient98 {
 					HttpClient httpClient = new DefaultHttpClient();
 					httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
 					httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
-					HttpGet httpget = new HttpGet();// GetÇëÇó
-					List<NameValuePair> qparams = new ArrayList<NameValuePair>();// ÉèÖÃ²ÎÊı
+					HttpGet httpget = new HttpGet();// Getè¯·æ±‚
+					List<NameValuePair> qparams = new ArrayList<NameValuePair>();// è®¾ç½®å‚æ•°
 					qparams.add(new BasicNameValuePair("cnt", count));
 
 					try {
 						URI uri = URIUtils.createURI("http", "10.200.6.47", 8080, "/",
 								URLEncodedUtils.format(qparams, "UTF-8"), null);
 						httpget.setURI(uri);
-						// ·¢ËÍÇëÇó
+						// å‘é€è¯·æ±‚
 						HttpResponse httpresponse = httpClient.execute(httpget);
-						// »ñÈ¡·µ»ØÊı¾İ
+						// è·å–è¿”å›æ•°æ®
 						HttpEntity entity = httpresponse.getEntity();
 						String value = EntityUtils.toString(entity);
 						if (value != null && !"error".equals(value))
@@ -231,9 +230,9 @@ public class HbaseClient98 {
 		HConnection connection = HConnectionManager.createConnection(conf);
 		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 1);
 
-		Get get = new Get("72811071".getBytes());// ¸ù¾İrowkey²éÑ¯
+		Get get = new Get("72811071".getBytes());// æ ¹æ®rowkeyæŸ¥è¯¢
 		Result r = table.get(get);
-		System.out.println("»ñµÃµ½rowkey:" + new String(r.getRow()));
+		System.out.println("è·å¾—åˆ°rowkey:" + new String(r.getRow()));
 		CrawlDatum datum = new CrawlDatum();
 		createValue(datum, r);
 		System.out.println(datum);
@@ -293,8 +292,8 @@ public class HbaseClient98 {
 		scan.setCaching(1000);
 		// don't set to true for MR jobs
 		// scan.setCacheBlocks(false);
-		// É¨ÃèÌØ¶¨Çø¼ä
-		// Scan scan=new Scan(Bytes.toBytes("¿ªÊ¼ĞĞºÅ"),Bytes.toBytes("½áÊøĞĞºÅ"));
+		// æ‰«æç‰¹å®šåŒºé—´
+		// Scan scan=new Scan(Bytes.toBytes("å¼€å§‹è¡Œå·"),Bytes.toBytes("ç»“æŸè¡Œå·"));
 
 		int i = 0;
 		ResultScanner rs = table.getScanner(scan);
@@ -302,7 +301,7 @@ public class HbaseClient98 {
 			if (i++ >= 100)
 				break;
 			System.out.println("==================================");
-			System.out.println("ĞĞºÅ:  " + Bytes.toString(r.getRow()));
+			System.out.println("è¡Œå·:  " + Bytes.toString(r.getRow()));
 
 			byte[] url = r.getValue(Bytes.toBytes("cf1"), Bytes.toBytes("url"));
 			if (url != null)
@@ -370,90 +369,90 @@ public class HbaseClient98 {
 		connection.close();
 	}
 
-	// ´´½¨Êı¾İ¿â±í
+	// åˆ›å»ºæ•°æ®åº“è¡¨
 	public static void createTable(HBaseAdmin admin, String tableName, HColumnDescriptor columnDescriptor,
 			long maxFileSize, boolean del, byte[][] splitKeys) throws Exception {
 		if (admin.tableExists(tableName)) {
-			System.out.println("±íÒÑ¾­´æÔÚ:" + tableName);
+			System.out.println("è¡¨å·²ç»å­˜åœ¨:" + tableName);
 			if (del) {
 				if (admin.isTableAvailable(tableName))
 					admin.disableTable(tableName);
 				admin.deleteTable(tableName);
-				System.out.println("±íÒÑdel:" + tableName);
+				System.out.println("è¡¨å·²del:" + tableName);
 			} else {
 				admin.close();
 				return;
 			}
 		}
-		// ĞÂ½¨Ò»¸ö ±íµÄÃèÊö
+		// æ–°å»ºä¸€ä¸ª è¡¨çš„æè¿°
 		HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
 		if (maxFileSize != -1)
 			tableDescriptor.setMaxFileSize(maxFileSize);
-		tableDescriptor.addFamily(columnDescriptor); // ÔÚÃèÊöÀïÌí¼ÓÁĞ×å
+		tableDescriptor.addFamily(columnDescriptor); // åœ¨æè¿°é‡Œæ·»åŠ åˆ—æ—
 		if (splitKeys != null)
 			admin.createTable(tableDescriptor, splitKeys);
 		else
 			admin.createTable(tableDescriptor);
 
-		System.out.println("´´½¨±í³É¹¦:" + tableName);
+		System.out.println("åˆ›å»ºè¡¨æˆåŠŸ:" + tableName);
 	}
 
-	// ´´½¨Êı¾İ¿â±í
+	// åˆ›å»ºæ•°æ®åº“è¡¨
 	public static void createTable(String tableName, HColumnDescriptor[] columnDescriptors, long maxFileSize,
 			boolean del) throws Exception {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 
 		if (admin.tableExists(tableName)) {
-			System.out.println("±íÒÑ¾­´æÔÚ:" + tableName);
+			System.out.println("è¡¨å·²ç»å­˜åœ¨:" + tableName);
 			if (del) {
 				admin.disableTable(tableName);
 				admin.deleteTable(tableName);
-				System.out.println("±íÒÑdel:" + tableName);
+				System.out.println("è¡¨å·²del:" + tableName);
 			} else {
 				admin.close();
 				return;
 			}
 		} else {
-			// ĞÂ½¨Ò»¸ö ±íµÄÃèÊö
+			// æ–°å»ºä¸€ä¸ª è¡¨çš„æè¿°
 			HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
 			tableDescriptor.setMaxFileSize(maxFileSize);
 			for (HColumnDescriptor columnDescriptor : columnDescriptors) {
-				tableDescriptor.addFamily(columnDescriptor); // ÔÚÃèÊöÀïÌí¼ÓÁĞ×å
+				tableDescriptor.addFamily(columnDescriptor); // åœ¨æè¿°é‡Œæ·»åŠ åˆ—æ—
 			}
 			admin.createTable(tableDescriptor);
-			System.out.println("´´½¨±í³É¹¦:" + tableName);
+			System.out.println("åˆ›å»ºè¡¨æˆåŠŸ:" + tableName);
 		}
 		admin.close();
 	}
 
-	// ´´½¨Êı¾İ¿â±í
+	// åˆ›å»ºæ•°æ®åº“è¡¨
 	public static void createTable(HBaseAdmin admin, String tableName, HColumnDescriptor columnDescriptor,
 			long maxFileSize, boolean del, byte[] startKey, byte[] endKey, int numRegions) throws Exception {
 		if (admin.tableExists(tableName)) {
-			System.out.println("±íÒÑ¾­´æÔÚ:" + tableName);
+			System.out.println("è¡¨å·²ç»å­˜åœ¨:" + tableName);
 			if (del) {
 				admin.disableTable(tableName);
 				admin.deleteTable(tableName);
-				System.out.println("±íÒÑdel:" + tableName);
+				System.out.println("è¡¨å·²del:" + tableName);
 			} else {
 				admin.close();
 				return;
 			}
 		}
-		// ĞÂ½¨Ò»¸ö scores ±íµÄÃèÊö
+		// æ–°å»ºä¸€ä¸ª scores è¡¨çš„æè¿°
 		HTableDescriptor tableDescriptor = new HTableDescriptor(TableName.valueOf(tableName));
 		if (maxFileSize != -1)
 			tableDescriptor.setMaxFileSize(maxFileSize);
-		tableDescriptor.addFamily(columnDescriptor); // ÔÚÃèÊöÀïÌí¼ÓÁĞ×å
+		tableDescriptor.addFamily(columnDescriptor); // åœ¨æè¿°é‡Œæ·»åŠ åˆ—æ—
 		admin.createTable(tableDescriptor, startKey, endKey, numRegions);
-		System.out.println("´´½¨±í³É¹¦:" + tableName);
+		System.out.println("åˆ›å»ºè¡¨æˆåŠŸ:" + tableName);
 	}
 
-	// Ìí¼ÓÒ»ÌõÊı¾İ /¸üĞÂ
+	// æ·»åŠ ä¸€æ¡æ•°æ® /æ›´æ–°
 	public static void addRow(HTableInterface table, byte[] rowId, byte[] cf, byte[] column, byte[] value)
 			throws Exception {
 		Put put = new Put(rowId);
-		// ²ÎÊı·Ö±ğ£ºÁĞ×å¡¢ÁĞ¡¢Öµ
+		// å‚æ•°åˆ†åˆ«ï¼šåˆ—æ—ã€åˆ—ã€å€¼
 		put.add(cf, column, value);
 		table.put(put);
 
@@ -469,23 +468,23 @@ public class HbaseClient98 {
 	}
 
 	/**
-	 * É¾³ıÒ»ÌõÊı¾İ
+	 * åˆ é™¤ä¸€æ¡æ•°æ®
 	 * 
 	 * @param tableName
-	 *            ±íÃû
+	 *            è¡¨å
 	 * @param row
 	 *            rowkey
 	 * **/
 	public static void deleteRow(HTableInterface table, String rowkey) throws Exception {
 		Delete del = new Delete(Bytes.toBytes(rowkey));
-		table.delete(del);// É¾³ıÒ»ÌõÊı¾İ
+		table.delete(del);// åˆ é™¤ä¸€æ¡æ•°æ®
 	}
 
 	/**
-	 * É¾³ı¶àÌõÊı¾İ
+	 * åˆ é™¤å¤šæ¡æ•°æ®
 	 * 
 	 * @param tableName
-	 *            ±íÃû
+	 *            è¡¨å
 	 * @param row
 	 *            rowkey
 	 * **/
@@ -495,43 +494,43 @@ public class HbaseClient98 {
 			Delete del = new Delete(Bytes.toBytes(k));
 			list.add(del);
 		}
-		table.delete(list);// É¾³ı
+		table.delete(list);// åˆ é™¤
 	}
 
-	// É¾³ıÊı¾İ¿â±í
+	// åˆ é™¤æ•°æ®åº“è¡¨
 	public static void deleteTable(HBaseAdmin hAdmin, String tableName) throws Exception {
 		if (hAdmin.tableExists(tableName)) {
-			hAdmin.disableTable(tableName);// ¹Ø±ÕÒ»¸ö±í
-			hAdmin.deleteTable(tableName); // É¾³ıÒ»¸ö±í
-			System.out.println("É¾³ı±í³É¹¦:" + tableName);
+			hAdmin.disableTable(tableName);// å…³é—­ä¸€ä¸ªè¡¨
+			hAdmin.deleteTable(tableName); // åˆ é™¤ä¸€ä¸ªè¡¨
+			System.out.println("åˆ é™¤è¡¨æˆåŠŸ:" + tableName);
 		} else {
-			System.out.println("É¾³ıµÄ±í²»´æÔÚ:" + tableName);
+			System.out.println("åˆ é™¤çš„è¡¨ä¸å­˜åœ¨:" + tableName);
 		}
 	}
 
 	/**
-	 * µ¥Ìõ¼ş²éÑ¯,¸ù¾İrowkey²éÑ¯Î¨Ò»Ò»Ìõ¼ÇÂ¼
+	 * å•æ¡ä»¶æŸ¥è¯¢,æ ¹æ®rowkeyæŸ¥è¯¢å”¯ä¸€ä¸€æ¡è®°å½•
 	 * 
 	 * @param tableName
 	 * @throws IOException
 	 */
 	public static void getByKey(HTableInterface table, String key) throws IOException {
-		Get scan = new Get(key.getBytes());// ¸ù¾İrowkey²éÑ¯
+		Get scan = new Get(key.getBytes());// æ ¹æ®rowkeyæŸ¥è¯¢
 		Result r = table.get(scan);
-		System.out.println("»ñµÃµ½rowkey:" + new String(r.getRow()));
+		System.out.println("è·å¾—åˆ°rowkey:" + new String(r.getRow()));
 		for (Cell cell : r.rawCells()) {
-			System.out.println("Ê±¼ä´Á:  " + cell.getTimestamp());
-			System.out.println("ÁĞ´Ø:  "
+			System.out.println("æ—¶é—´æˆ³:  " + cell.getTimestamp());
+			System.out.println("åˆ—ç°‡:  "
 					+ Bytes.toString(cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength()));
-			System.out.println("ÁĞ:  "
+			System.out.println("åˆ—:  "
 					+ Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(), cell.getQualifierLength()));
-			System.out.println("Öµ:  "
+			System.out.println("å€¼:  "
 					+ Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
 		}
 	}
 
 	/**
-	 * µ¥Ìõ¼ş°´²éÑ¯£¬²éÑ¯¶àÌõ¼ÇÂ¼
+	 * å•æ¡ä»¶æŒ‰æŸ¥è¯¢ï¼ŒæŸ¥è¯¢å¤šæ¡è®°å½•
 	 * 
 	 * @param tableName
 	 * @throws IOException
@@ -539,21 +538,21 @@ public class HbaseClient98 {
 	public static void scanFilter(HTableInterface table) throws IOException {
 		Scan s = new Scan();
 		Filter filter = new SingleColumnValueFilter(Bytes.toBytes("column1"), null, CompareOp.EQUAL,
-				Bytes.toBytes("aaa")); // µ±ÁĞcolumn1µÄÖµÎªaaaÊ±½øĞĞ²éÑ¯
+				Bytes.toBytes("aaa")); // å½“åˆ—column1çš„å€¼ä¸ºaaaæ—¶è¿›è¡ŒæŸ¥è¯¢
 		s.setFilter(filter);
 
 		ResultScanner rs = table.getScanner(s);
 		for (Result r : rs) {
-			System.out.println("»ñµÃµ½rowkey:" + new String(r.getRow()));
+			System.out.println("è·å¾—åˆ°rowkey:" + new String(r.getRow()));
 			for (Cell cell : r.rawCells()) {
-				System.out.println("Ê±¼ä´Á:  " + cell.getTimestamp());
-				System.out.println("ÁĞ´Ø:  "
+				System.out.println("æ—¶é—´æˆ³:  " + cell.getTimestamp());
+				System.out.println("åˆ—ç°‡:  "
 						+ Bytes.toString(cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength()));
 				System.out
-						.println("ÁĞ:  "
+						.println("åˆ—:  "
 								+ Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(),
 										cell.getQualifierLength()));
-				System.out.println("Öµ:  "
+				System.out.println("å€¼:  "
 						+ Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
 			}
 		}
@@ -561,7 +560,7 @@ public class HbaseClient98 {
 	}
 
 	/**
-	 * ×éºÏÌõ¼ş²éÑ¯
+	 * ç»„åˆæ¡ä»¶æŸ¥è¯¢
 	 * 
 	 * @param tableName
 	 * @throws IOException
@@ -584,17 +583,17 @@ public class HbaseClient98 {
 
 		ResultScanner rs = table.getScanner(scan);
 		for (Result r : rs) {
-			System.out.println("»ñµÃµ½rowkey:" + new String(r.getRow()));
+			System.out.println("è·å¾—åˆ°rowkey:" + new String(r.getRow()));
 
 			for (Cell cell : r.rawCells()) {
-				System.out.println("Ê±¼ä´Á:  " + cell.getTimestamp());
-				System.out.println("ÁĞ´Ø:  "
+				System.out.println("æ—¶é—´æˆ³:  " + cell.getTimestamp());
+				System.out.println("åˆ—ç°‡:  "
 						+ Bytes.toString(cell.getFamilyArray(), cell.getFamilyOffset(), cell.getFamilyLength()));
 				System.out
-						.println("ÁĞ:  "
+						.println("åˆ—:  "
 								+ Bytes.toString(cell.getQualifierArray(), cell.getQualifierOffset(),
 										cell.getQualifierLength()));
-				System.out.println("Öµ:  "
+				System.out.println("å€¼:  "
 						+ Bytes.toString(cell.getValueArray(), cell.getValueOffset(), cell.getValueLength()));
 
 			}

@@ -17,24 +17,24 @@ public class OrderUtils {
 
 	/**
 	 * 
-	 * ¶Ômap¶ÔÏó £¬ °´ÕÕvalue½øĞĞÅÅĞò
+	 * å¯¹mapå¯¹è±¡ ï¼Œ æŒ‰ç…§valueè¿›è¡Œæ’åº
 	 * 
 	 * @param <K>
-	 *            keyÀàĞÍ
+	 *            keyç±»å‹
 	 * @param <V>
-	 *            value ÀàĞÍ £¬ ±ØĞë¼Ì³ĞComparable
+	 *            value ç±»å‹ ï¼Œ å¿…é¡»ç»§æ‰¿Comparable
 	 * @param map
-	 *            ´ıÅÅĞòµÄmap
+	 *            å¾…æ’åºçš„map
 	 * @param desc
-	 *            ½µĞò true ÉıĞòfalse
-	 * @return List<Map.Entry<K, V>> ÅÅĞòºóµÄlist
+	 *            é™åº true å‡åºfalse
+	 * @return List<Map.Entry<K, V>> æ’åºåçš„list
 	 */
 	public static <K, V extends Comparable<? super V>> List<Map.Entry<K, V>> orderMapByValue(Map<K, V> map,
 			final boolean desc) {
 		List<Map.Entry<K, V>> list = new ArrayList<Map.Entry<K, V>>(map.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
 			public int compare(Entry<K, V> o1, Entry<K, V> o2) {
-				if (desc) { // ½µĞò
+				if (desc) { // é™åº
 					if (o1.getValue() == null && o2.getValue() == null) {
 						return 0;
 					} else if (o2.getValue() == null) {
@@ -45,7 +45,7 @@ public class OrderUtils {
 						System.out.println(o1 + " compareTo " + o2 + " " + o2.getValue().compareTo(o1.getValue()));
 						return o2.getValue().compareTo(o1.getValue());
 					}
-				} else { // ÉıĞò
+				} else { // å‡åº
 					if (o1.getValue() == null && o2.getValue() == null) {
 						return 0;
 					} else if (o2.getValue() == null) {
@@ -63,24 +63,24 @@ public class OrderUtils {
 
 	/**
 	 * 
-	 * ¶Ômap¶ÔÏó £¬ °´ÕÕkey½øĞĞÅÅĞò
+	 * å¯¹mapå¯¹è±¡ ï¼Œ æŒ‰ç…§keyè¿›è¡Œæ’åº
 	 * 
 	 * @param <K>
-	 *            keyÀàĞÍ£¬ ±ØĞë¼Ì³ĞComparable
+	 *            keyç±»å‹ï¼Œ å¿…é¡»ç»§æ‰¿Comparable
 	 * @param <V>
-	 *            value ÀàĞÍ
+	 *            value ç±»å‹
 	 * @param map
-	 *            ´ıÅÅĞòµÄmap
+	 *            å¾…æ’åºçš„map
 	 * @param desc
-	 *            ½µĞò true ÉıĞòfalse
-	 * @return List<Map.Entry<K, V>> ÅÅĞòºóµÄlist
+	 *            é™åº true å‡åºfalse
+	 * @return List<Map.Entry<K, V>> æ’åºåçš„list
 	 */
 	public static <K extends Comparable<? super K>, V> List<Map.Entry<K, V>> orderMapByKey(Map<K, V> map,
 			final boolean desc) {
 		List<Map.Entry<K, V>> list = new ArrayList<Map.Entry<K, V>>(map.entrySet());
 		Collections.sort(list, new Comparator<Map.Entry<K, V>>() {
 			public int compare(Entry<K, V> o1, Entry<K, V> o2) {
-				if (desc) { // ½µĞò
+				if (desc) { // é™åº
 					if (o1.getKey() == null && o2.getKey() == null) {
 						return 0;
 					} else if (o2.getKey() == null) {
@@ -90,7 +90,7 @@ public class OrderUtils {
 					} else {
 						return o2.getKey().compareTo(o1.getKey());
 					}
-				} else { // ÉıĞò
+				} else { // å‡åº
 					if (o1.getKey() == null && o2.getKey() == null) {
 						return 0;
 					} else if (o2.getKey() == null) {
@@ -107,21 +107,21 @@ public class OrderUtils {
 	}
 
 	/**
-	 * ¶ÔÒ»¸ölist½øĞĞÅÅĞò
+	 * å¯¹ä¸€ä¸ªlistè¿›è¡Œæ’åº
 	 * 
 	 * 
 	 * @param <E>
-	 *            listÖĞµÄÔªËØ±ØĞë¼Ì³ĞComparable
+	 *            listä¸­çš„å…ƒç´ å¿…é¡»ç»§æ‰¿Comparable
 	 * @param list
-	 *            ´ıÅÅĞòlist
+	 *            å¾…æ’åºlist
 	 * @param desc
-	 *            ÊÇ·ñ½µĞòÅÅĞò
+	 *            æ˜¯å¦é™åºæ’åº
 	 */
 	public static <E extends Comparable<? super E>> void sortList(List<E> list, final boolean desc) {
 		if (list != null) {
 			Collections.sort(list, new Comparator<E>() {
 				public int compare(E o1, E o2) {
-					if (desc) { // ½µĞò
+					if (desc) { // é™åº
 						if (o1 == null && o2 == null) {
 							return 0;
 						} else if (o2 == null) {
@@ -131,7 +131,7 @@ public class OrderUtils {
 						} else {
 							return o2.compareTo(o1);
 						}
-					} else { // ÉıĞò
+					} else { // å‡åº
 						if (o1 == null && o2 == null) {
 							return 0;
 						} else if (o2 == null) {
@@ -149,15 +149,15 @@ public class OrderUtils {
 	}
 
 	/**
-	 * ¶ÔÒ»¸ösetÀàĞÍ½øĞĞÅÅĞò £¬ Èç¹ûÎª¿Õ £¬ ²»²Ù×÷ £¬ Èç¹û´æÔÚ £¬ ¶ÔÀïÃæÄÚÈİ½øĞĞÅÅĞò
+	 * å¯¹ä¸€ä¸ªsetç±»å‹è¿›è¡Œæ’åº ï¼Œ å¦‚æœä¸ºç©º ï¼Œ ä¸æ“ä½œ ï¼Œ å¦‚æœå­˜åœ¨ ï¼Œ å¯¹é‡Œé¢å†…å®¹è¿›è¡Œæ’åº
 	 * 
 	 * @param <E>
-	 *            ¼Ì³Ğ±È½ÏComparable
+	 *            ç»§æ‰¿æ¯”è¾ƒComparable
 	 * @param set
-	 *            setÀàĞÍ
+	 *            setç±»å‹
 	 * @param desc
-	 *            ÊÇ·ñ½µĞòÅÅĞò
-	 * @return ÅÅĞòÍê±Ïlist £¬ Èç¹ûset == null £¬ ·µ»ØÒ»¸ö¿ÕµÄlist £¬ ·ñÔò £¬ ·µ»ØÒ»¸ö°´ÕÕdesc¸³ÖµÅÅĞòlist
+	 *            æ˜¯å¦é™åºæ’åº
+	 * @return æ’åºå®Œæ¯•list ï¼Œ å¦‚æœset == null ï¼Œ è¿”å›ä¸€ä¸ªç©ºçš„list ï¼Œ å¦åˆ™ ï¼Œ è¿”å›ä¸€ä¸ªæŒ‰ç…§descèµ‹å€¼æ’åºlist
 	 */
 	public static <E extends Comparable<? super E>> List<E> sortSet(Collection<E> set, boolean desc) {
 		List<E> list = new ArrayList<E>();

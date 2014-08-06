@@ -59,11 +59,13 @@ public class HbaseClient {
 	public static String T_CRAWLDBPRE = "crawldb";
 
 	public static void main(String[] args) throws Exception {
-		HBaseAdmin admin = new HBaseAdmin(conf);
-		deleteTable(admin, T_CRAWLDBPRE + 3);
-		deleteTable(admin, T_CRAWLDBPRE + 4);
-		deleteTable(admin, T_CRAWLDBPRE + 5);
-		admin.close();
+		// HBaseAdmin admin = new HBaseAdmin(conf);
+		// deleteTable(admin, T_CRAWLDBPRE + 3);
+		// deleteTable(admin, T_CRAWLDBPRE + 4);
+		// deleteTable(admin, T_CRAWLDBPRE + 5);
+		// admin.close();
+
+		showJobStauts();
 
 		// createUrlid();
 		// createCrawldbIdx();
@@ -101,6 +103,37 @@ public class HbaseClient {
 				threadInsertData();
 			}
 		}
+	}
+
+	public static void showJobStauts() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable("urlid");
+
+		Scan scan = new Scan();
+		// 1 is the default in Scan, which will be bad for MapReduce jobs
+		scan.setCaching(1000);
+		// don't set to true for MR jobs
+		// scan.setCacheBlocks(false);
+		// 扫描特定区间
+		// Scan scan=new Scan(Bytes.toBytes("开始行号"),Bytes.toBytes("结束行号"));
+
+		int i = 0;
+		ResultScanner rs = table.getScanner(scan);
+		for (Result r : rs) {
+			if (i++ >= 100)
+				break;
+			System.out.println("==================================");
+			System.out.println("行号:  " + Bytes.toString(r.getRow()));
+
+			// byte[] url = r.getValue(Bytes.toBytes("cf1"),
+			// Bytes.toBytes("url"));
+			// if (url != null)
+			// System.out.println("url=" + new String(url));
+		}
+		rs.close();
+
+		table.close();
+		connection.close();
 	}
 
 	// 创建数据库表

@@ -41,7 +41,7 @@ public class HttpClientTest {
 					HttpClient httpClient = new DefaultHttpClient();
 					httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 3000);
 					httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
-					HttpGet get = new HttpGet();// GetÇëÇó
+					HttpGet get = new HttpGet();// Getè¯·æ±‚
 					URI uri = null;
 					try {
 						uri = URIUtils.createURI("http", host, 80, "/", null, null);
@@ -50,28 +50,29 @@ public class HttpClientTest {
 					}
 					get.setURI(uri);
 					// List<NameValuePair> qparams = new
-					// ArrayList<NameValuePair>();// ÉèÖÃ²ÎÊı
+					// ArrayList<NameValuePair>();// è®¾ç½®å‚æ•°
 					// qparams.add(new BasicNameValuePair("cnt", "10"));
 
 					try {
 						// URI uri = URIUtils.createURI("http", host, port,
 						// "/",
 						// URLEncodedUtils.format(qparams, "UTF-8"), null);
-						// ·¢ËÍÇëÇó
+						// å‘é€è¯·æ±‚
 						HttpResponse resp = httpClient.execute(get);
 						// System.out.println(resp.getStatusLine().getStatusCode());
 						// System.out.println(Arrays.asList(resp.getAllHeaders()));
 						if (200 != (resp.getStatusLine().getStatusCode()))
-							System.err.println(IPAddressUtil.textToNumericFormatV4(host) + " :×´Ì¬Âë´íÎó="
-									+ resp.getStatusLine().getStatusCode());
+							System.err.println(InetAddress.getByAddress(IPAddressUtil.textToNumericFormatV4(host))
+									.getHostName() + " :çŠ¶æ€ç é”™è¯¯=" + resp.getStatusLine().getStatusCode());
 						if (Arrays.asList(resp.getAllHeaders()).toString().indexOf("nginx") == -1)
-							System.err.println(IPAddressUtil.textToNumericFormatV4(host) + " :·Çnginx·şÎñ");
+							System.err.println(InetAddress.getByAddress(IPAddressUtil.textToNumericFormatV4(host))
+									.getHostName() + " :énginxæœåŠ¡");
 						System.out.println(InetAddress.getByAddress(IPAddressUtil.textToNumericFormatV4(host))
 								.getHostName() + " :is serving.");
 					} catch (Exception e) {
 						try {
 							System.err.println(InetAddress.getByAddress(IPAddressUtil.textToNumericFormatV4(host))
-									.getHostName() + " :·şÎñ²»¿ÉÓÃ£º" + e.getLocalizedMessage());
+									.getHostName() + " :æœåŠ¡ä¸å¯ç”¨ï¼š" + e.getLocalizedMessage());
 						} catch (UnknownHostException e1) {
 							e1.printStackTrace();
 						}

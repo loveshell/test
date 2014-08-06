@@ -66,7 +66,7 @@ public class UrlIdMain {
 	 * @throws Exception
 	 *             When there is an issue launching the application.
 	 */
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		// set up command line options
 		Options options = new Options();
 		options.addOption("p", "port", true, "Port to bind to [default: 8080]");
@@ -107,8 +107,15 @@ public class UrlIdMain {
 		// HelloServlet("TYPE1 Request")), "/TYPE1/*");
 
 		// start the server
-		server.start();
-		server.join();
+		try {
+			server.start();
+			server.join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.exit(-1);
+		}
 	}
 
 	public static class IdGenerator extends HttpServlet {

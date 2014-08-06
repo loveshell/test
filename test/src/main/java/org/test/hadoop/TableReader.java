@@ -1,9 +1,14 @@
 package org.test.hadoop;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HConnection;
@@ -21,13 +26,18 @@ import org.apache.hadoop.io.Writable;
 import org.apache.hadoop.mapred.JobConf;
 import org.apache.hadoop.mapred.RecordReader;
 import org.apache.nutch.crawl.CrawlDatum;
+import org.apache.nutch.crawl.Generator;
 import org.apache.nutch.metadata.Nutch;
 
 public class TableReader implements RecordReader<Text, CrawlDatum> {
 	private JobConf job;
-	private long topn = 10000;
+	private int defaultTopn = 5000;
+	private long topn = 5000;
 	private long current = 0;
 	private long total = 0;
+	private Map hostCnt = new HashMap();
+	private int hostn = -1;
+	private int reduceNum = 1;
 	private static long generateTime;
 
 	private HConnection connection;
@@ -39,6 +49,8 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 		this.topn = topn;
 		total = topn;
 		generateTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
+		hostn = job.getInt(Generator.GENERATOR_MAX_COUNT, -1);
+		reduceNum = job.getInt(GeneratorHbase2.GENERATL_REDUCENUM, 1);
 
 		HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
 		try {
@@ -54,8 +66,8 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 	private void init(FilterList filters) {
 		Scan scan = new Scan();
 		scan.setFilter(filters);
-		if (topn > 10000)
-			scan.setCaching(10000);
+		if (topn > defaultTopn)
+			scan.setCaching(defaultTopn);
 		else
 			scan.setCaching(Long.valueOf(topn).intValue());
 
@@ -69,7 +81,6 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 	private void createValue(CrawlDatum datum, Result r) {
 		NavigableMap<byte[], byte[]> map = r.getFamilyMap(Bytes.toBytes("cf1"));
 		org.apache.hadoop.io.MapWritable metaData = new org.apache.hadoop.io.MapWritable();
-		datum.setMetaData(metaData);
 
 		for (Iterator iterator = map.keySet().iterator(); iterator.hasNext();) {
 			byte[] key = (byte[]) iterator.next();
@@ -103,11 +114,11 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 				metaData.put(new Text(key), new Text(value));
 		}
 		metaData.put(new Text("urlid"), new Text(r.getRow()));
+		datum.setMetaData(metaData);
 	}
 
 	public static Put generatedPut(byte[] url, CrawlDatum value) {
 		Put put = createPut(url, value);
-		byte m = 1;
 		// generate time
 		put.add(Bytes.toBytes("cf1"), Bytes.toBytes(Nutch.GENERATE_TIME_KEY), Bytes.toBytes(generateTime));
 
@@ -116,7 +127,13 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 
 	public static Put createPut(byte[] url, CrawlDatum value) {
 		MapWritable meta = value.getMetaData();
-		Text key = (Text) meta.get(new Text("urlid"));
+		Text key = null;
+		for (Entry<Writable, Writable> e : meta.entrySet()) {
+			if ("urlid".equals(((Text) e.getKey()).toString())) {
+				key = (Text) e.getValue();
+				break;
+			}
+		}
 		Put put = new Put(key.getBytes());
 
 		put.add(Bytes.toBytes("cf1"), Bytes.toBytes("url"), url);
@@ -138,6 +155,54 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 		return put;
 	}
 
+	private boolean countHost(String url) {
+		String host = getHost(url);
+		if (host != null) {
+			if (hostCnt.containsKey(host)) {
+				AtomicLong cnt = (AtomicLong) hostCnt.get(host);
+				cnt.incrementAndGet();
+
+				if (hostn != -1) {
+					if (cnt.get() <= hostn)
+						return true;
+					else {
+						cnt.decrementAndGet();
+						return false;
+					}
+				}
+				return true;
+			} else {
+				hostCnt.put(host, new AtomicLong(1));
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	private String getHost(String url) {
+		String host = null;
+		try {
+			URL tmp = new URL(url);
+			host = tmp.getHost();
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		return host;
+	}
+
+	private String getHostStr() {
+		StringBuilder sb = new StringBuilder("partTotal:");
+		sb.append((long) (current / reduceNum)).append(",");
+		for (Iterator iterator = hostCnt.keySet().iterator(); iterator.hasNext();) {
+			String type = (String) iterator.next();
+			sb.append(type).append(":").append(hostCnt.get(type)).append(",");
+		}
+		sb.deleteCharAt(sb.length() - 1);
+		return sb.toString();
+	}
+
+	//
 	public boolean next(Text key, CrawlDatum value) throws IOException {
 		if (rs == null) {
 			current = total;
@@ -149,13 +214,19 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 				return false;
 			}
 
-			key.set(r.getValue(Bytes.toBytes("cf1"), Bytes.toBytes("url")));
-			createValue(value, r);
+			byte[] urlByte = r.getValue(Bytes.toBytes("cf1"), Bytes.toBytes("url"));
+			if (!countHost(Bytes.toString(urlByte))) {
+				continue;
+			}
 
 			if (++current > topn) {
-				total = current;
-				break;
+				total = --current;
+				return false;
 			}
+
+			key.set(urlByte);
+			createValue(value, r);
+
 			return true;
 		}
 
@@ -175,9 +246,11 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 	}
 
 	public void close() throws IOException {
-		rs.close();
+		if (rs != null)
+			rs.close();
 		table.close();
 		connection.close();
+		GeneratorHbase2.LOG.info(getHostStr());
 	}
 
 	public float getProgress() throws IOException {

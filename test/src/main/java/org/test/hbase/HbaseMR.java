@@ -43,7 +43,7 @@ public class HbaseMR extends Configured implements Tool {
 	static final Log LOG = LogFactory.getLog(HbaseMR.class);
 
 	/**
-	 * ×Ô¶¨ÒåÎÄ¼þÐ´±í
+	 * è‡ªå®šä¹‰æ–‡ä»¶å†™è¡¨
 	 * 
 	 * @author xxhuang
 	 */

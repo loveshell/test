@@ -51,7 +51,7 @@ public class HbaseMR2 extends Configured implements Tool {
 	static final Log LOG = LogFactory.getLog(HbaseMR2.class);
 
 	/**
-	 * ×Ô¶¨ÒåÎÄ¼şĞ´±í
+	 * è‡ªå®šä¹‰æ–‡ä»¶å†™è¡¨
 	 * 
 	 * @author xxhuang
 	 */
@@ -91,10 +91,10 @@ public class HbaseMR2 extends Configured implements Tool {
 			closeTable();
 			connection.close();
 			long mapend = System.currentTimeMillis();
-			System.out.println("hdfstotable: Õâ¸ömapºÄÊ±ºÁÃë=" + (mapend - mapStart));
-			System.out.println("hdfstotable: Õâ¸ömap¹²´¦Àí¼ÇÂ¼ÌõÊıÊÇ=" + totalCount + "¼ÇÂ¼/Ã¿Ãë=" + totalCount * 1000
+			System.out.println("hdfstotable: è¿™ä¸ªmapè€—æ—¶æ¯«ç§’=" + (mapend - mapStart));
+			System.out.println("hdfstotable: è¿™ä¸ªmapå…±å¤„ç†è®°å½•æ¡æ•°æ˜¯=" + totalCount + "è®°å½•/æ¯ç§’=" + totalCount * 1000
 					/ (mapend - mapStart));
-			System.out.println("hdfstotable: Õâ¸ömapÆô¶¯Ê±¼ä=" + getDate(mapStart) + "½áÊøÊ±¼ä=" + getDate(mapend));
+			System.out.println("hdfstotable: è¿™ä¸ªmapå¯åŠ¨æ—¶é—´=" + getDate(mapStart) + "ç»“æŸæ—¶é—´=" + getDate(mapend));
 		}
 
 		public void map(Text key, CrawlDatum value, OutputCollector<Text, CrawlDatum> output, Reporter reporter)
@@ -134,17 +134,17 @@ public class HbaseMR2 extends Configured implements Tool {
 			HttpClient httpClient = new DefaultHttpClient();
 			httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
 			httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
-			HttpGet httpget = new HttpGet();// GetÇëÇó
-			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// ÉèÖÃ²ÎÊı
+			HttpGet httpget = new HttpGet();// Getè¯·æ±‚
+			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// è®¾ç½®å‚æ•°
 			qparams.add(new BasicNameValuePair("cnt", count));
 
 			try {
 				URI uri = URIUtils.createURI("http", "10.200.6.47", 8080, "/",
 						URLEncodedUtils.format(qparams, "UTF-8"), null);
 				httpget.setURI(uri);
-				// ·¢ËÍÇëÇó
+				// å‘é€è¯·æ±‚
 				HttpResponse httpresponse = httpClient.execute(httpget);
-				// »ñÈ¡·µ»ØÊı¾İ
+				// è·å–è¿”å›æ•°æ®
 				HttpEntity entity = httpresponse.getEntity();
 				String value = EntityUtils.toString(entity);
 				if (value != null && !"error".equals(value))
@@ -242,8 +242,8 @@ public class HbaseMR2 extends Configured implements Tool {
 
 		long start = System.currentTimeMillis();
 		JobClient.runJob(job);
-		System.out.println("hdfstotable:¹²ºÄÊ±=" + (System.currentTimeMillis() - start));
-		System.out.println("hdfstotable: Õâ¸öjobÆô¶¯Ê±¼ä=" + getDate(start) + "½áÊøÊ±¼ä=" + getDate());
+		System.out.println("hdfstotable:å…±è€—æ—¶=" + (System.currentTimeMillis() - start));
+		System.out.println("hdfstotable: è¿™ä¸ªjobå¯åŠ¨æ—¶é—´=" + getDate(start) + "ç»“æŸæ—¶é—´=" + getDate());
 		return 0;
 	}
 
