@@ -44,12 +44,13 @@ public class NutchParallelUtilHBase {
 	// reader.interrupt(); //尝试中断读线程
 	// while(!fs.isDone);//Future返回如果没有完成，则一直循环等待，直到Future返回完成
 	public static Logger LOG = LoggerFactory.getLogger(NutchParallelUtilHBase.class);
-	protected static int genMax = 10;
+	protected static int genMax = 20;
 	protected static int genNum = 2;
 	protected static int genFirst = 4;
 	protected static int updateThreshold = 2;
 	protected static int fetchMap = 4;
-	private static int minCrawlDelay = 1;
+	protected static int tableDepth = 10;
+	protected static float minCrawlDelay = 0.0f;
 	// 容易死锁啊
 	protected static BlockingQueue<Path> generatedSegments = new ArrayBlockingQueue<Path>(genMax, true);
 	protected static BlockingQueue<Path> fetchedSegments = new ArrayBlockingQueue<Path>(genMax * 4, true);
@@ -67,7 +68,7 @@ public class NutchParallelUtilHBase {
 	Path currentFetch = null;//
 
 	protected static JobConf job;
-	protected static GeneratorHbase generator = null;
+	protected static GeneratorRedHbase generator = null;
 	protected static Fetcher fetcher = null;
 	protected static ParseSegment parser = null;
 	protected static CrawlDb crawlDbTool = null;
@@ -78,29 +79,33 @@ public class NutchParallelUtilHBase {
 	protected static long topN = 1000;
 	protected static int threads = 5;
 
-	public static void init(JobConf job, GeneratorHbase generator, Fetcher fetcher, ParseSegment parseSegment,
+	public static void init(JobConf job, GeneratorRedHbase generator, Fetcher fetcher, ParseSegment parseSegment,
 			CrawlDb crawlDbTool, int fetchThreads, int generate, int uThreshold) {
 		init(job, generator, fetcher, parseSegment, crawlDbTool, fetchThreads, generate, uThreshold, 4);
 	}
 
-	public static void init(JobConf job, GeneratorHbase generator, Fetcher fetcher, ParseSegment parseSegment,
+	public static void init(JobConf job, GeneratorRedHbase generator, Fetcher fetcher, ParseSegment parseSegment,
 			CrawlDb crawlDbTool, int fetchThreads, int generate, int uThreshold, int fetchMap) {
 		job.setBoolean("fetcher.parse", false);
-		filter = job.getBoolean(GeneratorHbase.GENERATOR_FILTER, true);
-		normalise = job.getBoolean(GeneratorHbase.GENERATOR_NORMALISE, true);
+		filter = job.getBoolean(GeneratorRedHbase.GENERATOR_FILTER, true);
+		normalise = job.getBoolean(GeneratorRedHbase.GENERATOR_NORMALISE, true);
 		threads = fetchThreads;
 
 		genFirst = generate;
+		if (genFirst > genMax)
+			genFirst = genMax;
+		genNum = genFirst;
 		updateThreshold = uThreshold;
-		minCrawlDelay = job.getInt("fetcher.server.min.delay", 1);
+		tableDepth = job.getInt("generate.table.depth", 10);
+		minCrawlDelay = job.getFloat("fetcher.server.min.delay", 0.0f);
 		fetchAhead = job.getBoolean("fetcher.nextstart.ahead", false);
 		NutchParallelUtilHBase.fetchMap = fetchMap;
-
 		NutchParallelUtilHBase.job = job;
 		NutchParallelUtilHBase.generator = generator;
 		NutchParallelUtilHBase.fetcher = fetcher;
 		NutchParallelUtilHBase.parser = parseSegment;
 		NutchParallelUtilHBase.crawlDbTool = crawlDbTool;
+		NutchParallelUtilHBase.fetcher.getConf().setInt("fetchMap", fetchMap);
 	}
 
 	public void process(Path crawlDb, Path segments, int numLists, long topN, boolean force) throws Exception {
@@ -188,7 +193,7 @@ public class NutchParallelUtilHBase {
 
 		if (genSegCount.get() == 0) //
 			return true;
-		if (genSegCount.get() > 2)// 2个以上无需补充
+		if (genSegCount.get() > genFirst - 3)// 消耗2个需补充
 			return false;
 		// 一个或2个// 有fetch or parse
 		if (fetchSegCount.get() > 0 || fetching.get() > 0)
@@ -203,7 +208,7 @@ public class NutchParallelUtilHBase {
 	 * @return
 	 */
 	private boolean shouldUpdate() {
-		if (minCrawlDelay == 0) {// 抓内网
+		if (minCrawlDelay == 0f) {// 抓内网
 			parsedSegments.clear();// 消费掉
 			parSegCount.set(0);
 
@@ -223,7 +228,7 @@ public class NutchParallelUtilHBase {
 
 	protected void generate(int segCount) throws Exception {
 		Path[] tmp = generator.generate(crawldb, rootSeg, fetchMap, topN, System.currentTimeMillis(), filter,
-				normalise, false, segCount, 1);
+				normalise, false, segCount, tableDepth);
 		if (tmp == null) {
 			LOG.info("generate: 没有生成任何segment");
 			gNullCount.incrementAndGet();
@@ -254,7 +259,6 @@ public class NutchParallelUtilHBase {
 				LOG.info(Thread.currentThread() + " 没有目录需要合并到crawldb。");
 				return;
 			}
-
 			LOG.info(Thread.currentThread() + " 更新crawldb:从该目录：" + toUpdate);
 			crawlDbTool.update(crawldb, toUpdate.toArray(new Path[0]), normalize, filter);
 			LOG.info(Thread.currentThread() + " 更新crawldb:完成segment的更新：" + toUpdate);
@@ -306,16 +310,25 @@ public class NutchParallelUtilHBase {
 						Path doing = currentFetch;
 						if (doing != null) {
 							try {
-								while (!FetchNotify.fetchDone(doing.getName(), fetchMap)) {
+								while (!FetchNotify.fetchDone(doing.getName(), fetchMap - 3)) {
 									try {
 										Thread.sleep(3000);
 									} catch (InterruptedException e) {
 										e.printStackTrace();
 									}
 								}
-								LOG.info("fetchjob id done, path=" + doing);
+								LOG.info(Thread.currentThread() + ":fetchjob id done, path=" + doing);
 								if (doing == currentFetch && genSegCount.get() > 0) {// 有东西需要抓
+									LOG.info(Thread.currentThread() + ":预先启动下一轮fetch，genSegCount=" + genSegCount.get());
 									fetchJobing.set(false);// 好启动新的fetch
+								} else {
+									LOG.info(Thread.currentThread() + ":未能预先启动下一轮fetch，genSegCount="
+											+ genSegCount.get());
+									try {
+										Thread.sleep(5000);
+									} catch (InterruptedException e1) {
+										e1.printStackTrace();
+									}
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
@@ -346,7 +359,7 @@ public class NutchParallelUtilHBase {
 			final int num = i;
 			Thread t = new Thread() {
 				public void run() {
-					Thread.currentThread().setName("parse线程" + num);
+					Thread.currentThread().setName("parseThread" + num);
 					LOG.info(Thread.currentThread() + ": 线程启动");
 					while (true) {
 						Path seg = null;
@@ -423,7 +436,7 @@ public class NutchParallelUtilHBase {
 				try {
 					table.close();
 					connection.close();
-				} catch (IOException e) {
+				} catch (Exception e) {
 					e.printStackTrace();
 				}
 			}

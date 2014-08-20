@@ -50,7 +50,7 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 		total = topn;
 		generateTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
 		hostn = job.getInt(Generator.GENERATOR_MAX_COUNT, -1);
-		reduceNum = job.getInt(GeneratorHbase2.GENERATL_REDUCENUM, 1);
+		reduceNum = job.getInt(GeneratorMapHbase.GENERATL_REDUCENUM, 1);
 
 		HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
 		try {
@@ -250,7 +250,7 @@ public class TableReader implements RecordReader<Text, CrawlDatum> {
 			rs.close();
 		table.close();
 		connection.close();
-		GeneratorHbase2.LOG.info(getHostStr());
+		GeneratorMapHbase.LOG.info(getHostStr());
 	}
 
 	public float getProgress() throws IOException {

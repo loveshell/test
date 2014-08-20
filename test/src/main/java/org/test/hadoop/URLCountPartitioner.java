@@ -149,9 +149,9 @@ public class URLCountPartitioner implements Partitioner<Text, Writable> {
 			}
 		}
 
-		GeneratorHbase2.LOG.info(hostNumValue.toString());
-		GeneratorHbase2.LOG.info(hostParts.toString());
-		GeneratorHbase2.LOG.info(partHosts.toString());
+		GeneratorMapHbase.LOG.info(hostNumValue.toString());
+		GeneratorMapHbase.LOG.info(hostParts.toString());
+		GeneratorMapHbase.LOG.info(partHosts.toString());
 	}
 
 	// partLimit > total
@@ -191,7 +191,7 @@ public class URLCountPartitioner implements Partitioner<Text, Writable> {
 			URL url = new URL(urlString);
 			host = url.getHost();
 		} catch (MalformedURLException e) {
-			GeneratorHbase2.LOG.warn("Malformed URL: '" + urlString + "'");
+			GeneratorMapHbase.LOG.warn("Malformed URL: '" + urlString + "'");
 		}
 
 		if (host == null)
@@ -210,7 +210,7 @@ public class URLCountPartitioner implements Partitioner<Text, Writable> {
 			url = new URL(urlString);
 			hashCode = url.getHost().hashCode();
 		} catch (MalformedURLException e) {
-			GeneratorHbase2.LOG.warn("Malformed URL: '" + urlString + "'");
+			GeneratorMapHbase.LOG.warn("Malformed URL: '" + urlString + "'");
 		}
 		// make hosts wind up in different partitions on different runs
 		hashCode ^= seed;
@@ -228,7 +228,7 @@ public class URLCountPartitioner implements Partitioner<Text, Writable> {
 			host = url.getHost();
 			hashCode = host.hashCode();
 		} catch (MalformedURLException e) {
-			GeneratorHbase2.LOG.warn("Malformed URL: '" + urlString + "'");
+			GeneratorMapHbase.LOG.warn("Malformed URL: '" + urlString + "'");
 		}
 
 		// make hosts wind up in different partitions on different runs

@@ -1,0 +1,499 @@
+<?xml version="1.0"?>
+<!-- Licensed under the Apache License, Version 2.0 (the "License"); you may not 
+	use this file except in compliance with the License. You may obtain a copy of the 
+	License at http://www.apache.org/licenses/LICENSE-2.0 Unless required by applicable 
+	law or agreed to in writing, software distributed under the License is distributed 
+	on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express 
+	or implied. See the License for the specific language governing permissions and limitations 
+	under the License. See accompanying LICENSE file. -->
+
+<!-- This file contains queue allocations for the Capacity Scheduler. Its format 
+	is explained in the Capacity Scheduler documentation at http://hadoop.apache.org/docs/current/hadoop-yarn/hadoop-yarn-site/CapacityScheduler.html. 
+	The documentation also includes a sample config file. -->
+
+<configuration>
+	<property>
+		<name>yarn.scheduler.capacity.root.queues</name>
+		<value>sls_queue_1,sls_queue_2,sls_queue_3</value>
+		<description>The queues at the this level (root is the root queue).
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_1.capacity</name>
+		<value>25</value>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_1.maximum-capacity</name>
+		<value>100</value>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_2.capacity</name>
+		<value>25</value>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_2.maximum-capacity</name>
+		<value>100</value>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_3.capacity</name>
+		<value>50</value>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.sls_queue_3.maximum-capacity</name>
+		<value>100</value>
+	</property>
+</configuration>
+
+
+<configuration>
+	<property>
+		<name>yarn.scheduler.capacity.maximum-applications</name>
+		<value>10000</value>
+		<description>最多可同时处于等待和运行状态的应用程序数目</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.maximum-am-resource-percent</name>
+		<value>0.1</value>
+		<description>集群中可用于运行application master的资源比例上限，这通常用于限制并发运行的应用程序数目。
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.queues</name>
+		<value>default</value>
+		<description>root队列的所有子队列，该实例中只有一个</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.capacity</name>
+		<value>100</value>
+		<description>default队列的资源容量</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.user-limit-factor</name>
+		<value>1</value>
+		<description>
+			每个用户可使用的资源限制
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.maximum-capacity</name>
+		<value>100</value>
+		<description>
+			Default队列可使用的资源上限.
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.state</name>
+		<value>RUNNING</value>
+		<description>
+			Default队列的状态，可以是RUNNING或者STOPPED.
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.acl_submit_applications</name>
+		<value>*</value>
+		<description>
+			限制哪些用户可向default队列中提交应用程序.
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.root.default.acl_administer_queue</name>
+		<value>*</value>
+		<description>
+			限制哪些用户可管理default队列中的应用程序，“*”表示任意用户
+		</description>
+	</property>
+
+	<property>
+		<name>yarn.scheduler.capacity.node-locality-delay</name>
+		<value>-1</value>
+		<description>调度器尝试调度一个rack-local
+			container之前，最多跳过的调度机会，通常而言，该值被设置成集群中机架数目，默认情况下为-1，表示不启用该功能。
+		</description>
+	</property>
+</configuration>
+
+
+
+<configuration>
+
+	<property>
+		<name>mapred.capacity-scheduler.maximum-system-jobs</name>
+		<value>3000</value>
+		<description>Maximum number of jobs in the system which can be initialized,
+			concurrently, by the CapacityScheduler.
+		</description>
+	</property>
+
+<!-- 
+    <queue-name>.capacity：设置调度器中各个queue的容量，这里指的是占用的集群的slots的百分比，需要注意的是，所有queue的该配置项加起来必须小于等于100，否则会导致JobTracker启动失败。 
+	<queue-name>.maximum-capacity：设置调度器中各个queue最大可以占有的容量，默认为-1表示最大可以占有集群100%的资源，和设置为100的效果是一样的。 
+	<queue-name>.minimum-user-limit-percent：当queue中多个用户出现slots竞争的时候，限制每个用户的slots资源的百分比。举个例子，当minimum-user-limit-percent设置为25%时候，如果queue中有多余4个用户同时提交job，那么调度器保证每个用户占有的slots不超过queue中slots数的25%，默认为100表示不对用户作限制。 
+	<queue-name>.user-limit-factor：设置queue中用户可占用queue容量的系数，默认为1表示，queue中每个用户最多只能占有queue的容量（即mapred.capacity-scheduler.queue.<queue-name>.capacity），因此，需要注意的是，如果queue中只有一个用户提交job，且希望用户在集群不繁忙时候可扩展到mapred.capacity-scheduler.queue.<queue-name>.maximum-capacity指定的slots数，则必须相应调大user-limit-factor这个系数。 
+	<queue-name>.supports-priority：设置调度器中各个queue是否支持job优先级，不用过多解释。 
+	mapred.capacity-scheduler.maximum-system-jobs：设置调度器中各个queue中合起来共计可初始化后并发执行的job数，需要注意的是，各个queue会按照自己占有集群slots资源的比例（即mapred.capacity-scheduler.queue.<queue-name>.capacity）决定每个queue最多同时并发执行的job数！举个例子，假设maximum-system-jobs为20个，而queue1占集群10%资源，那么意味着queue1最多可同时并发运行2个job，如果碰巧是运行时间比较长的job的话，将直接导致其他新提交的job被JobTracker阻塞不能进行初始化！ 
+	<queue-name>.maximum-initialized-active-tasks：设置queue中所有并发运行job包含的task数的上限值，如果超过此限制，则新提交到该queue中的job会被排队缓存到磁盘上。 
+	<queue-name>.maximum-initialized-active-tasks-per-user：设置queue中每个特定用户并发运行job包含的task数的上限值，如果超过此限制，则该用户新提交到该queue中的job会被排队缓存到磁盘上。 
+	<queue-name>.init-accept-jobs-factor：设置每个queue中可容纳接收的job总数（maximum-system-jobs * queue-capacity）的系数，举个例子，如果maximum-system-jobs为20，queue-capacity为10%，init-accept-jobs-factor为10，则当queue中job总数达到10*（20*10%）=20时，新的job将被JobTracker拒绝提交。 -->
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.capacity</name>
+		<value>20</value>
+		<description>Percentage of the number of slots in the cluster that are
+			to be
+			available for jobs in this queue.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.maximum-capacity</name>
+		<value>-1</value>
+		<description>
+			maximum-capacity defines a limit beyond which a queue cannot use
+			the capacity of the cluster.
+			This provides a means to limit how much excess
+			capacity a queue can use. By
+			default, there is no limit.
+			The maximum-capacity
+			of a queue can only be greater than or equal to its minimum
+			capacity.
+			Default
+			value of -1 implies a queue can use complete capacity of the cluster.
+
+			This
+			property could be to curtail certain jobs which are long running in nature
+			from occupying more than a
+			certain percentage of the cluster, which in the
+			absence of pre-emption, could lead
+			to capacity guarantees of
+			other queues being
+			affected.
+
+			One important thing to note is that maximum-capacity is a percentage
+			, so based
+			on the cluster's capacity
+			the max capacity would change. So if large
+			no of nodes or racks get added to the
+			cluster , max Capacity in
+			absolute terms
+			would increase accordingly.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.supports-priority</name>
+		<value>false</value>
+		<description>If true, priorities of jobs will be taken into
+			account in
+			scheduling decisions.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.minimum-user-limit-percent
+		</name>
+		<value>100</value>
+		<description> Each queue enforces a limit on the percentage of resources
+			allocated to a user at any given time, if there is competition for them.
+			This
+			user limit can vary between a minimum and maximum value. The former
+			depends on
+			the number of users who have submitted jobs, and the latter is
+			set to this
+			property value. For example, suppose the value of this
+			property is 25. If two
+			users have submitted jobs to a queue, no single
+			user can use more than 50% of
+			the queue resources. If a third user submits
+			a job, no single user can use
+			more than 33% of the queue resources. With 4
+			or more users, no user can use
+			more than 25% of the queue's resources. A
+			value of 100 implies no user limits
+			are imposed.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.user-limit-factor</name>
+		<value>1</value>
+		<description>The multiple of the queue capacity which can be configured to
+			allow a single user to acquire more slots.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.maximum-initialized-active-tasks
+		</name>
+		<value>200000</value>
+		<description>The maximum number of tasks, across all jobs in the queue,
+			which
+			can be initialized concurrently. Once the queue's jobs exceed this
+			limit they
+			will be queued on disk.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.maximum-initialized-active-tasks-per-user
+		</name>
+		<value>100000</value>
+		<description>The maximum number of tasks per-user, across all the of the
+			user's jobs in the queue, which can be initialized concurrently. Once the
+			user's jobs exceed this limit they will be queued on disk.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.queue.default.init-accept-jobs-factor</name>
+		<value>10</value>
+		<description>The multipe of (maximum-system-jobs * queue-capacity) used to
+			determine the number of jobs which are accepted by the scheduler.
+		</description>
+	</property>
+
+	<!-- The default configuration settings for the capacity task scheduler -->
+	<!-- The default values would be applied to all the queues which don't have -->
+	<!-- the appropriate property for the particular queue -->
+	<property>
+		<name>mapred.capacity-scheduler.default-supports-priority</name>
+		<value>false</value>
+		<description>If true, priorities of jobs will be taken into
+			account in
+			scheduling decisions by default in a job queue.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.default-minimum-user-limit-percent</name>
+		<value>100</value>
+		<description>The percentage of the resources limited to a particular user
+			for
+			the job queue at any given point of time by default.
+		</description>
+	</property>
+
+
+	<property>
+		<name>mapred.capacity-scheduler.default-user-limit-factor</name>
+		<value>1</value>
+		<description>The default multiple of queue-capacity which is used to
+			determine
+			the amount of slots a single user can consume concurrently.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.default-maximum-active-tasks-per-queue</name>
+		<value>200000</value>
+		<description>The default maximum number of tasks, across all jobs in the
+			queue, which can be initialized concurrently. Once the queue's jobs exceed
+			this limit they will be queued on disk.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.default-maximum-active-tasks-per-user</name>
+		<value>100000</value>
+		<description>The default maximum number of tasks per-user, across all the of
+			the user's jobs in the queue, which can be initialized concurrently. Once
+			the
+			user's jobs exceed this limit they will be queued on disk.
+		</description>
+	</property>
+
+	<property>
+		<name>mapred.capacity-scheduler.default-init-accept-jobs-factor</name>
+		<value>10</value>
+		<description>The default multipe of (maximum-system-jobs * queue-capacity)
+			used to determine the number of jobs which are accepted by the scheduler.
+		</description>
+	</property>
+
+	<!-- Capacity scheduler Job Initialization configuration parameters -->
+	<property>
+		<name>mapred.capacity-scheduler.init-poll-interval</name>
+		<value>5000</value>
+		<description>The amount of time in miliseconds which is used to poll
+			the job
+			queues for jobs to initialize.
+		</description>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.init-worker-threads</name>
+		<value>5</value>
+		<description>Number of worker threads which would be used by
+			Initialization
+			poller to initialize jobs in a set of queue.
+			If number mentioned in property
+			is equal to number of job queues
+			then a single thread would initialize jobs in
+			a queue. If lesser
+			then a thread would get a set of queues assigned. If the
+			number
+			is greater then number of threads would be equal to number of
+			job
+			queues.
+		</description>
+	</property>
+
+	<!-- defualt -->
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.capacity</name>
+		<value>25</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.maximum-capacity</name>
+		<value>80</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.supports-priority</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.minimum-user-limit-percent
+		</name>
+		<value>20</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.user-limit-factor</name>
+		<value>10</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.maximum-initialized-active-tasks
+		</name>
+		<value>200000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.maximum-initialized-active-tasks-per-user
+		</name>
+		<value>100000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.defualt.init-accept-jobs-factor</name>
+		<value>100</value>
+	</property>
+
+
+	<!-- etl -->
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.capacity</name>
+		<value>25</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.maximum-capacity</name>
+		<value>80</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.supports-priority</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.minimum-user-limit-percent</name>
+		<value>20</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.user-limit-factor</name>
+		<value>10</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.maximum-initialized-active-tasks
+		</name>
+		<value>200000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.maximum-initialized-active-tasks-per-user
+		</name>
+		<value>100000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.etl.init-accept-jobs-factor</name>
+		<value>100</value>
+	</property>
+
+	<!-- day -->
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.capacity</name>
+		<value>25</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.maximum-capacity</name>
+		<value>80</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.supports-priority</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.minimum-user-limit-percent</name>
+		<value>20</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.user-limit-factor</name>
+		<value>10</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.maximum-initialized-active-tasks
+		</name>
+		<value>200000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.maximum-initialized-active-tasks-per-user
+		</name>
+		<value>100000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.day.init-accept-jobs-factor</name>
+		<value>100</value>
+	</property>
+
+	<!-- general -->
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.capacity</name>
+		<value>25</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.maximum-capacity</name>
+		<value>80</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.supports-priority</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.minimum-user-limit-percent
+		</name>
+		<value>20</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.user-limit-factor</name>
+		<value>10</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.maximum-initialized-active-tasks
+		</name>
+		<value>200000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.maximum-initialized-active-tasks-per-user
+		</name>
+		<value>100000</value>
+	</property>
+	<property>
+		<name>mapred.capacity-scheduler.queue.general.init-accept-jobs-factor</name>
+		<value>100</value>
+	</property>
+
+</configuration>  

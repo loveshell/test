@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+
+<!-- Put site-specific property overrides in this file. -->
+<configuration>	
+	<property>
+	  <name>fetcher.nextstart.ahead</name>
+	  <value>true</value>
+	</property>
+	
+	<property>
+		<name>http.timeout</name>
+		<value>6000</value>
+	</property>
+	<property>
+		<name>fetcher.server.min.delay</name>
+		<value>0.1</value>
+	</property>
+	<property>
+		<name>fetcher.server.delay</name>
+		<value>0.2</value>
+	</property>
+	<property>
+		<name>fetcher.threads.fetch</name>
+		<value>150</value>
+	</property>
+	<property>
+		<name>fetcher.threads.per.queue</name>
+		<value>30</value>
+	</property>
+	<property>
+	  <name>fetcher.queue.depth.multiplier</name>
+	  <value>1000</value>
+	</property>
+	<property>
+	  <name>fetcher.max.exceptions.per.queue</name>
+	  <value>500</value>
+	</property>
+
+	<property>
+		<name>generate.max.count</name>
+		<value>5000</value>
+	</property>
+	<property>
+		<name>db.ignore.external.links</name>
+		<value>true</value>
+	</property>
+	<!-- htmlparsefilter-topical| -->
+	<property>
+		<name>plugin.includes</name>
+		<value>protocol-http|urlfilter-regex|parse-(html|tika)|htmlparsefilter-topical|index-(basic|anchor)|indexer-solr|scoring-topic|urlnormalizer-(pass|regex|basic)
+		</value>
+	</property>
+	<property>
+		<name>http.agent.name</name>
+		<value>njuct</value>
+	</property>
+
+<!--上服务器需注释 
+	<property>
+		<name>plugin.folders</name>
+		<value>./build/plugins</value>
+	</property>
+	-->
+
+	<!-- db -->
+	<property>
+		<name>db.signature.class</name>
+		<value>org.apache.nutch.wind.TextProfileSignatureChinese</value>
+	</property>
+	<property>
+		<name>db.fetch.interval.default</name>
+		<value>10800</value>
+	</property>
+	<property>
+		<name>crawl.gen.delay</name>
+		<value>28800000</value>
+	</property>
+	<property>
+		<name>db.max.outlinks.per.page</name>
+		<value>-1</value>
+	</property>
+
+	<!-- generate -->
+	<property>
+		<name>generate.update.crawldb</name>
+		<value>true</value>
+	</property>
+
+	<!-- fetch -->
+	<property>
+		<name>http.max.delays</name>
+		<value>3</value>
+	</property>
+	<property>
+		<name>fetcher.max.crawl.delay</name>
+		<value>0</value>
+	</property>
+	<property>
+		<name>fetcher.parse</name>
+		<value>false</value>
+	</property>
+	<property>
+		<name>http.content.limit</name>
+		<value>102400</value>
+	</property>
+	<property>
+		<name>parser.timeout</name>
+		<value>30</value>
+	</property>
+	<!-- 	-->
+	<property>
+		<name>parser.skip.truncated</name>
+		<value>false</value>
+	</property>
+
+
+	<property>
+		<name>topic.relevance.threshold</name>
+		<value>0</value>
+	</property>
+	<property>
+		<name>topic.relevance.maxvalue</name>
+		<value>1</value>
+	</property>
+	<property>
+		<name>topic.relevance.minvalue</name>
+		<value>0</value>
+	</property>
+	<property>
+		<name>topic.relevance.whiterate</name>
+		<value>0.9</value>
+	</property>
+	<property>
+		<name>topic.relevance.blackrate</name>
+		<value>0.05</value>
+	</property>
+
+	<property>
+		<name>id.server.name</name>
+		<value>10.200.6.47</value>
+	</property>
+	<property>
+		<name>id.server.port</name>
+		<value>8080</value>
+	</property>
+	<property>
+		<name>commit.hbase.threshold</name>
+		<value>10000</value>
+	</property>
+	<!-- 
+	<property>
+		<name>nutch.testkeywords.dir</name>
+		<value>D:/work/Spider/NutchWork/dir</value>
+	</property>
+	-->
+	<!--分值离散化配置： 每个配置用;隔开，每个配置x,y,n表示从x到y之间使用n个分值，sum(n)必须等于桶数 -->
+	<property>
+		<name>nutch.score.step</name>
+		<value>0,2,1;2,4,10;4,10,100</value>
+	</property>
+	<!--增加网页抓取调度类配置-->
+	<property>
+	  <name>db.fetch.schedule.class</name>
+	  <value>org.apache.nutch.crawl.AdaptiveFetchSchedule</value>
+	</property>	
+	<!-- 网页抓取的阀值 -->
+	<property>
+	  <name>fetch.pageContent.counter</name>
+	  <value>800</value> 
+	</property>
+
+</configuration>

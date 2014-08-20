@@ -76,11 +76,11 @@ public class CodeInputFormat implements InputFormat<IntWritable, IntWritable> {
 	}
 
 	public InputSplit[] getSplits(JobConf job, int numSplits) throws IOException {
-		return new CustomInputSplit[] { new CustomInputSplit(job.getInt(GeneratorHbase2.GENERATL_REDUCENUM, 1)) };
+		return new CustomInputSplit[] { new CustomInputSplit(job.getInt(GeneratorMapHbase.GENERATL_REDUCENUM, 1)) };
 	}
 
 	public RecordReader<IntWritable, IntWritable> getRecordReader(InputSplit split, JobConf job, Reporter reporter)
 			throws IOException {
-		return new CodeReader(job.getInt(GeneratorHbase2.GENERATL_REDUCENUM, 1));
+		return new CodeReader(job.getInt(GeneratorMapHbase.GENERATL_REDUCENUM, 1));
 	}
 }

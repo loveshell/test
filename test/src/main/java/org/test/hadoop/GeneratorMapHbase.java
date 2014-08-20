@@ -58,8 +58,8 @@ import org.apache.nutch.util.TimingUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class GeneratorHbase0 extends Generator {
-	public static final Logger LOG = LoggerFactory.getLogger(GeneratorHbase0.class);
+public class GeneratorMapHbase extends Generator {
+	public static final Logger LOG = LoggerFactory.getLogger(GeneratorMapHbase.class);
 	static final String GENERATL_CNT = "generate.cnt";
 	static final String GENERATL_TABLE = "generate.table";
 	static final String GENERATL_REDUCENUM = "generate.reduceNum";
@@ -188,10 +188,10 @@ public class GeneratorHbase0 extends Generator {
 		}
 	}
 
-	public GeneratorHbase0() {
+	public GeneratorMapHbase() {
 	}
 
-	public GeneratorHbase0(Configuration conf) {
+	public GeneratorMapHbase(Configuration conf) {
 		setConf(conf);
 	}
 
@@ -277,7 +277,7 @@ public class GeneratorHbase0 extends Generator {
 		LOG.info("Generator: segment: " + segment);
 
 		JobConf job = new NutchJob(getConf());
-		job.setJarByClass(GeneratorHbase2.class);
+		job.setJarByClass(GeneratorMapHbase.class);
 		job.setJobName("generate: from " + table + " "
 				+ (new SimpleDateFormat("yyyyMMdd HH:mm:ss")).format(System.currentTimeMillis()));
 		// job.setLong(HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, 300000);
@@ -326,7 +326,7 @@ public class GeneratorHbase0 extends Generator {
 	 * Generate a fetchlist from the crawldb.
 	 */
 	public static void main(String args[]) throws Exception {
-		int res = ToolRunner.run(NutchConfiguration.create(), new GeneratorHbase0(), args);
+		int res = ToolRunner.run(NutchConfiguration.create(), new GeneratorMapHbase(), args);
 		System.exit(res);
 	}
 

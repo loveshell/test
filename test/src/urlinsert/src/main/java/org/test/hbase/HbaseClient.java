@@ -65,7 +65,7 @@ public class HbaseClient {
 		// deleteTable(admin, T_CRAWLDBPRE + 5);
 		// admin.close();
 
-		showJobStauts();
+		// showJobStauts();
 
 		// createUrlid();
 		// createCrawldbIdx();
@@ -100,7 +100,7 @@ public class HbaseClient {
 			} else if ("--countTable1".equals(args[i])) {
 				countTable1();
 			} else {
-				threadInsertData();
+				showJobStauts();
 			}
 		}
 	}
@@ -515,7 +515,7 @@ public class HbaseClient {
 		columnDescriptor.setMaxVersions(1);
 
 		HBaseAdmin admin = new HBaseAdmin(conf);
-		createTable(admin, T_CRAWLDBPRE + idx, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
+		createTable(admin, T_CRAWLDBPRE + idx, columnDescriptor, 10737418240l, true, getHostSplits());
 		admin.close();
 
 		System.out.println("createCrawldbs: end.");
@@ -530,7 +530,7 @@ public class HbaseClient {
 		// deleteTable(admin, T_CRAWLDBPRE + i);
 		// }
 		for (int i = 1; i < (max + 1); i++) {
-			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, -1, true, getCharSplits("0", "10000000000", 100));
+			createTable(admin, T_CRAWLDBPRE + i, columnDescriptor, 10737418240l, true, getHostSplits());
 		}
 		admin.close();
 
@@ -693,6 +693,35 @@ public class HbaseClient {
 		} else {
 			System.out.println("删除的表不存在:" + tableName);
 		}
+	}
+
+	public static byte[][] getDomainSplits() {
+		int charNum = 26;
+		char a = 'a';
+		byte[][] splits = new byte[charNum][];
+		for (int i = 0; i < charNum; i++) {
+			splits[i] = Bytes.toBytes(String.valueOf(a++));
+		}
+		return splits;
+	}
+
+	public static byte[][] getHostSplits() {
+		int numSplits = 51;
+		String wwwPre = "www.";
+		char a = 'a';
+		byte[][] splits = new byte[numSplits][];
+		for (int i = 0; i < 22; i++) {
+			splits[i] = String.valueOf(a++).getBytes();
+		}
+		a = 'a';
+		for (int i = 0; i < 26; i++) {
+			StringBuilder sb = new StringBuilder(wwwPre).append(a++);
+			splits[22 + i] = sb.toString().getBytes();
+		}
+		splits[48] = "x".getBytes();
+		splits[49] = "y".getBytes();
+		splits[50] = "z".getBytes();
+		return splits;
 	}
 
 	public static byte[][] getUrlSplits() {

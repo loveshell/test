@@ -28,7 +28,8 @@ public class HttpClientTest {
 		String[] ips = { "10.200.5.227", "10.200.5.21", "10.200.4.232", "10.200.4.141", "10.200.4.196", "10.200.7.13",
 				"10.200.4.249", "10.200.5.85", "10.200.7.22", "10.200.5.17", "10.200.7.225", "10.200.4.136",
 				"10.200.6.207" };
-
+		String[] hosts = { "xxhuang", "kfang-felton", "sjwu", "wtong", "kwu-ganymede", "qwang-forward", "hwei-mike",
+				"mfang-nj", "zning", "qzhang-john", "zddu", "xjyan" };
 		for (int i = 0; i < ips.length; i++) {
 			httpgetThread(ips[i]);
 		}
