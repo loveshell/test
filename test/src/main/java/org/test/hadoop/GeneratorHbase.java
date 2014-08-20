@@ -207,6 +207,7 @@ public class GeneratorHbase extends Generator {
 
 				HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
 				job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, HBASE_REGIONSERVER_LEASE_PERIOD);
+				job.setLong(HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, HBASE_REGIONSERVER_LEASE_PERIOD);
 				try {
 					connection = HConnectionManager.createConnection(this.job);
 					this.table = connection.getTable(tableName);
