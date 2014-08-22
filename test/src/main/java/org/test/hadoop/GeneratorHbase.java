@@ -168,7 +168,7 @@ public class GeneratorHbase extends Generator {
 				break;
 			}
 		}
-		Put put = new Put(key.getBytes());
+		Put put = new Put(Bytes.toBytes(key.toString()));
 
 		put.add(Bytes.toBytes("cf1"), Bytes.toBytes("url"), url);
 		put.add(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), Bytes.toBytes(value.getScore()));
@@ -207,7 +207,6 @@ public class GeneratorHbase extends Generator {
 
 				HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
 				job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, HBASE_REGIONSERVER_LEASE_PERIOD);
-				job.setLong(HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, HBASE_REGIONSERVER_LEASE_PERIOD);
 				try {
 					connection = HConnectionManager.createConnection(this.job);
 					this.table = connection.getTable(tableName);
@@ -358,14 +357,16 @@ public class GeneratorHbase extends Generator {
 			table = job.get(GENERATL_TABLE);
 			String[] hostSplits = getHostSplits();
 			List<TableKeyInputSplit> list = new ArrayList<TableKeyInputSplit>();
-			for (int i = 0; i < hostSplits.length; i++) {
+			int divisor = 2;
+			int mapCnt = hostSplits.length / divisor;
+			for (int i = 0; i < mapCnt; i++) {
 				TableKeyInputSplit split = null;
 				if (i == 0)
-					split = new TableKeyInputSplit(table, "!", hostSplits[0]);
-				else if (i == hostSplits.length - 1)
-					split = new TableKeyInputSplit(table, hostSplits[i], "~");
+					split = new TableKeyInputSplit(table, "!", hostSplits[(i + 1) * divisor]);
+				else if (i == mapCnt - 1)
+					split = new TableKeyInputSplit(table, hostSplits[i * divisor], "~");
 				else
-					split = new TableKeyInputSplit(table, hostSplits[i - 1], hostSplits[i]);
+					split = new TableKeyInputSplit(table, hostSplits[i * divisor], hostSplits[(i + 1) * divisor]);
 
 				list.add(split);
 			}
@@ -402,6 +403,7 @@ public class GeneratorHbase extends Generator {
 
 			int intervalThreshold = job.getInt(Generator.GENERATOR_MIN_INTERVAL, -1);
 			long curTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
+			int hostn = job.getInt(Generator.GENERATOR_MAX_COUNT, -1);
 
 			List<Filter> tmp = new ArrayList<Filter>();
 			// 抓取时间限制 // check fetch schedule
@@ -421,7 +423,11 @@ public class GeneratorHbase extends Generator {
 						CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
 				tmp.add(columnFilter);
 			}
-
+			if (hostn > 0) {
+				// topn限制
+				Filter filter = new HostFilter(hostn);
+				tmp.add(filter);
+			}
 			FilterList filters = new FilterList(tmp);
 			return new TableReader(job, table, filters, ((TableKeyInputSplit) split).getBegin(),
 					((TableKeyInputSplit) split).getEnd(), reporter);
@@ -599,7 +605,7 @@ public class GeneratorHbase extends Generator {
 			if (!hostFilte(key.toString()))
 				return;
 
-			Put put = createGenerateTime(key.getBytes(), value, generateTime);
+			Put put = createGenerateTime(Bytes.toBytes(key.toString()), value, generateTime);
 			table.put(put);
 			if (++cnt % tableCacheSize == 0) {
 				table.flushCommits();
@@ -658,7 +664,7 @@ public class GeneratorHbase extends Generator {
 				// if (!smartFilter(value))
 				// continue;
 
-				Put put = createGenerateTime(urlKey.getBytes(), value, generateTime);
+				Put put = createGenerateTime(Bytes.toBytes(urlKey.toString()), value, generateTime);
 				table.put(put);
 				if (++cnt % 10000 == 0) {
 					table.flushCommits();
@@ -822,13 +828,8 @@ public class GeneratorHbase extends Generator {
 			throws IOException {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		long start = System.currentTimeMillis();
-		LOG.info("Generator: starting at " + sdf.format(start));
-		LOG.info("Generator: Selecting best-scoring urls due for fetch.");
-		LOG.info("Generator: filtering: " + filter);
-		LOG.info("Generator: normalizing: " + norm);
-		if ("true".equals(getConf().get(GENERATE_MAX_PER_HOST_BY_IP))) {
-			LOG.info("Generator: GENERATE_MAX_PER_HOST_BY_IP will be ignored, use partition.url.mode instead");
-		}
+		LOG.info("Generator: from table=" + tableNum + " starting at " + sdf.format(start));
+		LOG.info("Generator: filtering:=" + filter + "; Generator: normalizing=" + norm);
 
 		Path segment = new Path(segments, Generator.generateSegmentName());
 		long begin = System.currentTimeMillis();
@@ -845,6 +846,7 @@ public class GeneratorHbase extends Generator {
 
 		long end = System.currentTimeMillis();
 		// have records
+		GenerateInfos.hostn = getConf().getInt(Generator.GENERATOR_MAX_COUNT, -1);
 		GenerateInfo genInfo = GenerateInfos.getGenerateInfo();
 		genInfo.start = begin;
 		genInfo.generate = cnt;
@@ -863,19 +865,19 @@ public class GeneratorHbase extends Generator {
 				return false;
 			return fs.delete(segment, true);
 		} catch (Exception e) {
-			e.printStackTrace();
+			LOG.error(e.getLocalizedMessage());
 		}
 		return false;
 	}
 
 	private RunningJob generateJob(String table, Path segment, int reduceCnt, boolean filter, boolean norm,
 			boolean force) throws IOException {
-		LOG.info("Generator: segment=" + segment);
+		LOG.info("Generator: from table=" + table + " segment=" + segment);
 
 		JobConf job = new NutchJob(getConf());
 		job.setJarByClass(GeneratorHbase.class);
-		job.setJobName("generate: from " + table + " "
-				+ (new SimpleDateFormat("MMdd HH:mm:ss")).format(System.currentTimeMillis()));
+		job.setJobName("generate:" + table + " "
+				+ (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " path=" + segment);
 
 		if (reduceCnt == -1) {
 			reduceCnt = job.getNumMapTasks(); // a partition per fetch task
@@ -994,8 +996,8 @@ public class GeneratorHbase extends Generator {
 
 		JobConf job = new NutchJob(getConf());
 		job.setJarByClass(GeneratorHbase.class);
-		job.setJobName("generate: from " + table + " "
-				+ (new SimpleDateFormat("MMdd HH:mm:ss")).format(System.currentTimeMillis()));
+		job.setJobName("generate:" + table + " "
+				+ (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " path=" + segment);
 		// job.setLong(HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, 300000);
 
 		if (reduceCnt == -1) {
