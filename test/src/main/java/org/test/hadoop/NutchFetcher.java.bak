@@ -1,0 +1,624 @@
+/**
+ * 
+ */
+package org.apache.nutch.wind.fetcher;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map.Entry;
+import java.util.TreeSet;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.MapFile;
+import org.apache.hadoop.io.SequenceFile.CompressionType;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.mapred.Counters.Counter;
+import org.apache.hadoop.mapred.FileInputFormat;
+import org.apache.hadoop.mapred.FileOutputFormat;
+import org.apache.hadoop.mapred.JobClient;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapred.OutputCollector;
+import org.apache.hadoop.mapred.RecordReader;
+import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapred.RunningJob;
+import org.apache.hadoop.mapred.SequenceFileOutputFormat;
+import org.apache.hadoop.util.StringUtils;
+import org.apache.nutch.crawl.CrawlDatum;
+import org.apache.nutch.crawl.Generator;
+import org.apache.nutch.crawl.NutchWritable;
+import org.apache.nutch.crawl.SignatureFactory;
+import org.apache.nutch.fetcher.Fetcher;
+import org.apache.nutch.metadata.Metadata;
+import org.apache.nutch.metadata.Nutch;
+import org.apache.nutch.parse.Outlink;
+import org.apache.nutch.parse.Parse;
+import org.apache.nutch.parse.ParseData;
+import org.apache.nutch.parse.ParseImpl;
+import org.apache.nutch.parse.ParseOutputFormat;
+import org.apache.nutch.parse.ParseResult;
+import org.apache.nutch.parse.ParseSegment;
+import org.apache.nutch.parse.ParseStatus;
+import org.apache.nutch.parse.ParseText;
+import org.apache.nutch.protocol.Content;
+import org.apache.nutch.protocol.Protocol;
+import org.apache.nutch.protocol.ProtocolStatus;
+import org.apache.nutch.util.NutchJob;
+import org.apache.nutch.util.StringUtil;
+import org.apache.nutch.util.TimingUtil;
+import org.apache.nutch.util.URLUtil;
+import org.apache.nutch.wind.WindParallelUtilHBase;
+import org.apache.nutch.wind.WindParallelUtilHBase.FetchNotify;
+import org.apache.nutch.wind.stat.FetchInfo;
+import org.apache.nutch.wind.stat.FetchInfos;
+
+/**
+ * @author xxhuang
+ * 
+ */
+public class WindFetcher extends Fetcher {
+	protected BlockingQueue fetchContent = new LinkedBlockingQueue();
+	protected BlockingQueue fetchDatum = new LinkedBlockingQueue();
+	protected AtomicBoolean writeToken = new AtomicBoolean(false);
+
+	protected String fetchOutDir;
+	protected String subMapId;
+	protected long writeHold = 10000;
+	protected int pathIdx = 0;
+	protected CompressionType compType;
+	protected int hostn = -1;
+	protected boolean notifyEnded = false;
+	protected ExecutorService executorService = Executors.newCachedThreadPool();
+
+	public WindFetcher() {
+		super();
+	}
+
+	public WindFetcher(Configuration conf) {
+		super(conf);
+		hostn = conf.getInt(Generator.GENERATOR_MAX_COUNT, -1);
+		if (hostn == -1)
+			hostn = 500;
+	}
+
+	public void fetch(Path segment, int threads) throws IOException {
+		checkConfiguration();
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		long start = System.currentTimeMillis();
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Fetcher: starting at " + sdf.format(start));
+			LOG.info("Fetcher: segment: " + segment);
+		}
+		// set the actual time for the timelimit relative
+		// to the beginning of the whole job and not of a specific task
+		// otherwise it keeps trying again if a task fails
+		long timelimit = getConf().getLong("fetcher.timelimit.mins", -1);
+		if (timelimit != -1) {
+			timelimit = System.currentTimeMillis() + (timelimit * 60 * 1000);
+			LOG.info("Fetcher Timelimit set for : " + timelimit);
+			getConf().setLong("fetcher.timelimit", timelimit);
+		}
+		// Set the time limit after which the throughput threshold feature is
+		// enabled
+		timelimit = getConf().getLong("fetcher.throughput.threshold.check.after", 10);
+		timelimit = System.currentTimeMillis() + (timelimit * 60 * 1000);
+		getConf().setLong("fetcher.throughput.threshold.check.after", timelimit);
+
+		int maxOutlinkDepth = getConf().getInt("fetcher.follow.outlinks.depth", -1);
+		if (maxOutlinkDepth > 0) {
+			LOG.info("Fetcher: following outlinks up to depth: " + Integer.toString(maxOutlinkDepth));
+
+			int maxOutlinkDepthNumLinks = getConf().getInt("fetcher.follow.outlinks.num.links", 4);
+			int outlinksDepthDivisor = getConf().getInt("fetcher.follow.outlinks.depth.divisor", 2);
+
+			int totalOutlinksToFollow = 0;
+			for (int i = 0; i < maxOutlinkDepth; i++) {
+				totalOutlinksToFollow += (int) Math.floor(outlinksDepthDivisor / (i + 1) * maxOutlinkDepthNumLinks);
+			}
+			LOG.info("Fetcher: maximum outlinks to follow: " + Integer.toString(totalOutlinksToFollow));
+		}
+
+		JobConf job = new NutchJob(getConf());
+		job.setJobName("fetch " + (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " " + segment);
+		// // add by hxx
+		// if (isParsing(job)) {
+		// try {
+		// HostDb.distributeHostdb(job);
+		// } catch (IOException e) {
+		// e.printStackTrace();
+		// }
+		// } // end add
+		job.setInt("fetcher.threads.fetch", threads);
+		job.set(Nutch.SEGMENT_NAME_KEY, segment.getName());
+		// for politeness, don't permit parallel execution of a single task
+		job.setSpeculativeExecution(false);
+		FileInputFormat.addInputPath(job, new Path(segment, CrawlDatum.GENERATE_DIR_NAME));
+		job.setInputFormat(InputFormat.class);
+		job.setMapRunnerClass(this.getClass());
+		job.setNumReduceTasks(0); // 设置 reduce task 为 0 // by tongw
+		FileOutputFormat.setOutputPath(job, segment);
+		job.setOutputFormat(FetcherOutputFormatForIO.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(NutchWritable.class);
+		RunningJob runningJob = JobClient.runJob(job);
+
+		long end = System.currentTimeMillis();
+		if (runningJob.isSuccessful()) {
+			FetchInfo info = FetchInfos.getFetchInfo();
+			info.start = start;
+			info.end = end;
+			info.name = job.getJobName();
+			Counter counter = runningJob.getCounters().findCounter("Map-Reduce Framework", "Map output records");
+			if (counter != null)
+				info.pageTotal = counter.getValue();
+			info.fetchTime = (end - start);
+			info.downBytes = runningJob.getCounters().findCounter("FetcherStatus", "bytes_downloaded").getValue();
+			info.pageSuccess = runningJob.getCounters()
+					.findCounter("FetcherStatus", ProtocolStatus.STATUS_SUCCESS.getName()).getValue();
+
+			LOG.info(info.toString());
+			LOG.info(FetchInfos.printString());
+		}
+		LOG.info("Fetcher: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
+	}
+
+	public void run(RecordReader<Text, CrawlDatum> input, OutputCollector<Text, NutchWritable> output, Reporter reporter)
+			throws IOException {
+		this.output = output;
+		this.reporter = reporter;
+		this.fetchQueues = new FetchItemQueues(getConf());
+
+		hostn = getConf().getInt(Generator.GENERATOR_MAX_COUNT, -1);
+		if (hostn == -1)
+			hostn = 500;
+
+		int threadCount = getConf().getInt("fetcher.threads.fetch", 10);
+		int timeoutDivisor = getConf().getInt("fetcher.threads.timeout.divisor", 2);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Fetcher: threads: " + threadCount);
+			LOG.info("Fetcher: time-out divisor: " + timeoutDivisor);
+		}
+
+		int queueDepthMuliplier = getConf().getInt("fetcher.queue.depth.multiplier", 50);
+		feeder = new QueueFeeder(input, fetchQueues, threadCount * queueDepthMuliplier);
+		// feeder.setPriority((Thread.MAX_PRIORITY + Thread.NORM_PRIORITY) / 2);
+
+		// the value of the time limit is either -1 or the time where it should
+		// finish
+		long timelimit = getConf().getLong("fetcher.timelimit", -1);
+		if (timelimit != -1)
+			feeder.setTimeLimit(timelimit);
+		feeder.start();
+
+		// set non-blocking & no-robots mode for HTTP protocol plugins.
+		getConf().setBoolean(Protocol.CHECK_BLOCKING, false);
+		getConf().setBoolean(Protocol.CHECK_ROBOTS, false);
+
+		for (int i = 0; i < threadCount; i++) { // spawn threads
+			new WindFetcherThread(getConf()).start();
+		}
+
+		// select a timeout that avoids a task timeout
+		long timeout = getConf().getInt("mapred.task.timeout", 10 * 60 * 1000) / timeoutDivisor;
+
+		// Used for threshold check, holds pages and bytes processed in the last
+		// second
+		int pagesLastSec;
+		int bytesLastSec;
+
+		// Set to true whenever the threshold has been exceeded for the first
+		// time
+		int throughputThresholdNumRetries = 0;
+
+		int throughputThresholdPages = getConf().getInt("fetcher.throughput.threshold.pages", -1);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Fetcher: throughput threshold: " + throughputThresholdPages);
+		}
+		int throughputThresholdMaxRetries = getConf().getInt("fetcher.throughput.threshold.retries", 5);
+		if (LOG.isInfoEnabled()) {
+			LOG.info("Fetcher: throughput threshold retries: " + throughputThresholdMaxRetries);
+		}
+		long throughputThresholdTimeLimit = getConf().getLong("fetcher.throughput.threshold.check.after", -1);
+		do { // wait for threads to exit
+			pagesLastSec = pages.get();
+			bytesLastSec = (int) bytes.get();
+
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+
+			pagesLastSec = pages.get() - pagesLastSec;
+			bytesLastSec = (int) bytes.get() - bytesLastSec;
+
+			reporter.incrCounter("FetcherStatus", "bytes_downloaded", bytesLastSec);
+
+			reportStatus(pagesLastSec, bytesLastSec);
+
+			LOG.info("-activeThreads=" + activeThreads + ", spinWaiting=" + spinWaiting.get()
+					+ ", fetchQueues.totalSize=" + fetchQueues.getTotalSize());
+
+			if (!feeder.isAlive() && fetchQueues.getTotalSize() < 5) {
+				fetchQueues.dump();
+			}
+
+			// if throughput threshold is enabled
+			if (throughputThresholdTimeLimit < System.currentTimeMillis() && throughputThresholdPages != -1) {
+				// Check if we're dropping below the threshold
+				if (pagesLastSec < throughputThresholdPages) {
+					throughputThresholdNumRetries++;
+					LOG.warn(Integer.toString(throughputThresholdNumRetries)
+							+ ": dropping below configured threshold of " + Integer.toString(throughputThresholdPages)
+							+ " pages per second");
+
+					// Quit if we dropped below threshold too many times
+					if (throughputThresholdNumRetries == throughputThresholdMaxRetries) {
+						LOG.warn("Dropped below threshold too many times, killing!");
+
+						// Disable the threshold checker
+						throughputThresholdPages = -1;
+
+						// Empty the queues cleanly and get number of items that
+						// were dropped
+						int hitByThrougputThreshold = fetchQueues.emptyQueues();
+
+						if (hitByThrougputThreshold != 0)
+							reporter.incrCounter("FetcherStatus", "hitByThrougputThreshold", hitByThrougputThreshold);
+					}
+				}
+			}
+			// remove长尾？
+			if (!feeder.isAlive() && !notifyEnded) {
+				if (maxUrls >= 5000) {
+					if (fetchQueues.getQueueCount() < 10) {
+						longTail();
+					}
+				} else if (maxUrls >= 2000) {// 中
+					if (fetchQueues.getQueueCount() < 5) {
+						longTail();
+					}
+				} else if (fetchQueues.getQueueCount() <= 2 && fetchQueues.getTotalSize() > 15) {// 初期
+					longTail();
+				}
+			}
+			// check timelimit
+			if (!feeder.isAlive()) {
+				int hitByTimeLimit = fetchQueues.checkTimelimit();
+				if (hitByTimeLimit != 0)
+					reporter.incrCounter("FetcherStatus", "hitByTimeLimit", hitByTimeLimit);
+			}
+
+			// some requests seem to hang, despite all intentions
+			if ((System.currentTimeMillis() - lastRequestStart.get()) > timeout) {
+				if (LOG.isWarnEnabled()) {
+					LOG.warn("Aborting with " + activeThreads + " hung threads.");
+				}
+				// return;
+				break;
+			}
+		} while (activeThreads.get() > 0);
+
+		writeLast(); // 保存剩下队列里的内容。
+		// hxx
+		if (!notifyEnded)
+			FetchNotify.notifyFetchMapEnd(getConf());
+		// end hxx
+	}
+
+	protected void longTail() {
+		notifyEnded = true;
+		int hitLongTail = fetchQueues.emptyQueues();
+		FetchNotify.notifyFetchMapEnd(getConf());
+		reporter.incrCounter("MyFetcher", "hitLongTail", hitLongTail);
+		reporter.incrCounter("MyFetcher", subMapId, maxUrls);
+	}
+
+	private class WindFetcherThread extends FetcherThread {
+		public WindFetcherThread(Configuration conf) {
+			super(conf);
+			fetchOutDir = conf.get("mapred.output.dir");
+			subMapId = conf.get("mapred.task.id").substring(26);
+			writeHold = conf.getLong("fetch.pageContent.counter", writeHold);
+			compType = SequenceFileOutputFormat.getOutputCompressionType((JobConf) conf);
+		}
+
+		protected ParseStatus output(Text key, CrawlDatum datum, Content content, ProtocolStatus pstatus, int status,
+				int outlinkDepth) {
+			datum.setStatus(status);
+			datum.setFetchTime(System.currentTimeMillis());
+			if (pstatus != null)
+				datum.getMetaData().put(Nutch.WRITABLE_PROTO_STATUS_KEY, pstatus);
+
+			ParseResult parseResult = null;
+			if (content != null) {
+				Metadata metadata = content.getMetadata();
+
+				// store the guessed content type in the crawldatum
+				if (content.getContentType() != null)
+					datum.getMetaData().put(new Text(Metadata.CONTENT_TYPE), new Text(content.getContentType()));
+
+				// add segment to metadata
+				metadata.set(Nutch.SEGMENT_NAME_KEY, segmentName);
+				// add score to content metadata so that ParseSegment can pick
+				// it up.
+				// remark:把url的score保存下来
+				try {
+					scfilters.passScoreBeforeParsing(key, datum, content);
+				} catch (Exception e) {
+					if (LOG.isWarnEnabled()) {
+						LOG.warn("Couldn't pass score, url " + key + " (" + e + ")");
+					}
+				}
+				/*
+				 * Note: Fetcher will only follow meta-redirects coming from the
+				 * original URL.
+				 */
+				// remark:fetcher.parse参数控制，default是fase，如果为true是深度优先遍历，会造成重复抓取和死循环，如果设定fetcher.follow.outlinks.depth
+				// ,就会漏抓，不能全网抓取，一般用在小规模的垂直抓取，限定了Host，在MapReduce里，一次fetch中是没法判重的。
+				// 另外一个原因：所有连接的处理会在reduce阶段进行，当抓取的深度和内容越来越多时，会找出OutOfMemory和磁盘空间不足错误
+				// 系统的IO也很频繁.
+				if (parsing && status == CrawlDatum.STATUS_FETCH_SUCCESS) {
+					if (!skipTruncated || (skipTruncated && !ParseSegment.isTruncated(content))) {
+						try {
+							// // add by hxx
+							// try {
+							// HostDb.loadHosts(conf);
+							// } catch (IOException e) {
+							// e.printStackTrace();
+							// } // // end add
+							// remark:根据文档类型，解析内容
+							parseResult = this.parseUtil.parse(content);
+						} catch (Exception e) {
+							LOG.warn("Error parsing: " + key + ": " + StringUtils.stringifyException(e));
+						}
+					}
+
+					if (parseResult == null) {
+						byte[] signature = SignatureFactory.getSignature(getConf()).calculate(content,
+								new ParseStatus().getEmptyParse(conf));
+						datum.setSignature(signature);
+					}
+				}
+				/*
+				 * Store status code in content So we can read this value during
+				 * parsing (as a separate job) and decide to parse or not.
+				 */
+				content.getMetadata().add(Nutch.FETCH_STATUS_KEY, Integer.toString(status));
+			}
+
+			try {
+				batchWrite(key, new NutchWritable(datum));
+				// remark:保存原始页面的内容（解析前）
+				if (content != null && storingContent)
+					batchWrite(key, new NutchWritable(content));
+
+				if (parseResult != null) {
+					// remark:处理解析的结果
+					for (Entry<Text, Parse> entry : parseResult) {
+						Text url = entry.getKey();
+						Parse parse = entry.getValue();
+						ParseStatus parseStatus = parse.getData().getStatus();
+						ParseData parseData = parse.getData();
+
+						if (!parseStatus.isSuccess()) {
+							LOG.warn("Error parsing: " + key + ": " + parseStatus);
+							parse = parseStatus.getEmptyParse(getConf());
+						}
+
+						// Calculate page signature. For non-parsing fetchers
+						// this will
+						// be done in ParseSegment
+						// remark:计算页面指纹
+						byte[] signature = SignatureFactory.getSignature(getConf()).calculate(content, parse);
+						// Ensure segment name and score are in parseData
+						// metadata
+						parseData.getContentMeta().set(Nutch.SEGMENT_NAME_KEY, segmentName);
+						parseData.getContentMeta().set(Nutch.SIGNATURE_KEY, StringUtil.toHexString(signature));
+						// Pass fetch time to content meta
+						parseData.getContentMeta().set(Nutch.FETCH_TIME_KEY, Long.toString(datum.getFetchTime()));
+						if (url.equals(key))
+							datum.setSignature(signature);
+						try {
+							scfilters.passScoreAfterParsing(url, content, parse);
+						} catch (Exception e) {
+							if (LOG.isWarnEnabled()) {
+								LOG.warn("Couldn't pass score, url " + key + " (" + e + ")");
+							}
+						}
+
+						String fromHost;
+
+						// collect outlinks for subsequent db update
+						Outlink[] links = parseData.getOutlinks();
+						int outlinksToStore = Math.min(maxOutlinks, links.length);
+						if (ignoreExternalLinks) {
+							try {
+								fromHost = new URL(url.toString()).getHost().toLowerCase();
+							} catch (MalformedURLException e) {
+								fromHost = null;
+							}
+						} else {
+							fromHost = null;
+						}
+
+						int validCount = 0;
+
+						// Process all outlinks, normalize, filter and
+						// deduplicate
+						List<Outlink> outlinkList = new ArrayList<Outlink>(outlinksToStore);
+						HashSet<String> outlinks = new HashSet<String>(outlinksToStore);
+						for (int i = 0; i < links.length && validCount < outlinksToStore; i++) {
+							String toUrl = links[i].getToUrl();
+
+							toUrl = ParseOutputFormat.filterNormalize(url.toString(), toUrl, fromHost,
+									ignoreExternalLinks, urlFilters, normalizers);
+							if (toUrl == null) {
+								continue;
+							}
+
+							validCount++;
+							links[i].setUrl(toUrl);
+							outlinkList.add(links[i]);
+							outlinks.add(toUrl);
+						}
+
+						// Only process depth N outlinks
+						if (maxOutlinkDepth > 0 && outlinkDepth < maxOutlinkDepth) {
+							reporter.incrCounter("FetcherOutlinks", "outlinks_detected", outlinks.size());
+
+							// Counter to limit num outlinks to follow per page
+							int outlinkCounter = 0;
+
+							// Calculate variable number of outlinks by depth
+							// using the divisor (outlinks = Math.floor(divisor
+							// / depth * num.links))
+							int maxOutlinksByDepth = (int) Math.floor(outlinksDepthDivisor / (outlinkDepth + 1)
+									* maxOutlinkDepthNumLinks);
+
+							String followUrl;
+
+							// Walk over the outlinks and add as new FetchItem
+							// to the queues
+							Iterator<String> iter = outlinks.iterator();
+							while (iter.hasNext() && outlinkCounter < maxOutlinkDepthNumLinks) {
+								followUrl = iter.next();
+
+								// Check whether we'll follow external outlinks
+								if (outlinksIgnoreExternal) {
+									if (!URLUtil.getHost(url.toString()).equals(URLUtil.getHost(followUrl))) {
+										continue;
+									}
+								}
+
+								reporter.incrCounter("FetcherOutlinks", "outlinks_following", 1);
+
+								// Create new FetchItem with depth incremented
+								FetchItem fit = FetchItem.create(new Text(followUrl), new CrawlDatum(
+										CrawlDatum.STATUS_LINKED, interval), queueMode, outlinkDepth + 1);
+								fetchQueues.addFetchItem(fit);
+
+								outlinkCounter++;
+							}
+						}
+
+						// Overwrite the outlinks in ParseData with the
+						// normalized and filtered set
+						parseData.setOutlinks(outlinkList.toArray(new Outlink[outlinkList.size()]));
+						// remark:写入解析后的数据
+						output.collect(url, new NutchWritable(new ParseImpl(new ParseText(parse.getText()), parseData,
+								parse.isCanonical())));
+					}
+				}
+			} catch (IOException e) {
+				if (LOG.isErrorEnabled()) {
+					LOG.error("fetcher output caught:" + e.toString());
+				}
+			}
+
+			// return parse status if it exits
+			if (parseResult != null && !parseResult.isEmpty()) {
+				Parse p = parseResult.get(content.getUrl());
+				if (p != null) {
+					reporter.incrCounter("ParserStatus",
+							ParseStatus.majorCodes[p.getData().getStatus().getMajorCode()], 1);
+					return p.getData().getStatus();
+				}
+			}
+			return null;
+		}
+	}
+
+	protected void batchWrite(Text key, NutchWritable writable) throws IOException {
+		FetcherData data = new FetcherData(key, writable);
+		Writable obj = writable.get();
+		if (obj instanceof Content) {
+			fetchContent.add(data);
+		} else {
+			fetchDatum.add(data);
+		}
+		if (fetchContent.size() >= writeHold && writeToken.compareAndSet(false, true)) {
+			executorService.submit(new Runnable() {
+				@Override
+				public void run() {
+					try {
+						writeBatch("" + pathIdx++);
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			});
+		}
+	}
+
+	private void writeBatch(String batchPath) throws IOException {
+		TreeSet contentSet = new TreeSet();
+		TreeSet datumSet = new TreeSet();
+		int i = 0;
+		while (i++ < writeHold) {
+			contentSet.add(fetchContent.poll());
+			datumSet.add(fetchDatum.poll());
+		}
+
+		writeHdfs(contentSet, datumSet, batchPath);
+		writeToken.compareAndSet(true, false);
+	}
+
+	protected void writeLast() throws IOException {
+		TreeSet contentSet = new TreeSet();
+		TreeSet datumSet = new TreeSet();
+		while (!fetchContent.isEmpty()) {
+			contentSet.add(fetchContent.poll());
+		}
+		while (!fetchDatum.isEmpty()) {
+			datumSet.add(fetchDatum.poll());
+		}
+		// contentSet.addAll(fetchContent);
+		// datumSet.addAll(fetchDatum);
+
+		writeHdfs(contentSet, datumSet, "last");
+	}
+
+	private void writeHdfs(TreeSet contentSet, TreeSet datumSet, String batchPath) throws IOException {
+		FileSystem fs = FileSystem.get(getConf());
+		String contentPath = fetchOutDir + "/content/" + batchPath + "/" + subMapId;
+		String datumPath = fetchOutDir + "/crawl_fetch/" + batchPath + "/" + subMapId;
+
+		LOG.info("开始写path=" + contentPath + "; " + datumPath);
+		MapFile.Writer contentWrite = new MapFile.Writer(getConf(), fs, contentPath, Text.class, Content.class,
+				compType);
+		MapFile.Writer datumWrite = new MapFile.Writer(getConf(), fs, datumPath, Text.class, CrawlDatum.class, compType);
+
+		Iterator it = contentSet.iterator();
+		while (it.hasNext()) {
+			FetcherData data = (FetcherData) it.next();
+			contentWrite.append(data.getText(), data.getNw().get());
+		}
+		contentWrite.close();
+
+		it = datumSet.iterator();
+		while (it.hasNext()) {
+			FetcherData data = (FetcherData) it.next();
+			datumWrite.append(data.getText(), data.getNw().get());
+		}
+		datumWrite.close();
+
+		Path path = new Path(contentPath);
+		fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
+		path = new Path(datumPath);
+		fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
+	}
+}

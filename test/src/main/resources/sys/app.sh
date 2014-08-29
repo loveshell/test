@@ -1,3 +1,9 @@
+1.静态内部类跟静态方法一样，只能访问静态的成员变量和方法，不能访问非静态的方法和属性，但是普通内部类可以访问任意外部类的成员变量和方法
+hbase:    split 'regionName', 'splitKey'  
+split 'crawldb1,0,1409282923319.7b4d78091f202c8a2d24048fbac9fe6f.', '0a'
+count 'crawldb1', INTERVAL =>10000
+scan 'crawldb1', {COLUMNS => ['cf1'], LIMIT => 1000, STARTROW => '0', STOPROW => '1'}
+    
 hdfs:snn.stop, replication=2
 hbase:memory
 mapreduce:memory, map.tasks, reduce.tasks
@@ -7,8 +13,10 @@ nutch:total=2400000;topn=80000;hostmax=5000,hostThreads=30,totalThreads=150, map
 socket.setSoTimeout(http.getTimeout());
 this.timeout = conf.getInt("http.timeout", 10000);
 
--Xmx1536m -XX:MaxPermSize=128M -Dfile.encoding=UTF-8 -XX:+UseParallelGC -Duser.language=zh -Duser.region=CN 
- 
+-d64 -Xms2g -Xmx5g -XX:MaxPermSize=512M -XX:+UseParallelGC -XX:-UseGCOverheadLimit -Dfile.encoding=UTF-8 -Duser.language=zh -Duser.region=CN 
+JAVA_OPTS='-server -d64 -Xms2g -Xmx20g -XX:PermSize=1g -XX:MaxPermSize=4g -XX:-UseGCOverheadLimit'
+这个是JDK6新添的错误类型。是发生在GC占用大量时间为释放很小空间的时候发生的，是一种保护机制。解决方案是，关闭该功能，使用—— -XX:-UseGCOverheadLimit
+
 scp hbase.tar.gz imsrvtest1:/data/
 ssh imsrvtest1 "cd /data;tar -zxf /data/hbase.tar.gz"
 scp /data/nutch_new/hbasetest.jar imsrvtest1:/data/hbase-0.98.3-hadoop1/lib/;scp /data/nutch_new/hbasetest.jar imsrvtest2:/data/hbase-0.98.3-hadoop1/lib/;scp /data/nutch_new/hbasetest.jar skytest2:/data/hbase-0.98.3-hadoop1/lib/;scp /data/nutch_new/hbasetest.jar skytest1:/data/hbase-0.98.3-hadoop1/lib/;

@@ -78,6 +78,7 @@ public class HbaseClient {
 		// countTable1();
 
 		if (args.length < 1) {
+			help();
 			return;
 		}
 		for (int i = 0; i < args.length; i++) {
@@ -86,23 +87,32 @@ public class HbaseClient {
 			} else if ("--createCrawldbIdx".equals(args[i])) {
 				createCrawldbIdx();
 			} else if ("--createCrawldb".equals(args[i])) {
-				i++;
-				createCrawldb(Integer.parseInt(args[i]));
+				createCrawldb(Integer.parseInt(args[++i]));
 			} else if ("--createCrawldbs".equals(args[i])) {
-				i++;
-				createCrawldbs(Integer.parseInt(args[i]));
-			} else if ("--threadInsertData".equals(args[i])) {
-				threadInsertData();
+				createCrawldbs(Integer.parseInt(args[++i]));
+			} else if ("--droptable".equals(args[i])) {
+				dropTable(args[++i]);
 			} else if ("--tableInit".equals(args[i])) {
 				createUrlid();
 				createCrawldbIdx();
 				createCrawldbs(2);
-			} else if ("--countTable1".equals(args[i])) {
-				countTable1();
+			} else if ("--countcrawldb".equals(args[i])) {
+				countCrawldb(args[++i]);
 			} else {
-				showJobStauts();
+				help();
 			}
 		}
+	}
+
+	public static void help() {
+		System.out
+				.println("useage: --createUrlid, --createCrawldbIdx, --createCrawldb i, --createCrawldbs i, --droptable name, --tableInit, --countcrawldb i");
+	}
+
+	public static void dropTable(String name) throws Exception {
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		deleteTable(admin, name);
+		admin.close();
 	}
 
 	public static void showJobStauts() throws Exception {
@@ -110,25 +120,15 @@ public class HbaseClient {
 		HTableInterface table = connection.getTable("urlid");
 
 		Scan scan = new Scan();
-		// 1 is the default in Scan, which will be bad for MapReduce jobs
 		scan.setCaching(1000);
-		// don't set to true for MR jobs
-		// scan.setCacheBlocks(false);
-		// 扫描特定区间
-		// Scan scan=new Scan(Bytes.toBytes("开始行号"),Bytes.toBytes("结束行号"));
 
 		int i = 0;
 		ResultScanner rs = table.getScanner(scan);
 		for (Result r : rs) {
-			if (i++ >= 100)
+			if (i++ >= 1000)
 				break;
 			System.out.println("==================================");
 			System.out.println("行号:  " + Bytes.toString(r.getRow()));
-
-			// byte[] url = r.getValue(Bytes.toBytes("cf1"),
-			// Bytes.toBytes("url"));
-			// if (url != null)
-			// System.out.println("url=" + new String(url));
 		}
 		rs.close();
 
@@ -154,9 +154,9 @@ public class HbaseClient {
 		System.out.println("createUrlid: end.");
 	}
 
-	public static void countTable1() throws IOException {
+	public static void countCrawldb(String idx) throws IOException {
 		HConnection connection = HConnectionManager.createConnection(conf);
-		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 1);
+		HTableInterface table = connection.getTable(T_CRAWLDBPRE + idx);
 		Scan scan = new Scan();
 		scan.setCaching(10000);
 		List<Filter> filters = new ArrayList<Filter>();
@@ -166,13 +166,23 @@ public class HbaseClient {
 		scan.setFilter(filterList);
 		ResultScanner rs = table.getScanner(scan);
 		long cnt = 0;
+		Set<String> hosts = new HashSet<String>();
 		for (Result r : rs) {
+			String key = Bytes.toString(r.getRow());
+			char[] keys = key.toCharArray();
+			for (int i = keys.length - 1; i >= 0; i--) {
+				if (!Character.isDigit(keys[i])) {
+					key = key.substring(0, i);
+					break;
+				}
+			}
+			hosts.add(key);
 			cnt++;
 		}
 		rs.close();
 		table.close();
 		connection.close();
-		System.out.println("crawldb1 count=" + cnt);
+		System.out.println("table=crawldb" + idx + " url count=" + cnt + " host count=" + hosts.size());
 	}
 
 	public static void threadInsertData() throws IOException {
@@ -390,10 +400,7 @@ public class HbaseClient {
 		HTableInterface table = connection.getTable(T_CRAWLDBPRE + 1);
 
 		Scan scan = new Scan();
-		// 1 is the default in Scan, which will be bad for MapReduce jobs
 		scan.setCaching(1000);
-		// don't set to true for MR jobs
-		// scan.setCacheBlocks(false);
 		// 扫描特定区间
 		// Scan scan=new Scan(Bytes.toBytes("开始行号"),Bytes.toBytes("结束行号"));
 
@@ -706,21 +713,26 @@ public class HbaseClient {
 	}
 
 	public static byte[][] getHostSplits() {
-		int numSplits = 51;
-		String wwwPre = "www.";
+		byte[][] splits = new byte[61][];
+		int i = 0;
+		for (; i < 10; i++) {
+			splits[i] = Bytes.toBytes(String.valueOf(i));
+		}
+
 		char a = 'a';
-		byte[][] splits = new byte[numSplits][];
-		for (int i = 0; i < 22; i++) {
-			splits[i] = String.valueOf(a++).getBytes();
+		for (; i < 32; i++) {
+			splits[i] = Bytes.toBytes(String.valueOf(a++));
 		}
+
 		a = 'a';
-		for (int i = 0; i < 26; i++) {
+		String wwwPre = "www.";
+		for (; i < 58; i++) {
 			StringBuilder sb = new StringBuilder(wwwPre).append(a++);
-			splits[22 + i] = sb.toString().getBytes();
+			splits[i] = Bytes.toBytes(sb.toString());
 		}
-		splits[48] = "x".getBytes();
-		splits[49] = "y".getBytes();
-		splits[50] = "z".getBytes();
+		splits[i++] = Bytes.toBytes("x");
+		splits[i++] = Bytes.toBytes("y");
+		splits[i++] = Bytes.toBytes("z");
 		return splits;
 	}
 

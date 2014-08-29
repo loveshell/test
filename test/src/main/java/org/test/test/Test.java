@@ -18,11 +18,14 @@ public class Test {
 		// String a = "";
 		// a += "dd";
 		// System.out.println(a);
-		float a = 28;
-		float b = 8;
-		System.out.println(Math.round(a / b));
+		// float a = 28;
+		// float b = 8;
+		// System.out.println(Math.round(a / b));
 		// System.out.println(Arrays.asList(getHostSplits()));
 		// System.out.println(getHost("http://www.sina.com"));
+
+		String a = "attempt_201408261602_0068_m_000001_0".substring(26);
+		System.out.println(a.substring(0, a.length() - 2));
 	}
 
 	public static String[] getHostSplits() {

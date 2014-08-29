@@ -6,14 +6,19 @@ package org.test.hadoop;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
+import org.apache.hadoop.fs.FileSystem;
+import org.apache.hadoop.fs.FileUtil;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.client.HConnection;
@@ -29,6 +34,7 @@ import org.apache.nutch.crawl.CrawlDb;
 import org.apache.nutch.fetcher.Fetcher;
 import org.apache.nutch.metadata.Nutch;
 import org.apache.nutch.parse.ParseSegment;
+import org.apache.nutch.protocol.Content;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,31 +50,18 @@ public class NutchParallelUtilHBase {
 	// reader.interrupt(); //尝试中断读线程
 	// while(!fs.isDone);//Future返回如果没有完成，则一直循环等待，直到Future返回完成
 	public static Logger LOG = LoggerFactory.getLogger(NutchParallelUtilHBase.class);
+
 	protected static int genMax = 20;
-	protected static int genNum = 2;
+	protected static int genCount = 2;
 	protected static int genFirst = 4;
 	protected static int updateThreshold = 2;
-	protected static int fetchMap = 4;
+	protected static int fetchMap = 8;
 	protected static int tableDepth = 10;
 	protected static float minCrawlDelay = 0.0f;
-	// 容易死锁啊
-	protected static BlockingQueue<Path> generatedSegments = new ArrayBlockingQueue<Path>(genMax, true);
-	protected static BlockingQueue<Path> fetchedSegments = new ArrayBlockingQueue<Path>(genMax * 4, true);
-	protected static BlockingQueue<Path> parsedSegments = new ArrayBlockingQueue<Path>(genMax * 4, true);
-
-	protected static AtomicInteger gNullCount = new AtomicInteger(0);
-	protected static AtomicInteger genSegCount = new AtomicInteger(0);
-	protected static AtomicInteger fetchSegCount = new AtomicInteger(0);
-	protected static AtomicInteger fetching = new AtomicInteger(0);
-	protected static AtomicInteger parSegCount = new AtomicInteger(0);
-	protected static List<Path> toUpdate = new ArrayList<Path>();
-	protected static boolean updateNeedGen = false;// 更新后，值改变
-	static boolean fetchAhead = false;// 提前启动fetchjob开关
-	static AtomicBoolean fetchJobing = new AtomicBoolean(false);// fetchjob争用标志
-	Path currentFetch = null;//
+	protected static boolean fetchAhead = false;// 提前启动fetchjob开关
 
 	protected static JobConf job;
-	protected static GeneratorRedHbase generator = null;
+	protected static GeneratorHbase generator = null;
 	protected static Fetcher fetcher = null;
 	protected static ParseSegment parser = null;
 	protected static CrawlDb crawlDbTool = null;
@@ -78,23 +71,49 @@ public class NutchParallelUtilHBase {
 	protected static boolean normalise = true;
 	protected static long topN = 1000;
 	protected static int threads = 5;
+	// add by tong
+	public static final String oldSuffixName = "_f";
+	public static final String newSuffixName = "_p";
 
-	public static void init(JobConf job, GeneratorRedHbase generator, Fetcher fetcher, ParseSegment parseSegment,
-			CrawlDb crawlDbTool, int fetchThreads, int generate, int uThreshold) {
-		init(job, generator, fetcher, parseSegment, crawlDbTool, fetchThreads, generate, uThreshold, 4);
+	// 容易死锁啊
+	protected BlockingQueue<Path> generatedSegments = new ArrayBlockingQueue<Path>(genMax, true);
+	// 记录Content目录下各子目录路径 add // by // tongw
+	protected BlockingQueue<Path> toParseParentSegs = new ArrayBlockingQueue<Path>(genMax * 10, true);
+	protected BlockingQueue<Path> toParseSonSegs = new ArrayBlockingQueue<Path>(genMax * 50, true);
+	// for update
+	protected BlockingQueue<Path> parsedSegments = new ArrayBlockingQueue<Path>(genMax * 10, true);
+
+	protected AtomicInteger genNullCount = new AtomicInteger(0);
+	protected AtomicInteger genedSegCount = new AtomicInteger(0);
+	protected AtomicInteger fetching = new AtomicInteger(0);// 正在抓取标识
+	protected AtomicInteger toParseParentSegCount = new AtomicInteger(0);
+	protected AtomicInteger parsedSegCount = new AtomicInteger(0);
+
+	protected List<Path> toUpdate = new ArrayList<Path>();// 批量更新
+	protected boolean updateNeedGen = false;// 更新后，值改变
+	// fetch job // 令牌
+	protected AtomicInteger fetchToken = new AtomicInteger(0);
+	protected Path lastFetch = null;// fetch争用用
+
+	public static void init(JobConf job, GeneratorHbase generator, Fetcher fetcher, ParseSegment parseSegment,
+			CrawlDb crawlDbTool, int fetchThreads, int genFirst, int updateHold) {
+		init(job, generator, fetcher, parseSegment, crawlDbTool, fetchThreads, genFirst, updateHold,
+				job.getInt("job.reduce.num", 8));
 	}
 
-	public static void init(JobConf job, GeneratorRedHbase generator, Fetcher fetcher, ParseSegment parseSegment,
+	public static void init(JobConf job, GeneratorHbase generator, Fetcher fetcher, ParseSegment parseSegment,
 			CrawlDb crawlDbTool, int fetchThreads, int generate, int uThreshold, int fetchMap) {
 		job.setBoolean("fetcher.parse", false);
-		filter = job.getBoolean(GeneratorRedHbase.GENERATOR_FILTER, true);
-		normalise = job.getBoolean(GeneratorRedHbase.GENERATOR_NORMALISE, true);
+		filter = job.getBoolean(GeneratorHbase.GENERATOR_FILTER, true);
+		normalise = job.getBoolean(GeneratorHbase.GENERATOR_NORMALISE, true);
 		threads = fetchThreads;
 
 		genFirst = generate;
 		if (genFirst > genMax)
 			genFirst = genMax;
-		genNum = genFirst;
+		if (genFirst <= genCount)
+			genFirst = genCount + 1;
+		genCount = genFirst;
 		updateThreshold = uThreshold;
 		tableDepth = job.getInt("generate.table.depth", 10);
 		minCrawlDelay = job.getFloat("fetcher.server.min.delay", 0.0f);
@@ -106,9 +125,10 @@ public class NutchParallelUtilHBase {
 		NutchParallelUtilHBase.parser = parseSegment;
 		NutchParallelUtilHBase.crawlDbTool = crawlDbTool;
 		NutchParallelUtilHBase.fetcher.getConf().setInt("fetchMap", fetchMap);
+
 	}
 
-	public void process(Path crawlDb, Path segments, int numLists, long topN, boolean force) throws Exception {
+	public void process(Path crawlDb, Path segments, int reduceCnt, long topN, boolean force) throws Exception {
 		NutchParallelUtilHBase.topN = topN;
 		NutchParallelUtilHBase.rootSeg = segments;
 		NutchParallelUtilHBase.crawldb = crawlDb;
@@ -119,6 +139,7 @@ public class NutchParallelUtilHBase {
 		if (fetchAhead)
 			fetch(2);
 		parse();
+		parseSon();
 
 		check();
 	}
@@ -126,16 +147,16 @@ public class NutchParallelUtilHBase {
 	protected void check() throws Exception {
 		long cnt = 0;
 		while (true) {
-			if (gNullCount.get() > 0 && genNum == genFirst)
+			if (genNullCount.get() > 0 && genCount == genFirst)
 				throw new Exception("第一次没有generate到数据，程序退出.................................");
-			if (gNullCount.get() > 0) {
+			if (genNullCount.get() > 0) {
 				if (cnt++ == 360)
 					throw new Exception("over 60 minutes 都没有url被generate，程序退出.................................");
 			} else {
 				cnt = 0;
 			}
 
-			Thread.sleep(10000);
+			threadSleep(10000);
 		}
 	}
 
@@ -148,7 +169,7 @@ public class NutchParallelUtilHBase {
 					if (shouldGenerate()) {
 						LOG.info("generator: segment个数不足，开始generate。");
 						try {
-							generate(genNum);
+							genAll();
 						} catch (Exception e) {
 							e.printStackTrace();
 						}
@@ -163,11 +184,7 @@ public class NutchParallelUtilHBase {
 						}
 						LOG.info("updater: 完成update crawldb。");
 					}
-					try {
-						Thread.sleep(8000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
+					threadSleep(5000);
 				}
 			}
 		};
@@ -181,23 +198,22 @@ public class NutchParallelUtilHBase {
 	 * @return
 	 */
 	private boolean shouldGenerate() {
-		if (updateNeedGen && genSegCount.get() < genNum)// 更新了url库,并且已经generate的数目小于临界值
+		if (updateNeedGen && genedSegCount.get() < genCount)// 更新了url库,并且已经generate的数目小于临界值
 		{
 			updateNeedGen = false;
-			gNullCount.set(0);
+			genNullCount.set(0);
 			return true;
 		}
-
-		if (gNullCount.get() > 0)// 上次generate没有数据
+		if (genNullCount.get() > 0)// 上次generate没有数据
 			return false;
 
-		if (genSegCount.get() == 0) //
+		if (genedSegCount.get() == 0 && fetching.get() == 0) //
 			return true;
-		if (genSegCount.get() > genFirst - 3)// 消耗2个需补充
-			return false;
-		// 一个或2个// 有fetch or parse
-		if (fetchSegCount.get() > 0 || fetching.get() > 0)
-			return false;
+		// if (genedSegCount.get() > genFirst - 3)// 消耗2个需补充
+		// return false;
+		// // 一个或2个// 有fetch
+		// if (fetching.get() > 0)
+		// return false;
 
 		return true;
 	}
@@ -210,41 +226,62 @@ public class NutchParallelUtilHBase {
 	private boolean shouldUpdate() {
 		if (minCrawlDelay == 0f) {// 抓内网
 			parsedSegments.clear();// 消费掉
-			parSegCount.set(0);
+			parsedSegCount.set(0);
 
 			return false;
 		}
 
-		if (parSegCount.get() == 0)
+		if (parsedSegCount.get() == 0)
 			return false;
-		if (parSegCount.get() >= updateThreshold)// 2个及以上需要更新
+		if (parsedSegCount.get() >= updateThreshold)// 2个及以上需要更新
 			return true;
 		// 一个已解析好
-		if (genSegCount.get() > 0)// 有segment没fetch
+		if (genedSegCount.get() > 0)// 有segment没fetch
 			return false;
 
 		return true;
 	}
 
+	protected void genAll() throws Exception {
+		int tableMax = job.getInt("generate.table.Max", 10);
+		int success = 0;
+		for (int i = tableMax; i > tableMax - tableDepth; i--) {
+			Path tmp = generator.generateAll(i, rootSeg, fetchMap, filter, normalise, false);
+			if (tmp != null) {
+				success++;
+				generatedSegments.add(tmp);
+				genedSegCount.incrementAndGet();
+				LOG.info("generate: 生成待抓取的urls：" + tmp);
+			}
+			if (shouldUpdate())
+				return;
+		}
+		if (success == 0) {
+			LOG.info("generate: 这轮没有生成任何segments..............................");
+			genNullCount.incrementAndGet();
+		} else {
+			genNullCount.set(0);
+			genCount = 2;// 第一轮有记录
+		}
+	}
+
 	protected void generate(int segCount) throws Exception {
-		Path[] tmp = generator.generate(crawldb, rootSeg, fetchMap, topN, System.currentTimeMillis(), filter,
-				normalise, false, segCount, tableDepth);
+		Path[] tmp = generator.generate(rootSeg, fetchMap, topN, filter, normalise, false, segCount, tableDepth);
 		if (tmp == null) {
 			LOG.info("generate: 没有生成任何segment");
-			gNullCount.incrementAndGet();
+			genNullCount.incrementAndGet();
 			return;
 		}
-		gNullCount.set(0);
+		genNullCount.set(0);
 		for (Path path : tmp) {
 			generatedSegments.add(path);
-			genSegCount.incrementAndGet();
+			genedSegCount.incrementAndGet();
 		}
 		LOG.info("generate: 生成待抓取的urls：" + Arrays.asList(tmp));
 
-		if (segCount == genFirst)
-			genNum = 2;
+		genCount = 2;
 		if (segCount > tmp.length)// 最后一轮没有generate到数据
-			gNullCount.incrementAndGet();
+			genNullCount.incrementAndGet();
 	}
 
 	private void update(final boolean normalize, final boolean filter) throws Exception {
@@ -253,7 +290,7 @@ public class NutchParallelUtilHBase {
 			Path seg = null;
 			while ((seg = parsedSegments.poll()) != null) {
 				toUpdate.add(seg);
-				parSegCount.decrementAndGet();
+				parsedSegCount.decrementAndGet();
 			}
 			if (toUpdate.size() == 0) {
 				LOG.info(Thread.currentThread() + " 没有目录需要合并到crawldb。");
@@ -267,7 +304,7 @@ public class NutchParallelUtilHBase {
 			e.printStackTrace();
 			for (Path path : toUpdate) {
 				parsedSegments.add(path);
-				parSegCount.incrementAndGet();
+				parsedSegCount.incrementAndGet();
 			}
 		}
 	}
@@ -277,73 +314,63 @@ public class NutchParallelUtilHBase {
 			public void run() {
 				Thread.currentThread().setName("fetch线程" + num);
 				LOG.info(Thread.currentThread() + ": 线程启动");
+
+				fetchToken.compareAndSet(0, num);// 抢令牌
 				while (true) {
-					if (fetchJobing.compareAndSet(false, true)) {
+					if (fetchToken.compareAndSet(num, num)) {
+						lastFetch = null;
+						fetching.incrementAndGet();
 						Path seg = null;
 						try {
-							seg = generatedSegments.poll(3, TimeUnit.SECONDS);
+							seg = generatedSegments.poll(60, TimeUnit.SECONDS);
 						} catch (Exception e1) {
-							e1.printStackTrace();
 						}
-						currentFetch = seg;
+						lastFetch = seg;
 						if (seg != null) {
-							genSegCount.decrementAndGet();
-							fetching.incrementAndGet();
-
-							LOG.info(Thread.currentThread() + ": 开始抓取目录：" + seg);
+							genedSegCount.decrementAndGet();
+							LOG.info(Thread.currentThread() + ": 开始fetch目录：" + seg);
 							try {
-								fetcher.fetch(seg, NutchParallelUtilHBase.threads);// fetch
+								// modify by// tongw
+								toParseParentSegs.add(seg);// 抓取行为与之前有所变化，每次抓取前放入segment信息标识为正在抓取的目录
+								toParseParentSegCount.incrementAndGet();
 
-								fetchedSegments.add(seg);// 成功放入队列供下步处理
-								fetchSegCount.incrementAndGet();
+								fetcher.fetch(seg, NutchParallelUtilHBase.threads);// fetch
+								// fetchedSegments.add(seg);
 							} catch (Exception e) {
 								e.printStackTrace();
 								generatedSegments.add(seg);// 失败返回原队列
-								genSegCount.incrementAndGet();
+								genedSegCount.incrementAndGet();
 							}
-							fetching.decrementAndGet();
-							LOG.info(Thread.currentThread() + ": 结束抓取目录：" + seg);
+							LOG.info(Thread.currentThread() + ": 结束fetch目录：" + seg);
 						}
-						if (seg == currentFetch)// 没有其他人在抓
-							fetchJobing.compareAndSet(true, false);
+
+						if (fetchToken.compareAndSet(num, num))// 没有其他fetch
+							lastFetch = null;
+						fetching.decrementAndGet();
 					} else {
-						Path doing = currentFetch;
+						Path doing = lastFetch;
 						if (doing != null) {
 							try {
-								while (!FetchNotify.fetchDone(doing.getName(), fetchMap - 3)) {
-									try {
-										Thread.sleep(3000);
-									} catch (InterruptedException e) {
-										e.printStackTrace();
-									}
+								while (!FetchNotify.fetchDone(doing.getName(), fetchMap - 2)) {
+									threadSleep(3000);
 								}
 								LOG.info(Thread.currentThread() + ":fetchjob id done, path=" + doing);
-								if (doing == currentFetch && genSegCount.get() > 0) {// 有东西需要抓
-									LOG.info(Thread.currentThread() + ":预先启动下一轮fetch，genSegCount=" + genSegCount.get());
-									fetchJobing.set(false);// 好启动新的fetch
+								// 有东西需要抓
+								if (doing == lastFetch) {// 好启动新的fetch
+									fetchToken.set(num);
+									LOG.info(Thread.currentThread() + ":预先启动下一轮fetch，genSegCount="
+											+ genedSegCount.get());
 								} else {
 									LOG.info(Thread.currentThread() + ":未能预先启动下一轮fetch，genSegCount="
-											+ genSegCount.get());
-									try {
-										Thread.sleep(5000);
-									} catch (InterruptedException e1) {
-										e1.printStackTrace();
-									}
+											+ genedSegCount.get());
+									threadSleep(5000);
 								}
 							} catch (Exception e) {
 								e.printStackTrace();
-								try {
-									Thread.sleep(10000);
-								} catch (InterruptedException e1) {
-									e1.printStackTrace();
-								}
+								threadSleep(10000);
 							}
 						} else {
-							try {
-								Thread.sleep(3000);
-							} catch (InterruptedException e) {
-								e.printStackTrace();
-							}
+							threadSleep(3000);
 						}
 					}
 				}
@@ -354,35 +381,143 @@ public class NutchParallelUtilHBase {
 		t.start();
 	}
 
-	protected static void parse() throws Exception {
-		for (int i = 0; i < 1; i++) {
+	protected void parse() throws Exception {
+		for (int i = 0; i < 2; i++) {
 			final int num = i;
 			Thread t = new Thread() {
 				public void run() {
-					Thread.currentThread().setName("parseThread" + num);
+					Thread.currentThread().setName("parseParentThread" + num);
+					LOG.info(Thread.currentThread() + ": 线程启动");
+
+					FileSystem fs = null;
+					try {
+						fs = FileSystem.get(job);
+					} catch (IOException e1) {
+						e1.printStackTrace();
+					}
+					while (true) { // fetchedSegments
+						Path curFetching = null;// 正在抓取的目录
+						while (curFetching == null) {
+							threadSleep(1000);
+							try {
+								curFetching = toParseParentSegs.poll(60, TimeUnit.MINUTES);
+							} catch (InterruptedException e) {
+							}
+						}
+						// 成功获取
+						toParseParentSegCount.decrementAndGet();
+						boolean end = false;// 这轮抓取是否结束标志
+						Path contentdir = new Path(curFetching, Content.DIR_NAME);
+						Map pathDone = new HashMap();
+						while (!end) {
+							try {
+								if (fs.exists(contentdir)) {
+									FileStatus[] fstats = fs.listStatus(contentdir);
+									if (fstats.length > 0) {
+										Path[] paths = FileUtil.stat2Paths(fstats);// 有序？
+										paths = removeDone(paths, pathDone);
+										for (Path p : paths) {
+											if (fs.isDirectory(p) && isPathDone(fs, p, paths.length)) {// 有抓取输出
+												toParseSonSegs.add(p);
+												pathDone.put(p.toString(), null);
+												if (p.getName().startsWith("last"))// 有序就没有问题
+													end = true;
+											}
+										}
+									}
+								}
+							} catch (Exception e) {
+								LOG.error(e.getLocalizedMessage());
+							}
+							if (toParseParentSegCount.get() > 50) {
+								LOG.error(Thread.currentThread() + " 等待parse的父目录数=" + toParseParentSegCount.get()
+										+ " 跳过当前处理的目录=" + curFetching);
+								break;// 跳过该目录？
+							}
+							threadSleep(10 * 1000);
+						}
+					}
+				}
+			};
+			t.setDaemon(true);
+			t.start();
+		}
+	}
+
+	protected Path[] removeDone(Path[] listPaths, Map pathDone) {
+		if (listPaths.length == 0)
+			return listPaths;
+		if (pathDone.isEmpty()) {
+			Arrays.sort(listPaths);
+			return listPaths;
+		}
+
+		List<Path> tmp = new ArrayList<Path>();
+		for (Path path : listPaths) {
+			if (pathDone.containsKey(path.toString()))
+				continue;
+			tmp.add(path);
+		}
+
+		Collections.sort(tmp);
+		return tmp.toArray(new Path[] {});
+	}
+
+	protected boolean isPathDone(FileSystem fs, Path path, int pathCount) {
+		boolean hasDone = false;
+		boolean notDone = false;
+		int cnt = 0;
+		try {
+			FileStatus[] fstats = fs.listStatus(path);
+			Path[] paths = FileUtil.stat2Paths(fstats);
+			for (Path p : paths) {
+				if (fs.isDirectory(p) && p.getName().endsWith(oldSuffixName)) {
+					hasDone = true;
+					cnt++;
+				}
+				if (fs.isDirectory(p) && !p.getName().endsWith(oldSuffixName) && !p.getName().endsWith(newSuffixName)) {
+					notDone = true;
+				}
+			}
+			if (path.getName().startsWith("last")) {
+				return cnt == fetchMap;
+			}
+			if (pathCount > 2)// 下个目录都有了，可能还有错，反正任务会重跑
+				return hasDone && !notDone;
+			if (cnt == fetchMap)// 有fetchMap个才确认
+				return true;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		return false;
+	}
+
+	protected void parseSon() throws Exception {
+		for (int i = 0; i < 5; i++) {// 外部配置化？
+			final int num = i;
+			Thread t = new Thread() {
+				public void run() {
+					Thread.currentThread().setName("parseSonThread" + num);
 					LOG.info(Thread.currentThread() + ": 线程启动");
 					while (true) {
 						Path seg = null;
-						try {
-							seg = fetchedSegments.poll(5, TimeUnit.SECONDS);
+						try {// fetchedSegments
+							seg = toParseSonSegs.poll(60, TimeUnit.SECONDS);
 						} catch (InterruptedException e1) {
-							e1.printStackTrace();
 						}
 						if (seg != null) {
-							fetchSegCount.decrementAndGet();
-
-							LOG.info(Thread.currentThread() + ":开始处理目录：" + seg);
+							LOG.info(Thread.currentThread() + ":开始parse目录：" + seg);
 							try {
 								parser.parse(seg);
 
 								parsedSegments.add(seg);// 成功放入队列供下步处理
-								parSegCount.incrementAndGet();
+								parsedSegCount.incrementAndGet();
 							} catch (Exception e) {
 								e.printStackTrace();
-								fetchedSegments.add(seg);// 失败返回原队列
-								fetchSegCount.incrementAndGet();
+								toParseSonSegs.add(seg);// 失败返回原队列
 							}
-							LOG.info(Thread.currentThread() + ":结束处理目录：" + seg);
+							LOG.info(Thread.currentThread() + ":结束parse目录：" + seg);
 						}
 					}
 
@@ -390,6 +525,14 @@ public class NutchParallelUtilHBase {
 			};
 			t.setDaemon(true);
 			t.start();
+		}
+	}
+
+	protected void threadSleep(long time) {
+		try {
+			Thread.sleep(time);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -442,7 +585,7 @@ public class NutchParallelUtilHBase {
 			}
 		}
 
-		public static boolean fetchDone(String path, int partNum) throws Exception {
+		public static boolean fetchDone(String path, int partCnt) throws Exception {
 			if (connection == null) {
 				connection = HConnectionManager.createConnection(HBaseConfiguration.create());
 				table = connection.getTable(tableName);
@@ -460,7 +603,7 @@ public class NutchParallelUtilHBase {
 			// table.close();
 			// connection.close();
 
-			return partNum == cnt;
+			return partCnt == cnt;
 		}
 
 	}

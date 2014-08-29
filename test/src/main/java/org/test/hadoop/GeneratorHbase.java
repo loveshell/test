@@ -282,21 +282,29 @@ public class GeneratorHbase extends Generator {
 		}
 
 		protected static String[] getHostSplits() {
-			int numSplits = 51;
-			String wwwPre = "www.";
+			String[] splits = new String[61];
+			int i = 0;
+			int len = 10;
+			for (i = 0; i < len; i++) {
+				splits[i] = String.valueOf(i);
+			}
+
 			char a = 'a';
-			String[] splits = new String[numSplits];
-			for (int i = 0; i < 22; i++) {
+			len += 22;
+			for (; i < len; i++) {
 				splits[i] = String.valueOf(a++);
 			}
+
 			a = 'a';
-			for (int i = 0; i < 26; i++) {
+			String wwwPre = "www.";
+			len += 26;
+			for (; i < len; i++) {
 				StringBuilder sb = new StringBuilder(wwwPre).append(a++);
-				splits[22 + i] = sb.toString();
+				splits[i] = sb.toString();
 			}
-			splits[48] = "x";
-			splits[49] = "y";
-			splits[50] = "z";
+			splits[i++] = "x";
+			splits[i++] = "y";
+			splits[i++] = "z";
 			return splits;
 		}
 
@@ -362,7 +370,7 @@ public class GeneratorHbase extends Generator {
 			for (int i = 0; i < mapCnt; i++) {
 				TableKeyInputSplit split = null;
 				if (i == 0)
-					split = new TableKeyInputSplit(table, "!", hostSplits[(i + 1) * divisor]);
+					split = new TableKeyInputSplit(table, "1", hostSplits[(i + 1) * divisor]);
 				else if (i == mapCnt - 1)
 					split = new TableKeyInputSplit(table, hostSplits[i * divisor], "~");
 				else
@@ -406,22 +414,27 @@ public class GeneratorHbase extends Generator {
 			int hostn = job.getInt(Generator.GENERATOR_MAX_COUNT, -1);
 
 			List<Filter> tmp = new ArrayList<Filter>();
-			// 抓取时间限制 // check fetch schedule
-			SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
-					Bytes.toBytes("Fetchtime"), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime));
-			columnFilter.setFilterIfMissing(true);
-			tmp.add(columnFilter);
-			// generate时间限制
-			columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes(Nutch.GENERATE_TIME_KEY),
-					CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime
-							- job.getLong(Generator.GENERATOR_DELAY, 24 * 3600 * 1000l)));
-			tmp.add(columnFilter);
-			// 抓取间隔限制 // consider only entries with a
-			if (intervalThreshold > 0) {
-				// retry (or fetch) interval lower than threshold
-				columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"),
-						CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
+			if (!job.getBoolean("generate.test", true)) {
+				// 抓取时间限制 // check fetch schedule
+				SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
+						Bytes.toBytes("Fetchtime"), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime));
+				columnFilter.setFilterIfMissing(true);
 				tmp.add(columnFilter);
+				// generate时间限制
+				// columnFilter = new
+				// SingleColumnValueFilter(Bytes.toBytes("cf1"),
+				// Bytes.toBytes(Nutch.GENERATE_TIME_KEY),
+				// CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime
+				// - job.getLong(Generator.GENERATOR_DELAY, 24 * 3600 *
+				// 1000l)));
+				// tmp.add(columnFilter);
+				// 抓取间隔限制 // consider only entries with a
+				if (intervalThreshold > 0) {
+					// retry (or fetch) interval lower than threshold
+					columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("FetchInterval"),
+							CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
+					tmp.add(columnFilter);
+				}
 			}
 			if (hostn > 0) {
 				// topn限制
@@ -561,16 +574,16 @@ public class GeneratorHbase extends Generator {
 			seed = job.getInt("partition.url.seed", 0);
 			partitioner.configure(job);
 
-			String tableName = job.get(GENERATL_TABLE);
-			HBaseConfiguration.merge(conf, HBaseConfiguration.create(conf));
-			try {
-				connection = HConnectionManager.createConnection(job);
-				table = connection.getTable(tableName);
-				table.setAutoFlush(false, true);
-				table.setWriteBufferSize(300 * tableCacheSize);
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			// String tableName = job.get(GENERATL_TABLE);
+			// HBaseConfiguration.merge(conf, HBaseConfiguration.create(conf));
+			// try {
+			// connection = HConnectionManager.createConnection(job);
+			// table = connection.getTable(tableName);
+			// table.setAutoFlush(false, true);
+			// table.setWriteBufferSize(300 * tableCacheSize);
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
 
 			isSmart = job.getBoolean("nutch.smart.is", false);
 			if (isSmart) {
@@ -578,13 +591,13 @@ public class GeneratorHbase extends Generator {
 		}
 
 		public void close() {
-			try {
-				table.flushCommits();
-				table.close();
-				connection.close();
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
+			// try {
+			// table.flushCommits();
+			// table.close();
+			// connection.close();
+			// } catch (IOException e) {
+			// e.printStackTrace();
+			// }
 
 			LOG.info("total=" + cnt + "; " + hostCnt);
 		}
@@ -605,15 +618,15 @@ public class GeneratorHbase extends Generator {
 			if (!hostFilte(key.toString()))
 				return;
 
-			Put put = createGenerateTime(Bytes.toBytes(key.toString()), value, generateTime);
-			table.put(put);
-			if (++cnt % tableCacheSize == 0) {
-				table.flushCommits();
-				reporter.setStatus("commit:" + cnt);
-			}
-
+			// Put put = createGenerateTime(Bytes.toBytes(key.toString()),
+			// value, generateTime);
+			// table.put(put);
+			// if (++cnt % tableCacheSize == 0) {
+			// table.flushCommits();
+			// reporter.setStatus("commit:" + cnt);
+			// }
+			++cnt;
 			output.collect(key, value);// 收集一个，partition一个
-
 			reporter.incrCounter("Generator", "records", 1);
 		}
 
@@ -756,9 +769,6 @@ public class GeneratorHbase extends Generator {
 
 			Scan scan = new Scan();
 			scan.setFilter(getFilters());
-			// if (topn > rsCache)
-			// scan.setCaching(Long.valueOf(topn / 2).intValue());
-			// else
 			scan.setCaching(Long.valueOf(topn).intValue());
 
 			try {

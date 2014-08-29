@@ -2,6 +2,10 @@
 # 默认情况下,crontab中执行的日志写在/var/log下,
 0 1 11 * * /data/nutch_new/job/localhbase.sh >>/data/nutch_new/job/cron.log 2>&1
 
+nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase /nutchurl -dir /nutchdata1 >nutch.log 2>&1 &
+java -Xmx1024m -jar test.urlinsert-1.0.0-jar-with-dependencies.jar --countcrawldb 1;
+
+
 export LANG="zh_CN.UTF-8"
 export LC_ALL="zh_CN.UTF-8" 
 mv nohup.out baknohup.out;mv nutchhbase.log baknutchhbase.log;

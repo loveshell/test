@@ -28,7 +28,7 @@ public class FetchInfos {
 			if (i == 0)
 				start = info.start;
 			else {
-				str += ((info.end - fetchInfos.get(i - 1).end) / 1000 + "s,");
+				str += ((info.start - fetchInfos.get(i - 1).end) / 1000 + "s,");
 			}
 			if (i == fetchInfos.size() - 1)
 				end = info.end;
