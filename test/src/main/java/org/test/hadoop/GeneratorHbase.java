@@ -382,6 +382,7 @@ public class GeneratorHbase extends Generator {
 			return list.toArray(new TableKeyInputSplit[] {});
 		}
 
+		@Deprecated
 		public InputSplit[] getSplitsBak(JobConf job, int numSplits) throws IOException {
 			table = job.get(GENERATL_TABLE);
 			int reduceCnt = job.getInt(GENERATL_REDUCECNT, 8);
@@ -421,13 +422,10 @@ public class GeneratorHbase extends Generator {
 				columnFilter.setFilterIfMissing(true);
 				tmp.add(columnFilter);
 				// generate时间限制
-				// columnFilter = new
-				// SingleColumnValueFilter(Bytes.toBytes("cf1"),
-				// Bytes.toBytes(Nutch.GENERATE_TIME_KEY),
-				// CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime
-				// - job.getLong(Generator.GENERATOR_DELAY, 24 * 3600 *
-				// 1000l)));
-				// tmp.add(columnFilter);
+				columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
+						Bytes.toBytes(Nutch.GENERATE_TIME_KEY), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime
+								- job.getLong(Generator.GENERATOR_DELAY, 24 * 3600 * 1000l)));
+				tmp.add(columnFilter);
 				// 抓取间隔限制 // consider only entries with a
 				if (intervalThreshold > 0) {
 					// retry (or fetch) interval lower than threshold
@@ -574,16 +572,16 @@ public class GeneratorHbase extends Generator {
 			seed = job.getInt("partition.url.seed", 0);
 			partitioner.configure(job);
 
-			// String tableName = job.get(GENERATL_TABLE);
-			// HBaseConfiguration.merge(conf, HBaseConfiguration.create(conf));
-			// try {
-			// connection = HConnectionManager.createConnection(job);
-			// table = connection.getTable(tableName);
-			// table.setAutoFlush(false, true);
-			// table.setWriteBufferSize(300 * tableCacheSize);
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
+			String tableName = job.get(GENERATL_TABLE);
+			HBaseConfiguration.merge(conf, HBaseConfiguration.create(conf));
+			try {
+				connection = HConnectionManager.createConnection(job);
+				table = connection.getTable(tableName);
+				table.setAutoFlush(false, true);
+				table.setWriteBufferSize(300 * tableCacheSize);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			isSmart = job.getBoolean("nutch.smart.is", false);
 			if (isSmart) {
@@ -591,13 +589,13 @@ public class GeneratorHbase extends Generator {
 		}
 
 		public void close() {
-			// try {
-			// table.flushCommits();
-			// table.close();
-			// connection.close();
-			// } catch (IOException e) {
-			// e.printStackTrace();
-			// }
+			try {
+				table.flushCommits();
+				table.close();
+				connection.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 
 			LOG.info("total=" + cnt + "; " + hostCnt);
 		}
@@ -618,14 +616,12 @@ public class GeneratorHbase extends Generator {
 			if (!hostFilte(key.toString()))
 				return;
 
-			// Put put = createGenerateTime(Bytes.toBytes(key.toString()),
-			// value, generateTime);
-			// table.put(put);
-			// if (++cnt % tableCacheSize == 0) {
-			// table.flushCommits();
-			// reporter.setStatus("commit:" + cnt);
-			// }
-			++cnt;
+			Put put = createGenerateTime(Bytes.toBytes(key.toString()), value, generateTime);
+			table.put(put);
+			if (++cnt % tableCacheSize == 0) {
+				table.flushCommits();
+				reporter.setStatus("commit:" + cnt);
+			}
 			output.collect(key, value);// 收集一个，partition一个
 			reporter.incrCounter("Generator", "records", 1);
 		}
@@ -645,6 +641,7 @@ public class GeneratorHbase extends Generator {
 		}
 
 		@Override
+		@Deprecated
 		public void reduce(IntWritable key, Iterator<IntWritable> values, OutputCollector<Text, CrawlDatum> output,
 				Reporter reporter) throws IOException {
 			LOG.info("generatorHbase:load url from partition=" + key.get());
@@ -747,7 +744,7 @@ public class GeneratorHbase extends Generator {
 				URL tmp = new URL(url);
 				host = tmp.getHost();
 			} catch (MalformedURLException e) {
-				e.printStackTrace();
+				// e.printStackTrace();
 			}
 			return host;
 		}
@@ -808,8 +805,7 @@ public class GeneratorHbase extends Generator {
 			// columnFilter.setFilterIfMissing(true);
 			// tmp.add(columnFilter);
 
-			if (hostn > 0) {
-				// topn限制
+			if (hostn > 0) { // topn限制
 				Filter filter = new HostFilter(hostn);
 				tmp.add(filter);
 			}
@@ -875,7 +871,7 @@ public class GeneratorHbase extends Generator {
 				return false;
 			return fs.delete(segment, true);
 		} catch (Exception e) {
-			LOG.error(e.getLocalizedMessage());
+			LOG.error("removePath:" + segment, e);
 		}
 		return false;
 	}
@@ -918,12 +914,7 @@ public class GeneratorHbase extends Generator {
 		Path output = new Path(segment, CrawlDatum.GENERATE_DIR_NAME);
 		FileOutputFormat.setOutputPath(job, output);
 
-		RunningJob r = null;
-		try {
-			r = JobClient.runJob(job);
-		} catch (IOException e) {
-			throw e;
-		}
+		RunningJob r = JobClient.runJob(job);
 		return r;
 	}
 
@@ -1042,12 +1033,7 @@ public class GeneratorHbase extends Generator {
 		Path output = new Path(segment, CrawlDatum.GENERATE_DIR_NAME);
 		FileOutputFormat.setOutputPath(job, output);
 
-		RunningJob r = null;
-		try {
-			r = JobClient.runJob(job);
-		} catch (IOException e) {
-			throw e;
-		}
+		RunningJob r = JobClient.runJob(job);
 		return r;
 	}
 

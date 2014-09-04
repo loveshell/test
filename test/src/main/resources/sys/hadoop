@@ -1,0 +1,32 @@
+遇到的一个问题：如果没有mos.close(), 程序运行中会出现异常：
+　　12/05/21 20:12:47 WARN hdfs.DFSClient: DataStreamer Exception:
+　　org.apache.hadoop.ipc.RemoteException:org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException: No lease on
+　　/test/mosreduce/_temporary/_attempt_local_0001_r_000000_0/h-r-00000 File does not exist. [Lease. Holder: DFSClient_-352105532, pendingcreates: 5]
+
+java.io.IOException: Connection reset by peer        推测datanode节点存在内存瓶颈。
+原因：	常规数据交换量过大，导致通信故障datanode无法连接namenode
+	任务数据交换量过大，导致tasktracker与jobtracker通信故障
+解决：	1.增大带宽
+	2.配置机架感知脚本topology.script.file.name
+	3.关闭均衡器
+
+大并发写	
+org.apache.hadoop.io.retry.RetryInvocationHandler: A failover has occurred since the start of this method invocation attempt.
+Error Recovery for block blk_326610323152553165_1164644 in pipeline 10.95.198.22:60010, 10.95.198.21:60010, 10.95.198.11:60010: bad datanode 10.95.198.22:60010 
+//添加如下两句
+  config.set("dfs.socket.timeout","3600000");
+  config.set("dfs.datanode.socket.write.timeout","3600000");
+  <property>
+    <name>dfs.socket.timeout</name>
+    <value>900000</value>
+</property>
+
+同时，由于无法创建线程，RPC通信也会阻塞，
+org.apache.hadoop.io.retry.RetryInvocationHandler: Exception while invoking renewLease of class ClientNamenodeProtocolTranslatorPB. Trying to fail over immediately.
+ulimit -a   max user processes              (-u) 514824
+
+java.io.EOFException: Premature EOF: no length prefix available
+由于DataNode终止了block的传输，所以client会出现这种错误，导致client无法正常数据读写，查询NameNode和相应DataNode的错误日志即可发现错误原因。
+
+（1） dfs.namenode.handler.count或mapred.job.tracker.handler.count
+（2） dfs.datanode.handler.count

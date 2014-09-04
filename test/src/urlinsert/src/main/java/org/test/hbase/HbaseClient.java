@@ -715,18 +715,21 @@ public class HbaseClient {
 	public static byte[][] getHostSplits() {
 		byte[][] splits = new byte[61][];
 		int i = 0;
-		for (; i < 10; i++) {
+		int len = 10;
+		for (i = 0; i < len; i++) {
 			splits[i] = Bytes.toBytes(String.valueOf(i));
 		}
 
 		char a = 'a';
-		for (; i < 32; i++) {
+		len += 22;
+		for (; i < len; i++) {
 			splits[i] = Bytes.toBytes(String.valueOf(a++));
 		}
 
 		a = 'a';
 		String wwwPre = "www.";
-		for (; i < 58; i++) {
+		len += 26;
+		for (; i < len; i++) {
 			StringBuilder sb = new StringBuilder(wwwPre).append(a++);
 			splits[i] = Bytes.toBytes(sb.toString());
 		}

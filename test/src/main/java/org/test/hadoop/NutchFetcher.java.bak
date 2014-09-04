@@ -8,15 +8,20 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import org.apache.hadoop.conf.Configuration;
@@ -38,7 +43,6 @@ import org.apache.hadoop.mapred.RunningJob;
 import org.apache.hadoop.mapred.SequenceFileOutputFormat;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.nutch.crawl.CrawlDatum;
-import org.apache.nutch.crawl.Generator;
 import org.apache.nutch.crawl.NutchWritable;
 import org.apache.nutch.crawl.SignatureFactory;
 import org.apache.nutch.fetcher.Fetcher;
@@ -65,6 +69,8 @@ import org.apache.nutch.wind.WindParallelUtilHBase.FetchNotify;
 import org.apache.nutch.wind.stat.FetchInfo;
 import org.apache.nutch.wind.stat.FetchInfos;
 
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
+
 /**
  * @author xxhuang
  * 
@@ -79,9 +85,10 @@ public class WindFetcher extends Fetcher {
 	protected long writeHold = 10000;
 	protected int pathIdx = 0;
 	protected CompressionType compType;
-	protected int hostn = -1;
 	protected boolean notifyEnded = false;
-	protected ExecutorService executorService = Executors.newCachedThreadPool();
+	protected ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+			.setNameFormat("fetchout-%d").setDaemon(true).build());
+	protected SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 
 	public WindFetcher() {
 		super();
@@ -89,9 +96,6 @@ public class WindFetcher extends Fetcher {
 
 	public WindFetcher(Configuration conf) {
 		super(conf);
-		hostn = conf.getInt(Generator.GENERATOR_MAX_COUNT, -1);
-		if (hostn == -1)
-			hostn = 500;
 	}
 
 	public void fetch(Path segment, int threads) throws IOException {
@@ -182,10 +186,6 @@ public class WindFetcher extends Fetcher {
 		this.reporter = reporter;
 		this.fetchQueues = new FetchItemQueues(getConf());
 
-		hostn = getConf().getInt(Generator.GENERATOR_MAX_COUNT, -1);
-		if (hostn == -1)
-			hostn = 500;
-
 		int threadCount = getConf().getInt("fetcher.threads.fetch", 10);
 		int timeoutDivisor = getConf().getInt("fetcher.threads.timeout.divisor", 2);
 		if (LOG.isInfoEnabled()) {
@@ -211,6 +211,16 @@ public class WindFetcher extends Fetcher {
 		for (int i = 0; i < threadCount; i++) { // spawn threads
 			new WindFetcherThread(getConf()).start();
 		}
+
+		Thread t = new Thread() {
+			@Override
+			public void run() {
+				batchTimeWrite(System.currentTimeMillis());
+			}
+		};
+		// t.setDaemon(true);
+		t.start();// hxx
+		int bandWatch = 0;
 
 		// select a timeout that avoids a task timeout
 		long timeout = getConf().getInt("mapred.task.timeout", 10 * 60 * 1000) / timeoutDivisor;
@@ -283,18 +293,35 @@ public class WindFetcher extends Fetcher {
 			}
 			// remove长尾？
 			if (!feeder.isAlive() && !notifyEnded) {
-				if (maxUrls >= 5000) {
-					if (fetchQueues.getQueueCount() < 10) {
+				if (bytesLastSec < 1024 * 1024 && pagesLastSec < 30 && fetchQueues.getQueueCount() >= 100) {
+					if (++bandWatch > 60)
+						longTail();
+				} else
+					bandWatch = 0;
+
+				if (maxUrls >= 50000) {
+					if (fetchQueues.getQueueCount() < 90) {
 						longTail();
 					}
-				} else if (maxUrls >= 2000) {// 中
-					if (fetchQueues.getQueueCount() < 5) {
+				} else if (maxUrls >= 20000) {
+					if (fetchQueues.getQueueCount() < 60) {
+						longTail();
+					}
+				} else if (maxUrls >= 5000) {// 中
+					if (fetchQueues.getQueueCount() < 30) {
 						longTail();
 					}
 				} else if (fetchQueues.getQueueCount() <= 2 && fetchQueues.getTotalSize() > 15) {// 初期
 					longTail();
 				}
+			} else if (feeder.isAlive() && !notifyEnded) {
+				if (bytesLastSec < 1200 * 1024 && pagesLastSec < 40 && fetchQueues.getQueueCount() >= 100) {
+					if (++bandWatch > 60)
+						longTail();
+				} else
+					bandWatch = 0;
 			}
+
 			// check timelimit
 			if (!feeder.isAlive()) {
 				int hitByTimeLimit = fetchQueues.checkTimelimit();
@@ -311,12 +338,9 @@ public class WindFetcher extends Fetcher {
 				break;
 			}
 		} while (activeThreads.get() > 0);
-
-		writeLast(); // 保存剩下队列里的内容。
 		// hxx
 		if (!notifyEnded)
 			FetchNotify.notifyFetchMapEnd(getConf());
-		// end hxx
 	}
 
 	protected void longTail() {
@@ -401,10 +425,10 @@ public class WindFetcher extends Fetcher {
 			}
 
 			try {
-				batchWrite(key, new NutchWritable(datum));
+				batchCollect(key, new NutchWritable(datum));
 				// remark:保存原始页面的内容（解析前）
 				if (content != null && storingContent)
-					batchWrite(key, new NutchWritable(content));
+					batchCollect(key, new NutchWritable(content));
 
 				if (parseResult != null) {
 					// remark:处理解析的结果
@@ -542,6 +566,69 @@ public class WindFetcher extends Fetcher {
 		}
 	}
 
+	protected void batchCollect(Text key, NutchWritable writable) throws IOException {
+		FetcherData data = new FetcherData(key, writable);
+		Writable obj = writable.get();
+		if (obj instanceof Content) {
+			fetchContent.add(data);
+		} else {
+			fetchDatum.add(data);
+		}
+	}
+
+	protected void batchTimeWrite(long start) {
+		try {
+			Thread.sleep(10 * 1000);
+		} catch (InterruptedException e2) {
+		}
+		Random random = new Random();
+		while (activeThreads.get() > 20) {
+			int tmpTime = 3 + random.nextInt(1);
+			long now = System.currentTimeMillis();
+			if (now - start >= tmpTime * 60 * 1000) {
+				Future task = executorService.submit(new Callable() {
+					@Override
+					public Object call() throws Exception {
+						return writeTimePath(makePath());
+					}
+				});
+				try {
+					int size = (Integer) task.get(tmpTime, TimeUnit.MINUTES);
+					LOG.info(Thread.currentThread() + "阶段输出了记录 size=" + size);
+				} catch (Exception e) {
+					LOG.error(Thread.currentThread() + "阶段批量写入失败：" + e);
+					task.cancel(true);
+					// delOutput(timePath);有客户端检查
+				} finally {
+				}
+				start = now;
+			}
+			try {
+				Thread.sleep(3 * 1000);
+			} catch (InterruptedException e1) {
+			}
+		}
+
+		while (activeThreads.get() > 0) {
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+			}
+		}
+		writeLast();
+	}
+
+	private String makePath() {
+		Calendar now = Calendar.getInstance();
+		int minute = now.get(Calendar.MINUTE);
+		int ratio = minute / 3;
+		now.set(Calendar.MINUTE, ratio * 3 + 1);
+		now.set(Calendar.SECOND, 0);
+		now.set(Calendar.MILLISECOND, 0);
+		return sdf.format(now.getTime());
+	}
+
+	@Deprecated
 	protected void batchWrite(Text key, NutchWritable writable) throws IOException {
 		FetcherData data = new FetcherData(key, writable);
 		Writable obj = writable.get();
@@ -554,17 +641,14 @@ public class WindFetcher extends Fetcher {
 			executorService.submit(new Runnable() {
 				@Override
 				public void run() {
-					try {
-						writeBatch("" + pathIdx++);
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
+					writePath("" + (++pathIdx));
 				}
 			});
 		}
 	}
 
-	private void writeBatch(String batchPath) throws IOException {
+	@Deprecated
+	private void writePath(String batchPath) {
 		TreeSet contentSet = new TreeSet();
 		TreeSet datumSet = new TreeSet();
 		int i = 0;
@@ -577,48 +661,74 @@ public class WindFetcher extends Fetcher {
 		writeToken.compareAndSet(true, false);
 	}
 
-	protected void writeLast() throws IOException {
+	private int writeTimePath(String path) {
+		int size = fetchContent.size();
 		TreeSet contentSet = new TreeSet();
 		TreeSet datumSet = new TreeSet();
-		while (!fetchContent.isEmpty()) {
+		int i = 0;
+		while (i++ < size) {
 			contentSet.add(fetchContent.poll());
-		}
-		while (!fetchDatum.isEmpty()) {
 			datumSet.add(fetchDatum.poll());
 		}
-		// contentSet.addAll(fetchContent);
-		// datumSet.addAll(fetchDatum);
+
+		writeHdfs(contentSet, datumSet, path);
+		return size;
+	}
+
+	protected void writeLast() {
+		TreeSet contentSet = new TreeSet();
+		TreeSet datumSet = new TreeSet();
+		contentSet.addAll(fetchContent);
+		datumSet.addAll(fetchDatum);
 
 		writeHdfs(contentSet, datumSet, "last");
 	}
 
-	private void writeHdfs(TreeSet contentSet, TreeSet datumSet, String batchPath) throws IOException {
-		FileSystem fs = FileSystem.get(getConf());
+	private void writeHdfs(TreeSet contentSet, TreeSet datumSet, String batchPath) {
 		String contentPath = fetchOutDir + "/content/" + batchPath + "/" + subMapId;
 		String datumPath = fetchOutDir + "/crawl_fetch/" + batchPath + "/" + subMapId;
+		LOG.info("开始写dfs path=" + contentPath);
 
-		LOG.info("开始写path=" + contentPath + "; " + datumPath);
-		MapFile.Writer contentWrite = new MapFile.Writer(getConf(), fs, contentPath, Text.class, Content.class,
-				compType);
-		MapFile.Writer datumWrite = new MapFile.Writer(getConf(), fs, datumPath, Text.class, CrawlDatum.class, compType);
+		try {
+			FileSystem fs = FileSystem.get(getConf());
+			MapFile.Writer datumWrite = new MapFile.Writer(getConf(), fs, datumPath, Text.class, CrawlDatum.class,
+					compType);
+			Iterator it = datumSet.iterator();
+			while (it.hasNext()) {
+				FetcherData data = (FetcherData) it.next();
+				datumWrite.append(data.getText(), data.getNw().get());
+			}
+			datumWrite.close();
+			Path path = new Path(datumPath);
+			fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
 
-		Iterator it = contentSet.iterator();
-		while (it.hasNext()) {
-			FetcherData data = (FetcherData) it.next();
-			contentWrite.append(data.getText(), data.getNw().get());
+			fs = FileSystem.get(getConf());
+			it = contentSet.iterator();
+			MapFile.Writer contentWrite = new MapFile.Writer(getConf(), fs, contentPath, Text.class, Content.class,
+					compType);
+			while (it.hasNext()) {
+				FetcherData data = (FetcherData) it.next();
+				contentWrite.append(data.getText(), data.getNw().get());
+			}
+			contentWrite.close();
+			path = new Path(contentPath);
+			fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
+		} catch (Throwable e) {
+			delOutput(batchPath);
+			LOG.error("写dfs出错: " + e + " path=" + contentPath);// hadoop已经输出，不用再print
 		}
-		contentWrite.close();
+		LOG.info("写dfs结束 path=" + contentPath);
+	}
 
-		it = datumSet.iterator();
-		while (it.hasNext()) {
-			FetcherData data = (FetcherData) it.next();
-			datumWrite.append(data.getText(), data.getNw().get());
+	private void delOutput(String path) {
+		String contentPath = fetchOutDir + "/content/" + path + "/" + subMapId;
+		String datumPath = fetchOutDir + "/crawl_fetch/" + path + "/" + subMapId;
+		try {
+			FileSystem fs = FileSystem.get(getConf());
+			fs.delete(new Path(contentPath), true);
+			fs.delete(new Path(datumPath), true);
+		} catch (Exception e1) {
+			LOG.error("delOutput: " + e1 + " path=" + path);
 		}
-		datumWrite.close();
-
-		Path path = new Path(contentPath);
-		fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
-		path = new Path(datumPath);
-		fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
 	}
 }
