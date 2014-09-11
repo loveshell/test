@@ -137,8 +137,8 @@
 	</property>
 	<property>
 		<name>hbase.lease.recovery.dfs.timeout</name>
-		<value>61000</value>
-		<source>hbase-default.xml</source>
+		<value>610000</value>
+		<source>hbase-site.xml</source>
 	</property>
 	<property>
 		<name>dfs.namenode.delegation.token.renew-interval</name>
@@ -587,7 +587,7 @@
 	</property>
 	<property>
 		<name>zookeeper.session.timeout</name>
-		<value>900000</value>
+		<value>600000</value>
 		<source>hbase-site.xml</source>
 	</property>
 	<property>
@@ -607,7 +607,7 @@
 	</property>
 	<property>
 		<name>mapred.task.id</name>
-		<value>hb_m_njhadoopmaster2.wind.com.cn,60000,1410338622151</value>
+		<value>hb_m_njhadoopmaster2.wind.com.cn,60000,1410429842510</value>
 		<source>programatically</source>
 	</property>
 	<property>
@@ -1359,7 +1359,7 @@
 	</property>
 	<property>
 		<name>hbase.rpc.timeout</name>
-		<value>900000</value>
+		<value>600000</value>
 		<source>hbase-site.xml</source>
 	</property>
 	<property>
@@ -1520,7 +1520,7 @@
 	</property>
 	<property>
 		<name>hbase.zookeeper.quorum</name>
-		<value>njhadoopslave5.wind.com.cn,njhadoopslave4.wind.com.cn,njhadoopslave1.wind.com.cn,njhadoopslave2.wind.com.cn,njhadoopslave3.wind.com.cn
+		<value>njhadoopslave3.wind.com.cn,njhadoopslave5.wind.com.cn,njhadoopslave4.wind.com.cn,njhadoopslave2.wind.com.cn,njhadoopslave1.wind.com.cn
 		</value>
 		<source>hbase-site.xml</source>
 	</property>
@@ -1561,12 +1561,12 @@
 	</property>
 	<property>
 		<name>hbase.master.handler.count</name>
-		<value>100</value>
+		<value>50</value>
 		<source>hbase-site.xml</source>
 	</property>
 	<property>
 		<name>dfs.client.socket-timeout</name>
-		<value>900000</value>
+		<value>600000</value>
 		<source>hdfs-site.xml</source>
 	</property>
 	<property>
@@ -1686,8 +1686,8 @@
 	</property>
 	<property>
 		<name>hbase.regionserver.lease.period</name>
-		<value>60000</value>
-		<source>hbase-default.xml</source>
+		<value>600000</value>
+		<source>hbase-site.xml</source>
 	</property>
 	<property>
 		<name>dfs.nameservices</name>
@@ -1728,6 +1728,11 @@
 		<name>mapred.task.timeout</name>
 		<value>600000</value>
 		<source>mapred-default.xml</source>
+	</property>
+	<property>
+		<name>hbase.cluster.id</name>
+		<value>a4807b94-6225-4532-a470-66dd1cc7eaed</value>
+		<source>programatically</source>
 	</property>
 	<property>
 		<name>hbase.rest.threads.max</name>
@@ -1847,7 +1852,7 @@
 	<property>
 		<name>fs.defaultFS</name>
 		<value>hdfs://nameservice1</value>
-		<source>core-site.xml</source>
+		<source>programatically</source>
 	</property>
 	<property>
 		<name>file.client-write-packet-size</name>
@@ -2013,7 +2018,7 @@
 	</property>
 	<property>
 		<name>hbase.regionserver.handler.count</name>
-		<value>100</value>
+		<value>30</value>
 		<source>hbase-site.xml</source>
 	</property>
 	<property>
@@ -2186,6 +2191,11 @@
 		<name>dfs.datanode.du.reserved</name>
 		<value>0</value>
 		<source>hdfs-default.xml</source>
+	</property>
+	<property>
+		<name>fs.default.name</name>
+		<value>hdfs://nameservice1</value>
+		<source>because fs.defaultFS is deprecated</source>
 	</property>
 	<property>
 		<name>hbase.master.dns.interface</name>
