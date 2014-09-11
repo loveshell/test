@@ -2,6 +2,20 @@
 # 默认情况下,crontab中执行的日志写在/var/log下,
 0 1 11 * * /data/nutch_new/job/localhbase.sh >>/data/nutch_new/job/cron.log 2>&1
 
+
+获取今天时期：`date +%Y%m%d` 或 `date +%F` 或 $(date +%y%m%d) 
+获取昨天时期：`date -d yesterday +%Y%m%d` 
+获取前天日期：`date -d -2day +%Y%m%d` 
+依次类推比如获取10天前的日期：`date -d -10day +%Y%m%d` 
+或n天前的 `date -d "n days ago" +%y%m%d` 
+明天：`date -d tomorrow +%y%m%d` 
+
+curTime=`date +%Y%m%d%H%k`;
+curDate=`date +%Y%m%d`;
+mv nutch.log nutch.log.$curTime;
+nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase -dir /nutchdata$curDate -threads 500 >nutch.log 2>&1 &
+
+
 nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase /nutchurl -dir /nutchdata1 >nutch.log 2>&1 &
 java -Xmx1024m -jar test.urlinsert-1.0.0-jar-with-dependencies.jar --countcrawldb 1;
 

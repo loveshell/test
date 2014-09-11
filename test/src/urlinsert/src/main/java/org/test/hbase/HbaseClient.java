@@ -37,6 +37,7 @@ import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.io.hfile.Compression.Algorithm;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
 import org.apache.http.HttpEntity;
@@ -95,9 +96,18 @@ public class HbaseClient {
 			} else if ("--tableInit".equals(args[i])) {
 				createUrlid();
 				createCrawldbIdx();
-				createCrawldbs(2);
+				String max = args[++i];
+				if (max != null)
+					createCrawldbs(Integer.parseInt(max));
+				else
+					createCrawldbs(2);
 			} else if ("--countcrawldb".equals(args[i])) {
 				countCrawldb(args[++i]);
+
+			} else if ("--modifyIdx".equals(args[i])) {
+				modifyIdx();
+			} else if ("--modifyCrawldb".equals(args[i])) {
+				modifyCrawldb(args[++i]);
 			} else {
 				help();
 			}
@@ -112,6 +122,44 @@ public class HbaseClient {
 	public static void dropTable(String name) throws Exception {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		deleteTable(admin, name);
+		admin.close();
+	}
+
+	public static void modifyIdx() throws Exception {
+		HBaseAdmin admin = new HBaseAdmin(conf);
+
+		HColumnDescriptor hcd = new HColumnDescriptor("cf1");
+		hcd.setMaxVersions(1);
+		hcd.setValue("DURABILITY", Durability.ASYNC_WAL.name());
+		hcd.setValue(HTableDescriptor.DEFERRED_LOG_FLUSH, "true");
+		hcd.setCompressionType(Algorithm.SNAPPY);
+
+		HTableDescriptor htd = new HTableDescriptor(T_CRAWLDBIDX);
+		htd.addFamily(hcd);
+
+		admin.disableTable(T_CRAWLDBIDX);
+		admin.modifyTable(Bytes.toBytes(T_CRAWLDBIDX), htd);
+		admin.enableTable(T_CRAWLDBIDX);
+		admin.majorCompact(T_CRAWLDBIDX);
+		admin.close();
+	}
+
+	public static void modifyCrawldb(String num) throws Exception {
+		HBaseAdmin admin = new HBaseAdmin(conf);
+
+		HColumnDescriptor hcd = new HColumnDescriptor("cf1");
+		hcd.setMaxVersions(1);
+		hcd.setValue("DURABILITY", Durability.ASYNC_WAL.name());
+		hcd.setValue(HTableDescriptor.DEFERRED_LOG_FLUSH, "true");
+		hcd.setCompressionType(Algorithm.SNAPPY);
+
+		HTableDescriptor htd = new HTableDescriptor(T_CRAWLDBPRE + num);
+		htd.addFamily(hcd);
+
+		admin.disableTable(T_CRAWLDBPRE + num);
+		admin.modifyTable(Bytes.toBytes(T_CRAWLDBPRE + num), htd);
+		admin.enableTable(T_CRAWLDBPRE + num);
+		admin.majorCompact(T_CRAWLDBPRE + num);
 		admin.close();
 	}
 
@@ -134,24 +182,6 @@ public class HbaseClient {
 
 		table.close();
 		connection.close();
-	}
-
-	// 创建数据库表
-	public static void createUrlid() throws Exception {
-		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1").setInMemory(true);
-		columnDescriptor.setMaxVersions(1);
-
-		HBaseAdmin admin = new HBaseAdmin(conf);
-		createTable(admin, "urlid", columnDescriptor, -1, true, null);
-		admin.close();
-
-		HConnection connection = HConnectionManager.createConnection(conf);
-		HTableInterface table = connection.getTable("urlid");
-		System.out.println(table.getTableDescriptor().toString());
-		table.close();
-		connection.close();
-
-		System.out.println("createUrlid: end.");
 	}
 
 	public static void countCrawldb(String idx) throws IOException {
@@ -507,9 +537,31 @@ public class HbaseClient {
 		return new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(new Date(time));
 	}
 
+	// 创建数据库表
+	public static void createUrlid() throws Exception {
+		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1").setInMemory(true);
+		columnDescriptor.setMaxVersions(1);
+
+		HBaseAdmin admin = new HBaseAdmin(conf);
+		createTable(admin, "urlid", columnDescriptor, -1, true, null);
+		admin.close();
+
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable("urlid");
+		System.out.println(table.getTableDescriptor().toString());
+		table.close();
+		connection.close();
+
+		System.out.println("createUrlid: end.");
+	}
+
 	public static void createCrawldbIdx() throws Exception {
 		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
+		// setDurability
+		columnDescriptor.setValue("DURABILITY", Durability.ASYNC_WAL.name());
+		columnDescriptor.setValue(HTableDescriptor.DEFERRED_LOG_FLUSH, "true");
+		columnDescriptor.setCompressionType(Algorithm.SNAPPY);
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		createTable(admin, T_CRAWLDBIDX, columnDescriptor, 10737418240l, true, getUrlSplits());
 		admin.close();
@@ -520,6 +572,9 @@ public class HbaseClient {
 	public static void createCrawldb(int idx) throws Exception {
 		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
+		columnDescriptor.setValue("DURABILITY", Durability.ASYNC_WAL.name());
+		columnDescriptor.setValue(HTableDescriptor.DEFERRED_LOG_FLUSH, "true");
+		columnDescriptor.setCompressionType(Algorithm.SNAPPY);
 
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		createTable(admin, T_CRAWLDBPRE + idx, columnDescriptor, 10737418240l, true, getHostSplits());
@@ -531,6 +586,9 @@ public class HbaseClient {
 	public static void createCrawldbs(int max) throws Exception {
 		HColumnDescriptor columnDescriptor = new HColumnDescriptor("cf1");
 		columnDescriptor.setMaxVersions(1);
+		columnDescriptor.setValue("DURABILITY", Durability.ASYNC_WAL.name());
+		columnDescriptor.setValue(HTableDescriptor.DEFERRED_LOG_FLUSH, "true");
+		columnDescriptor.setCompressionType(Algorithm.SNAPPY);
 
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		// for (int i = 1; i < 4; i++) {

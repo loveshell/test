@@ -85,6 +85,7 @@ import org.apache.nutch.util.TimingUtil;
 // rLogging imports
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.test.hadoop.GeneratorHbase.TableTopInputFormat.TableKeyInputSplit;
 import org.test.hadoop.stat.GenerateInfo;
 import org.test.hadoop.stat.GenerateInfos;
 import org.test.hbase.HostFilter;
@@ -109,7 +110,7 @@ public class GeneratorHbase extends Generator {
 	public static final Logger LOG = LoggerFactory.getLogger(GeneratorHbase.class);
 	static final String GENERATL_TABLE = "generate.table";
 	static final String GENERATL_REDUCECNT = "generate.reduceCnt";
-	static int tableCacheSize = 100000;
+	static int tableCacheSize = 50000;
 	static int HBASE_REGIONSERVER_LEASE_PERIOD = 600000;
 
 	private static Put createGenerateTime(byte[] url, CrawlDatum value, long generateTime) {
@@ -200,13 +201,17 @@ public class GeneratorHbase extends Generator {
 			private HTableInterface table;
 			private ResultScanner rs;
 
-			public TableReader(JobConf job, String tableName, FilterList filters, String start, String end,
+			public TableReader(JobConf jobConf, String tableName, FilterList filters, String start, String end,
 					Reporter reporter) {
-				this.job = job;
+				this.job = jobConf;
 				this.reporter = reporter;
 
 				HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
-				job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, HBASE_REGIONSERVER_LEASE_PERIOD);
+				// this.job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY,
+				// HBASE_REGIONSERVER_LEASE_PERIOD);
+				LOG.info(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY + "==============="
+						+ job.getLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, 0));
+				tableCacheSize = job.getInt("commit.hbase.threshold", tableCacheSize);
 				try {
 					connection = HConnectionManager.createConnection(this.job);
 					this.table = connection.getTable(tableName);
@@ -369,9 +374,9 @@ public class GeneratorHbase extends Generator {
 			int mapCnt = hostSplits.length / divisor;
 			for (int i = 0; i < mapCnt; i++) {
 				TableKeyInputSplit split = null;
-				if (i == 0)
+				if (i == 0)// last
 					split = new TableKeyInputSplit(table, "1", hostSplits[(i + 1) * divisor]);
-				else if (i == mapCnt - 1)
+				else if (i == mapCnt - 1)// last
 					split = new TableKeyInputSplit(table, hostSplits[i * divisor], "~");
 				else
 					split = new TableKeyInputSplit(table, hostSplits[i * divisor], hostSplits[(i + 1) * divisor]);
@@ -413,6 +418,7 @@ public class GeneratorHbase extends Generator {
 			int intervalThreshold = job.getInt(Generator.GENERATOR_MIN_INTERVAL, -1);
 			long curTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
 			int hostn = job.getInt(Generator.GENERATOR_MAX_COUNT, -1);
+			long topn = job.getLong(Generator.GENERATOR_TOP_N, 0);
 
 			List<Filter> tmp = new ArrayList<Filter>();
 			if (!job.getBoolean("generate.test", true)) {
@@ -437,6 +443,11 @@ public class GeneratorHbase extends Generator {
 			if (hostn > 0) {
 				// topn限制
 				Filter filter = new HostFilter(hostn);
+				tmp.add(filter);
+			}
+			if (topn > 0) {
+				// 记录数限制
+				Filter filter = new PageFilter(topn);
 				tmp.add(filter);
 			}
 			FilterList filters = new FilterList(tmp);
@@ -560,7 +571,6 @@ public class GeneratorHbase extends Generator {
 		static final long ZeroTimeMillis = GetZeroTimeSeconds() * 1000L; // 单位秒;
 
 		public void configure(JobConf job) {
-			conf = job;
 			filter = job.getBoolean(GENERATOR_FILTER, true);
 			if (filter)
 				filters = new URLFilters(job);
@@ -571,9 +581,14 @@ public class GeneratorHbase extends Generator {
 			generateTime = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
 			seed = job.getInt("partition.url.seed", 0);
 			partitioner.configure(job);
+			tableCacheSize = job.getInt("commit.hbase.threshold", tableCacheSize);
 
 			String tableName = job.get(GENERATL_TABLE);
-			HBaseConfiguration.merge(conf, HBaseConfiguration.create(conf));
+			HBaseConfiguration.merge(job, HBaseConfiguration.create(job));
+			// job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY,
+			// HBASE_REGIONSERVER_LEASE_PERIOD);
+			LOG.info(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY + "==============="
+					+ job.getLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, 0));
 			try {
 				connection = HConnectionManager.createConnection(job);
 				table = connection.getTable(tableName);
@@ -582,6 +597,7 @@ public class GeneratorHbase extends Generator {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
+			conf = job;
 
 			isSmart = job.getBoolean("nutch.smart.is", false);
 			if (isSmart) {
@@ -597,7 +613,7 @@ public class GeneratorHbase extends Generator {
 				e.printStackTrace();
 			}
 
-			LOG.info("total=" + cnt + "; " + hostCnt);
+			LOG.info("total=" + cnt + "; hosts=" + hostCnt.size());
 		}
 
 		public void map(Text key, CrawlDatum value, OutputCollector<Text, CrawlDatum> output, Reporter reporter)
@@ -620,7 +636,9 @@ public class GeneratorHbase extends Generator {
 			table.put(put);
 			if (++cnt % tableCacheSize == 0) {
 				table.flushCommits();
-				reporter.setStatus("commit:" + cnt);
+				String region = ((TableKeyInputSplit) reporter.getInputSplit()).getBegin() + "-"
+						+ ((TableKeyInputSplit) reporter.getInputSplit()).getEnd();
+				reporter.setStatus(region + " commit:" + cnt);
 			}
 			output.collect(key, value);// 收集一个，partition一个
 			reporter.incrCounter("Generator", "records", 1);
@@ -830,23 +848,37 @@ public class GeneratorHbase extends Generator {
 		setConf(conf);
 	}
 
-	public Path generateAll(int tableNum, Path segments, int reduceCnt, boolean filter, boolean norm, boolean force)
-			throws IOException {
+	public Path generateAll(int tableNum, Path segments, int reduceCnt, boolean filter, boolean norm, boolean force) {
+		return generateAll(tableNum, segments, 0, reduceCnt, filter, norm, force);
+	}
+
+	public Path generateAll(int tableNum, Path segments, long topN, int reduceCnt, boolean filter, boolean norm,
+			boolean force) {
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		long start = System.currentTimeMillis();
 		LOG.info("Generator: from table=" + tableNum + " starting at " + sdf.format(start));
 		LOG.info("Generator: filtering:=" + filter + "; Generator: normalizing=" + norm);
 
 		Path segment = new Path(segments, Generator.generateSegmentName());
-		long begin = System.currentTimeMillis();
 		String table = "crawldb" + tableNum;
-		RunningJob r = generateJob(table, segment, reduceCnt, filter, norm, force);
-		Counter counter = r.getCounters().findCounter("Generator", "records");
-		long cnt = counter.getValue();
-		LOG.info("Generator: " + segment + " records: " + cnt + " current table=" + table + " timeused="
-				+ (System.currentTimeMillis() - begin) / 1000 + "s");
+		long cnt = 0;
+		try {
+			RunningJob r = generateJob(table, segment, topN, reduceCnt, filter, norm, force);
+			Counter counter = r.getCounters().findCounter("Generator", "records");
+			cnt = counter.getValue();
+			LOG.info("Generator: " + segment + " records: " + cnt + " current table=" + table + " timeused="
+					+ (System.currentTimeMillis() - start) / 1000 + "s");
+		} catch (Exception e) {
+			removePath(segment);
+			LOG.error("generateAll:", e);
+		}
+
+		int less = getConf().getInt("generator.less", 10000);
 		if (cnt == 0) {
-			removePath(FileSystem.get(getConf()), segment);
+			removePath(segment);
+			return null;
+		} else if (topN == 0 && cnt <= less) {// too less : && cnt <= 10000
+			removePath(segment);
 			return null;
 		}
 
@@ -854,7 +886,7 @@ public class GeneratorHbase extends Generator {
 		// have records
 		GenerateInfos.hostn = getConf().getInt(Generator.GENERATOR_MAX_COUNT, -1);
 		GenerateInfo genInfo = GenerateInfos.getGenerateInfo();
-		genInfo.start = begin;
+		genInfo.start = start;
 		genInfo.generate = cnt;
 		genInfo.table = table;
 		genInfo.end = end;
@@ -865,8 +897,9 @@ public class GeneratorHbase extends Generator {
 		return segment;
 	}
 
-	public static boolean removePath(FileSystem fs, Path segment) {
+	public boolean removePath(Path segment) {
 		try {
+			FileSystem fs = FileSystem.get(getConf());
 			if (!fs.exists(segment))
 				return false;
 			return fs.delete(segment, true);
@@ -876,7 +909,7 @@ public class GeneratorHbase extends Generator {
 		return false;
 	}
 
-	private RunningJob generateJob(String table, Path segment, int reduceCnt, boolean filter, boolean norm,
+	private RunningJob generateJob(String table, Path segment, long topN, int reduceCnt, boolean filter, boolean norm,
 			boolean force) throws IOException {
 		LOG.info("Generator: from table=" + table + " segment=" + segment);
 
@@ -896,6 +929,7 @@ public class GeneratorHbase extends Generator {
 		// record real generation time
 		long generateTime = System.currentTimeMillis();
 		job.setLong(Nutch.GENERATE_TIME_KEY, generateTime);
+		job.setLong(GENERATOR_TOP_N, topN);
 		job.setBoolean(GENERATOR_FILTER, filter);
 		job.setBoolean(GENERATOR_NORMALISE, norm);
 		job.set(GENERATL_TABLE, table);
