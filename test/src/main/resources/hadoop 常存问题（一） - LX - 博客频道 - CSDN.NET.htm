@@ -1,0 +1,883 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+     
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    
+<head>
+
+    <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/46aae4d1e2371e4aa769798941cef698/allmobilize.min.js"></script>
+ <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+
+    <title>hadoop 常存问题（一） - LX
+        - 博客频道 - CSDN.NET</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="经常遇到的exception是：PipeMapRed.waitOutputThreads(): subprocess failed with code NOS error code 1: Operation not permittedOS error code 2: No such file or directoryOS error code 3: No such proce" />
+    <script src="http://static.blog.csdn.net/scripts/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://static.blog.csdn.net/scripts/ad.js?v=1.1"></script>
+        <!--new top-->
+               <link rel="stylesheet" href="http://static.csdn.net/public/common/toolbar/css/index.css">        <!--new top-->
+
+    <link rel="Stylesheet" type="text/css" href="http://static.blog.csdn.net/skin/light_blue/css/style.css?v=1.1" />
+    <link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="/liuxincumt/rss/list" />
+    <link rel="shortcut icon" href="http://csdnimg.cn/public/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="http://static.blog.csdn.net/scripts/SyntaxHighlighter/styles/default.css" />
+ 
+
+
+</head>
+<body>
+    
+   
+      <!--new top-->
+    <script id="toolbar-tpl-scriptId" fixed="true" prod="blog" skin="black" src="http://static.csdn.net/public/common/toolbar/js/html.js" type="text/javascript"></script>
+     <!--new top-->
+    <div id="container">
+        <div id="header">
+    <div class="header">
+        <div id="blog_title">
+            <h2>
+                <a href="http://blog.csdn.net/liuxincumt">LX</a></h2>
+            <h3>记下来，才深刻；经常与人比较，才走的更远。</h3>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div id="navigator">
+    <div class="navigator_bg">
+    </div>
+    <div class="navigator">
+        <ul>
+                <li id="btnContents"><a href="http://blog.csdn.net/liuxincumt?viewmode=contents"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_mulu'])">
+                    <img src="http://static.blog.csdn.net/images/ico_list.gif">目录视图</span></a></li>
+                <li id="btnView"><a href="http://blog.csdn.net/liuxincumt?viewmode=list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_zhaiyao'])">
+                    <img src="http://static.blog.csdn.net/images/ico_summary.gif">摘要视图</span></a></li>
+                <li id="btnRss"><a href="http://blog.csdn.net/liuxincumt/rss/list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_RSS'])">
+                    <img src="http://static.blog.csdn.net/images/ico_rss.gif">订阅</span></a></li>                
+
+            </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var username = "liuxincumt";
+    var _blogger = username;
+    var blog_address = "http://blog.csdn.net/liuxincumt";
+    var static_host = "http://static.blog.csdn.net";
+    var currentUserName = "huangxx";  
+</script>
+
+        <div id="body">
+            <div id="main">
+                <div class="main">
+                        <div class="ad_class">
+<div class="notice tracking-ad" data-mod='popu_3' > 
+
+<a href="http://bbs.csdn.net/topics/390812950?page=2#post-398116601"target="_blank">
+<font color=blue>博客专家福利
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://bbs.csdn.net/topics/390863850">
+<font color=red>【限时活动】建专辑得大奖</font></a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://www.csdn.net/article/2014-09-10/2821606">
+<font color=blue>专访荣浩：流程的永恒之道
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38657235"><font color=red>当青春遇上互联网，能否点燃你的创业梦
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<a href="http://blog.csdn.net/blogdevteam/article/details/38418263">
+<font color=blue>推荐有礼--找出您心中的技术大牛
+</font></a>
+
+
+</div>                        </div>
+                        
+
+  
+<link href="http://static.blog.csdn.net/css/comment1.css" type="text/css" rel="stylesheet" />
+<link href="http://static.blog.csdn.net/css/style1.css" type="text/css" rel="stylesheet" />
+<script language='JavaScript' type='text/javascript' src='http://download.csdn.net/js/jquery.cookie.js'></script>
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/search-service/main.js"></script>
+<div id="article_details" class="details">
+    <div class="article_title">   
+         <span class="ico ico_type_Original"></span>
+
+
+    <h1>
+        <span class="link_title"><a href="/liuxincumt/article/details/6076903">
+        hadoop 常存问题（一）
+        </a></span>
+    </h1>
+</div>
+
+    <div class="article_manage">
+        <span class="link_categories">
+        分类：
+            <a href="/liuxincumt/article/category/1098529" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_fenlei']);">Hadoop</a> 
+        </span>
+    <span class="link_postdate">2010-12-15 09:32</span>
+    <span class="link_view" title="阅读次数">4003人阅读</span>
+    <span class="link_comments" title="评论次数"><a href="#comments" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_pinglun'])">评论</a>(0)</span>
+    <span class="link_collect"><a href="javascript:void(0);" onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shoucang']);collectArticle('hadoop 常存问题（一）','6076903');return false;" title="收藏">收藏</a></span>
+    <span class="link_report"><a href="#report"  onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_jubao']);report(6076903,2);return false;" title="举报">举报</a></span>
+    
+</div>
+<div class="tag2box"><a href='http://www.csdn.net/tag/hadoop' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">hadoop</a><a href='http://www.csdn.net/tag/file' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">file</a><a href='http://www.csdn.net/tag/structure' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">structure</a><a href='http://www.csdn.net/tag/descriptor' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">descriptor</a><a href='http://www.csdn.net/tag/subprocess' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">subprocess</a><a href='http://www.csdn.net/tag/network' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">network</a></div>
+
+  
+    
+<div id="article_content" class="article_content">
+
+<h2>经常遇到的exception是：PipeMapRed.waitOutputThreads(): subprocess failed with code N</h2>
+<p>&quot;OS error code 1: Operation not permitted&quot;</p>
+<p>&quot;OS error code 2: No such file or directory&quot;</p>
+<p>&quot;OS error code 3: No such process&quot;<br>
+&quot;OS error code 4: Interrupted system call&quot;<br>
+&quot;OS error code 5: Input/output error&quot;<br>
+&quot;OS error code 6: No such device or address&quot;<br>
+&quot;OS error code 7: Argument list too long&quot;<br>
+&quot;OS error code 8: Exec format error&quot;<br>
+&quot;OS error code 9: Bad file descriptor&quot;<br>
+&quot;OS error code 10: No child processes&quot;<br>
+&quot;OS error code 11: Resource temporarily unavailable&quot;<br>
+&quot;OS error code 12: Cannot allocate memory&quot;<br>
+&quot;OS error code 13: Permission denied&quot;<br>
+&quot;OS error code 14: Bad address&quot;<br>
+&quot;OS error code 15: Block device required&quot;<br>
+&quot;OS error code 16: Device or resource busy&quot;<br>
+&quot;OS error code 17: File exists&quot;<br>
+&quot;OS error code 18: Invalid cross-device link&quot;<br>
+&quot;OS error code 19: No such device&quot;<br>
+&quot;OS error code 20: Not a directory&quot;<br>
+&quot;OS error code 21: Is a directory&quot;<br>
+&quot;OS error code 22: Invalid argument&quot;<br>
+&quot;OS error code 23: Too many open files in system&quot;<br>
+&quot;OS error code 24: Too many open files&quot;<br>
+&quot;OS error code 25: Inappropriate ioctl for device&quot;<br>
+&quot;OS error code 26: Text file busy&quot;<br>
+&quot;OS error code 27: File too large&quot;<br>
+&quot;OS error code 28: No space left on device&quot;<br>
+&quot;OS error code 29: Illegal seek&quot;<br>
+&quot;OS error code 30: Read-only file system&quot;<br>
+&quot;OS error code 31: Too many links&quot;<br>
+&quot;OS error code 32: Broken pipe&quot;<br>
+&quot;OS error code 33: Numerical argument out of domain&quot;<br>
+&quot;OS error code 34: Numerical result out of range&quot;<br>
+&quot;OS error code 35: Resource deadlock avoided&quot;<br>
+&quot;OS error code 36: File name too long&quot;<br>
+&quot;OS error code 37: No locks available&quot;<br>
+&quot;OS error code 38: Function not implemented&quot;<br>
+&quot;OS error code 39: Directory not empty&quot;<br>
+&quot;OS error code 40: Too many levels of symbolic links&quot;<br>
+&quot;OS error code 42: No message of desired type&quot;<br>
+&quot;OS error code 43: Identifier removed&quot;<br>
+&quot;OS error code 44: Channel number out of range&quot;<br>
+&quot;OS error code 45: Level 2 not synchronized&quot;<br>
+&quot;OS error code 46: Level 3 halted&quot;<br>
+&quot;OS error code 47: Level 3 reset&quot;<br>
+&quot;OS error code 48: Link number out of range&quot;<br>
+&quot;OS error code 49: Protocol driver not attached&quot;<br>
+&quot;OS error code 50: No CSI structure available&quot;<br>
+&quot;OS error code 51: Level 2 halted&quot;<br>
+&quot;OS error code 52: Invalid exchange&quot;<br>
+&quot;OS error code 53: Invalid request descriptor&quot;<br>
+&quot;OS error code 54: Exchange full&quot;<br>
+&quot;OS error code 55: No anode&quot;<br>
+&quot;OS error code 56: Invalid request code&quot;<br>
+&quot;OS error code 57: Invalid slot&quot;<br>
+&quot;OS error code 59: Bad font file format&quot;<br>
+&quot;OS error code 60: Device not a stream&quot;<br>
+&quot;OS error code 61: No data available&quot;<br>
+&quot;OS error code 62: Timer expired&quot;<br>
+&quot;OS error code 63: Out of streams resources&quot;<br>
+&quot;OS error code 64: Machine is not on the network&quot;<br>
+&quot;OS error code 65: Package not installed&quot;<br>
+&quot;OS error code 66: Object is remote&quot;<br>
+&quot;OS error code 67: Link has been severed&quot;<br>
+&quot;OS error code 68: Advertise error&quot;<br>
+&quot;OS error code 69: Srmount error&quot;<br>
+&quot;OS error code 70: Communication error on send&quot;<br>
+&quot;OS error code 71: Protocol error&quot;<br>
+&quot;OS error code 72: Multihop attempted&quot;<br>
+&quot;OS error code 73: RFS specific error&quot;<br>
+&quot;OS error code 74: Bad message&quot;<br>
+&quot;OS error code 75: Value too large for defined data type&quot;<br>
+&quot;OS error code 76: Name not unique on network&quot;<br>
+&quot;OS error code 77: File descriptor in bad state&quot;<br>
+&quot;OS error code 78: Remote address changed&quot;<br>
+&quot;OS error code 79: Can not access a needed shared library&quot;<br>
+&quot;OS error code 80: Accessing a corrupted shared library&quot;<br>
+&quot;OS error code 81: .lib section in a.out corrupted&quot;<br>
+&quot;OS error code 82: Attempting to link in too many shared libraries&quot;<br>
+&quot;OS error code 83: Cannot exec a shared library directly&quot;<br>
+&quot;OS error code 84: Invalid or incomplete multibyte or wide character&quot;<br>
+&quot;OS error code 85: Interrupted system call should be restarted&quot;<br>
+&quot;OS error code 86: Streams pipe error&quot;<br>
+&quot;OS error code 87: Too many users&quot;<br>
+&quot;OS error code 88: Socket operation on non-socket&quot;<br>
+&quot;OS error code 89: Destination address required&quot;<br>
+&quot;OS error code 90: Message too long&quot;<br>
+&quot;OS error code 91: Protocol wrong type for socket&quot;<br>
+&quot;OS error code 92: Protocol not available&quot;<br>
+&quot;OS error code 93: Protocol not supported&quot;<br>
+&quot;OS error code 94: Socket type not supported&quot;<br>
+&quot;OS error code 95: Operation not supported&quot;<br>
+&quot;OS error code 96: Protocol family not supported&quot;<br>
+&quot;OS error code 97: Address family not supported by protocol&quot;<br>
+&quot;OS error code 98: Address already in use&quot;<br>
+&quot;OS error code 99: Cannot assign requested address&quot;<br>
+&quot;OS error code 100: Network is down&quot;<br>
+&quot;OS error code 101: Network is unreachable&quot;<br>
+&quot;OS error code 102: Network dropped connection on reset&quot;<br>
+&quot;OS error code 103: Software caused connection abort&quot;<br>
+&quot;OS error code 104: Connection reset by peer&quot;<br>
+&quot;OS error code 105: No buffer space available&quot;<br>
+&quot;OS error code 106: Transport endpoint is already connected&quot;<br>
+&quot;OS error code 107: Transport endpoint is not connected&quot;<br>
+&quot;OS error code 108: Cannot send after transport endpoint shutdown&quot;<br>
+&quot;OS error code 109: Too many references: cannot splice&quot;<br>
+&quot;OS error code 110: Connection timed out&quot;<br>
+&quot;OS error code 111: Connection refused&quot;<br>
+&quot;OS error code 112: Host is down&quot;<br>
+&quot;OS error code 113: No route to host&quot;<br>
+&quot;OS error code 114: Operation already in progress&quot;<br>
+&quot;OS error code 115: Operation now in progress&quot;<br>
+&quot;OS error code 116: Stale NFS file handle&quot;<br>
+&quot;OS error code 117: Structure needs cleaning&quot;<br>
+&quot;OS error code 118: Not a XENIX named type file&quot;<br>
+&quot;OS error code 119: No XENIX semaphores available&quot;<br>
+&quot;OS error code 120: Is a named type file&quot;<br>
+&quot;OS error code 121: Remote I/O error&quot;<br>
+&quot;OS error code 122: Disk quota exceeded&quot;<br>
+&quot;OS error code 123: No medium found&quot;<br>
+&quot;OS error code 124: Wrong medium type&quot;<br>
+&quot;OS error code 125: Operation canceled&quot;<br>
+&quot;OS error code 126: Required key not available&quot;<br>
+&quot;OS error code 127: Key has expired&quot;<br>
+&quot;OS error code 128: Key has been revoked&quot;<br>
+&quot;OS error code 129: Key was rejected by service&quot;<br>
+&quot;OS error code 130: Owner died&quot;<br>
+&quot;OS error code 131: State not recoverable&quot;<br>
+&quot;MySQL error code 132: Old database file&quot;<br>
+&quot;MySQL error code 133: No record read before update&quot;<br>
+&quot;MySQL error code 134: Record was already deleted (or record file crashed)&quot;<br>
+&quot;MySQL error code 135: No more room in record file&quot;<br>
+&quot;MySQL error code 136: No more room in index file&quot;<br>
+&quot;MySQL error code 137: No more records (read after end of file)&quot;<br>
+&quot;MySQL error code 138: Unsupported extension used for table&quot;<br>
+&quot;MySQL error code 139: Too big row&quot;<br>
+&quot;MySQL error code 140: Wrong create options&quot;<br>
+&quot;MySQL error code 141: Duplicate unique key or constraint on write or update&quot;<br>
+&quot;MySQL error code 142: Unknown character set used&quot;<br>
+&quot;MySQL error code 143: Conflicting table definitions in sub-tables of MERGE table&quot;<br>
+&quot;MySQL error code 144: Table is crashed and last repair failed&quot;<br>
+&quot;MySQL error code 145: Table was marked as crashed and should be repaired&quot;<br>
+&quot;MySQL error code 146: Lock timed out; Retry transaction&quot;<br>
+&quot;MySQL error code 147: Lock table is full; Restart program with a larger locktable&quot;<br>
+&quot;MySQL error code 148: Updates are not allowed under a read only transactions&quot;<br>
+&quot;MySQL error code 149: Lock deadlock; Retry transaction&quot;<br>
+&quot;MySQL error code 150: Foreign key constraint is incorrectly formed&quot;<br>
+&quot;MySQL error code 151: Cannot add a child row&quot;<br>
+&quot;MySQL error code 152: Cannot delete a parent row&quot;</p>
+
+</div>
+
+
+
+
+<!-- Baidu Button BEGIN -->
+
+<div class="bdsharebuttonbox" style="float: right;">
+<a href="#" class="bds_more" data-cmd="more" style="background-position:0 0 !important; background-image: url(http://bdimg.share.baidu.com/static/api/img/share/icons_0_16.png?v=d754dcc0.png) !important"></a>
+<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"  style="background-position:0 -52px !important"></a>
+<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"style="background-position:0 -104px !important"></a>
+<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"style="background-position:0 -260px !important"></a>
+<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"style="background-position:0 -208px !important"></a>
+<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"style="background-position:0 -1612px !important" ></a>
+</div>
+<script>window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "1", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "16" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+<!-- Baidu Button END -->
+
+<!--192.168.100.35-->
+<ul class="article_next_prev">
+            <li class="prev_article"><span  onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian']);location.href='/liuxincumt/article/details/6070890';">上一篇</span><a href="/liuxincumt/article/details/6070890" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian'])">svn 在linux下的使用命令</a></li>
+            <li class="next_article"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_xiayipian']);location.href='/liuxincumt/article/details/6078576';">下一篇</span><a href="/liuxincumt/article/details/6078576" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_xiayipian'])">Hadoop运行mapreduce实例时,抛出错误 All datanodes xxx.xxx.xxx.xxx:xxx are bad. Aborting…</a></li>
+</ul>
+
+<!-- Baidu Button BEGIN -->
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=1536434" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+
+</div>
+      <dl class="blog-associat-tag">
+        <dt>主题推荐</dt>
+        <dd>
+                <a href="http://www.csdn.net/tag/hadoop" target="_blank" class="blog-tage-red" >hadoop</a> 
+                <a href="http://www.csdn.net/tag/transactions" target="_blank" class="blog-tage-red" >transactions</a> 
+                <a href="http://www.csdn.net/tag/character" target="_blank" class="blog-tage-red" >character</a> 
+                <a href="http://www.csdn.net/tag/structure" target="_blank" class="blog-tage-red" >structure</a> 
+                <a href="http://www.csdn.net/tag/extension" target="_blank" class="blog-tage-red" >extension</a> 
+        </dd>
+    </dl> 
+
+
+<dl class="blog-ass-articl tracking-ad"  data-mod="popu_36" id="res-relatived"> 
+     <dt><span>猜你在找</span></dt>    
+</dl>
+
+<script type="text/javascript">
+    var searchtitletags = 'hadoop 常存问题（一）' + ',' + 'hadoop,transactions,character,structure,extension';
+    searchService({
+        index: 'blog',
+        query: searchtitletags,
+        from: 10,
+        size: 10,
+        appendTo: '#res-relatived',
+        url: 'recommend',
+        his: 2,
+        client: "blog_cf_enhance",
+        tmpl: '<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="#{ url }" title="#{ title }" strategy="#{ strategy }">#{ title }</a></dd>'
+    });
+
+ </script>   
+
+
+    <div id="ad_cen">
+   
+          <script type="text/javascript">
+              new Ad(4, 'ad_cen');
+          </script>
+    </div>
+<div class="comment_class">
+    <div id="comment_title" class="panel_head">
+        <span class="see_comment">查看评论</span><a name="comments"></a></div>
+    <div id="comment_list">
+    </div>
+    <div id="comment_bar">
+    </div>
+    <div id="comment_form">
+    </div>
+
+    <div class="announce">
+        * 以上用户言论只代表其个人观点，不代表CSDN网站的观点或立场<a name="reply"></a><a name="quote"></a></div>
+</div>
+
+<script type="text/javascript">
+    var fileName = '6076903';
+    var commentscount = 0;
+    var islock = false
+</script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/comment.js"></script>
+    <div id="ad_bot">
+    </div>
+    <script type="text/javascript">
+    new Ad(5, 'ad_bot');
+    </script>
+<div id="report_dialog">
+</div>
+
+<div id="d-top"  style="bottom:60px;">
+      
+
+       <a id="quick-reply" class="btn btn-top q-reply" title="快速回复" style="display:none;">
+            <img src="http://static.blog.csdn.net/images/blog-icon-reply.png" alt="快速回复">
+        </a>    
+
+    <a id="d-top-a" class="btn btn-top backtop"  style="display: none;" title="返回顶部" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_huidaodingbu'])" style="">         
+         <img src="http://static.blog.csdn.net/images/top.png" alt="TOP">
+    </a>
+</div>
+<script type="text/javascript">
+    $(function ()
+    {
+        $("#ad_frm_0").height("90px");
+        
+        setTimeout(function(){
+            $("#ad_frm_2").height("200px");
+        },1000);
+        
+
+        if($("#comment_content").length>0)
+        {
+            $("#quick-reply").show();
+
+            $("#quick-reply").click(function(){
+                setEditorFocus();
+            });
+        }       
+     
+        var d_top = $('#d-top-a');
+        document.onscroll = function ()
+        {
+            var scrTop = (document.body.scrollTop || document.documentElement.scrollTop);
+            if (scrTop > 500)
+            {
+                d_top.show();
+            } else
+            {
+                d_top.hide();
+            }
+        }
+        $('#d-top-a').click(function ()
+        {
+            scrollTo(0, 0);
+            this.blur();
+            return false;
+        });
+    });
+  
+</script>
+<style type="text/css">
+    .tag_list
+    {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #D7CBC1;
+        color: #000000;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none outside none;
+        margin: 10px 2% 0 1%;
+        padding: 1px;
+    }
+    .tag_list h5
+    {
+        background: none repeat scroll 0 0 #E0DBD3;
+        color: #47381C;
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .tag_list h5 a
+    {
+        color: #47381C;
+    }
+    .classify
+    {
+        margin: 10px 0;
+        padding: 4px 12px 8px;
+    }
+    .classify a
+    {
+        margin-right: 20px;
+        white-space: nowrap;
+    }
+</style>
+<div class="tag_list">
+    <h5>
+        <a href="http://www.csdn.net/tag/" target="_blank">核心技术类目</a></h5>
+    <div class="classify">
+<a title="全部主题" href="http://www.csdn.net/tag" target="_blank" onclick="LogClickCount(this,336);">全部主题</a>
+<a title="Hadoop" href="http://g.csdn.net/5272865" target="_blank" onclick="LogClickCount(this,336);">Hadoop</a>
+<a title="AWS" href="http://g.csdn.net/5272866" target="_blank" onclick="LogClickCount(this,336);">AWS</a>
+<a title="移动游戏" href="http://g.csdn.net/5272870" target="_blank" onclick="LogClickCount(this,336);">移动游戏</a>
+<a title="Java" href="http://g.csdn.net/5272871" target="_blank" onclick="LogClickCount(this,336);">Java</a>
+<a title="Android" href="http://g.csdn.net/5272872" target="_blank" onclick="LogClickCount(this,336);">Android</a>
+<a title="iOS" href="http://g.csdn.net/5272873" target="_blank" onclick="LogClickCount(this,336);">iOS</a>
+<a title="Swift" href="http://g.csdn.net/5272868" target="_blank" onclick="LogClickCount(this,336);">Swift</a>
+<a title="智能硬件" href="http://g.csdn.net/5272869" target="_blank" onclick="LogClickCount(this,336);">智能硬件</a>
+<a title="Docker" href="http://g.csdn.net/5272867" target="_blank" onclick="LogClickCount(this,336);">Docker</a>
+<a title="OpenStack" href="http://g.csdn.net/5272925" target="_blank" onclick="LogClickCount(this,336);">OpenStack</a>
+<a title="VPN" href="http://www.csdn.net/tag/vpn" target="_blank" onclick="LogClickCount(this,336);">VPN</a>
+<a title="Spark" href="http://g.csdn.net/5272924" target="_blank" onclick="LogClickCount(this,336);">Spark</a>
+<a title="ERP" href="http://www.csdn.net/tag/erp" target="_blank" onclick="LogClickCount(this,336);">ERP</a>
+<a title="IE10" href="http://www.csdn.net/tag/ie10" target="_blank" onclick="LogClickCount(this,336);">IE10</a>
+<a title="Eclipse" href="http://www.csdn.net/tag/eclipse" target="_blank" onclick="LogClickCount(this,336);">Eclipse</a>
+<a title="CRM" href="http://www.csdn.net/tag/crm" target="_blank" onclick="LogClickCount(this,336);">CRM</a>
+<a title="JavaScript" href="http://www.csdn.net/tag/javascript" target="_blank" onclick="LogClickCount(this,336);">JavaScript</a>
+<a title="数据库" href="http://www.csdn.net/tag/数据库" target="_blank" onclick="LogClickCount(this,336);">数据库</a>
+<a title="Ubuntu" href="http://www.csdn.net/tag/ubuntu" target="_blank" onclick="LogClickCount(this,336);">Ubuntu</a>
+<a title="NFC" href="http://www.csdn.net/tag/nfc" target="_blank" onclick="LogClickCount(this,336);">NFC</a>
+<a title="WAP" href="http://www.csdn.net/tag/wap" target="_blank" onclick="LogClickCount(this,336);">WAP</a>
+<a title="jQuery" href="http://www.csdn.net/tag/jquery" target="_blank" onclick="LogClickCount(this,336);">jQuery</a>
+<a title="BI" href="http://www.csdn.net/tag/bi" target="_blank" onclick="LogClickCount(this,336);">BI</a>
+<a title="HTML5" href="http://www.csdn.net/tag/html5" target="_blank" onclick="LogClickCount(this,336);">HTML5</a>
+<a title="Spring" href="http://www.csdn.net/tag/spring" target="_blank" onclick="LogClickCount(this,336);">Spring</a>
+<a title="Apache" href="http://www.csdn.net/tag/apache" target="_blank" onclick="LogClickCount(this,336);">Apache</a>
+<a title=".NET" href="http://www.csdn.net/tag/.net" target="_blank" onclick="LogClickCount(this,336);">.NET</a>
+<a title="API" href="http://www.csdn.net/tag/api" target="_blank" onclick="LogClickCount(this,336);">API</a>
+<a title="HTML" href="http://www.csdn.net/tag/html" target="_blank" onclick="LogClickCount(this,336);">HTML</a>
+<a title="SDK" href="http://www.csdn.net/tag/sdk" target="_blank" onclick="LogClickCount(this,336);">SDK</a>
+<a title="IIS" href="http://www.csdn.net/tag/iis" target="_blank" onclick="LogClickCount(this,336);">IIS</a>
+<a title="Fedora" href="http://www.csdn.net/tag/fedora" target="_blank" onclick="LogClickCount(this,336);">Fedora</a>
+<a title="XML" href="http://www.csdn.net/tag/xml" target="_blank" onclick="LogClickCount(this,336);">XML</a>
+<a title="LBS" href="http://www.csdn.net/tag/lbs" target="_blank" onclick="LogClickCount(this,336);">LBS</a>
+<a title="Unity" href="http://www.csdn.net/tag/unity" target="_blank" onclick="LogClickCount(this,336);">Unity</a>
+<a title="Splashtop" href="http://www.csdn.net/tag/splashtop" target="_blank" onclick="LogClickCount(this,336);">Splashtop</a>
+<a title="UML" href="http://www.csdn.net/tag/uml" target="_blank" onclick="LogClickCount(this,336);">UML</a>
+<a title="components" href="http://www.csdn.net/tag/components" target="_blank" onclick="LogClickCount(this,336);">components</a>
+<a title="Windows Mobile" href="http://www.csdn.net/tag/windowsmobile" target="_blank" onclick="LogClickCount(this,336);">Windows Mobile</a>
+<a title="Rails" href="http://www.csdn.net/tag/rails" target="_blank" onclick="LogClickCount(this,336);">Rails</a>
+<a title="QEMU" href="http://www.csdn.net/tag/qemu" target="_blank" onclick="LogClickCount(this,336);">QEMU</a>
+<a title="KDE" href="http://www.csdn.net/tag/kde" target="_blank" onclick="LogClickCount(this,336);">KDE</a>
+<a title="Cassandra" href="http://www.csdn.net/tag/cassandra" target="_blank" onclick="LogClickCount(this,336);">Cassandra</a>
+<a title="CloudStack" href="http://www.csdn.net/tag/cloudstack" target="_blank" onclick="LogClickCount(this,336);">CloudStack</a>
+<a title="FTC" href="http://www.csdn.net/tag/ftc" target="_blank" onclick="LogClickCount(this,336);">FTC</a>
+<a title="coremail" href="http://www.csdn.net/tag/coremail" target="_blank" onclick="LogClickCount(this,336);">coremail</a>
+<a title="OPhone " href="http://www.csdn.net/tag/ophone " target="_blank" onclick="LogClickCount(this,336);">OPhone </a>
+<a title="CouchBase" href="http://www.csdn.net/tag/couchbase" target="_blank" onclick="LogClickCount(this,336);">CouchBase</a>
+<a title="云计算" href="http://www.csdn.net/tag/云计算" target="_blank" onclick="LogClickCount(this,336);">云计算</a>
+<a title="iOS6" href="http://www.csdn.net/tag/iOS6" target="_blank" onclick="LogClickCount(this,336);">iOS6</a>
+<a title="Rackspace " href="http://www.csdn.net/tag/rackspace " target="_blank" onclick="LogClickCount(this,336);">Rackspace </a>
+<a title="Web App" href="http://www.csdn.net/tag/webapp" target="_blank" onclick="LogClickCount(this,336);">Web App</a>
+<a title="SpringSide" href="http://www.csdn.net/tag/springside" target="_blank" onclick="LogClickCount(this,336);">SpringSide</a>
+<a title="Maemo" href="http://www.csdn.net/tag/maemo" target="_blank" onclick="LogClickCount(this,336);">Maemo</a>
+<a title="Compuware" href="http://www.csdn.net/tag/compuware" target="_blank" onclick="LogClickCount(this,336);">Compuware</a>
+<a title="大数据" href="http://www.csdn.net/tag/大数据" target="_blank" onclick="LogClickCount(this,336);">大数据</a>
+<a title="aptech" href="http://www.csdn.net/tag/aptech" target="_blank" onclick="LogClickCount(this,336);">aptech</a>
+<a title="Perl" href="http://www.csdn.net/tag/perl" target="_blank" onclick="LogClickCount(this,336);">Perl</a>
+<a title="Tornado" href="http://www.csdn.net/tag/tornado" target="_blank" onclick="LogClickCount(this,336);">Tornado</a>
+<a title="Ruby" href="http://www.csdn.net/tag/ruby" target="_blank" onclick="LogClickCount(this,336);">Ruby</a>
+<a title="Hibernate" href="http://www.csdn.net/hibernate" target="_blank" onclick="LogClickCount(this,336);">Hibernate</a>
+<a title="ThinkPHP" href="http://www.csdn.net/tag/thinkphp" target="_blank" onclick="LogClickCount(this,336);">ThinkPHP</a>
+<a title="HBase" href="http://www.csdn.net/tag/hbase" target="_blank" onclick="LogClickCount(this,336);">HBase</a>
+<a title="Pure" href="http://www.csdn.net/tag/pure" target="_blank" onclick="LogClickCount(this,336);">Pure</a>
+<a title="Solr" href="http://www.csdn.net/tag/solr" target="_blank" onclick="LogClickCount(this,336);">Solr</a>
+<a title="Angular" href="http://www.csdn.net/tag/angular" target="_blank" onclick="LogClickCount(this,336);">Angular</a>
+<a title="Cloud Foundry" href="http://www.csdn.net/tag/cloudfoundry" target="_blank" onclick="LogClickCount(this,336);">Cloud Foundry</a>
+<a title="Redis" href="http://www.csdn.net/tag/redis" target="_blank" onclick="LogClickCount(this,336);">Redis</a>
+<a title="Scala" href="http://www.csdn.net/tag/scala" target="_blank" onclick="LogClickCount(this,336);">Scala</a>
+<a title="Django" href="http://www.csdn.net/tag/django" target="_blank" onclick="LogClickCount(this,336);">Django</a>
+<a title="Bootstrap" href="http://www.csdn.net/tag/bootstrap" target="_blank" onclick="LogClickCount(this,336);">Bootstrap</a>
+    </div>
+</div>
+
+
+                        <div class="clear">
+                        </div>
+                    </div>                   
+                
+            </div>
+            <div id="side">
+    <div class="side">
+<div id="panel_Profile" class="panel">
+<ul class="panel_head"><span>个人资料</span></ul>
+<ul class="panel_body profile">
+<div id="blog_userface">
+    <a href="http://my.csdn.net/liuxincumt" target="_blank">
+    <img src="http://avatar.csdn.net/6/1/A/1_liuxincumt.jpg" title="访问我的空间" style="max-width:90%"/>
+    </a>
+    <br />
+    <span><a href="http://my.csdn.net/liuxincumt" class="user_name" target="_blank">liuxincumt</a></span>
+</div>
+<div class="interact">
+<a href="javascript:void(0);" class="attent" id="span_add_follow" title="[加关注]" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_guanzhu'])"></a>
+
+ <a href="javascript:void(0);" class="letter"  title="[发私信]" onclick="window.open('http://msg.csdn.net/letters/model?receiver=liuxincumt','_blank','height=350,width=700');_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_sixin'])"></a>  
+</div>
+<div id="blog_medal">
+</div>
+<ul id="blog_rank">
+    <li>访问：<span>96904次</span></li>
+    <li>积分：<span>1504分</span></li>
+    <li>排名：<span>第10096名</span></li>
+</ul>
+<ul id="blog_statistics">
+    <li>原创：<span>49篇</span></li>
+    <li>转载：<span>71篇</span></li>
+    <li>译文：<span>0篇</span></li>
+    <li>评论：<span>9条</span></li>
+</ul>
+</ul>
+</div>
+
+
+<div class="panel" id="panel_Search">
+    <ul class="panel_head"><span>文章搜索</span></ul>
+    <ul class="panel_body">
+        <form id="frmSearch" action="http://so.csdn.net/search" class="form_search" target="_blank">
+        <span><input id="inputSearch" type="text" class="blogsearch" title="请输入关键字" /></span>
+        <input id="btnSubmit" type="button" value="搜索" title="search in blog" />
+        <input type="hidden" name="q" id="inputQ" />
+        <input type="hidden" name="t" value="blog" />
+        <a id="btnSearchBlog" target="_blank"></a>
+        </form>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {           
+            search();
+        });
+
+        $("#frmSearch").submit(function () {
+            search();
+            return false;
+        });
+
+        function search()
+        {
+            var url = "http://so.csdn.net/so/search/s.do?q=" + encodeURIComponent($("#inputSearch").val()) + "&u=" + username + "&t=blog";
+            window.location.href = url;
+        }   
+    });
+</script><div id="panel_Category" class="panel">
+<ul class="panel_head"><span>文章分类</span></ul>
+<ul class="panel_body">
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098527" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">算法</a><span>(22)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098528" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Python</a><span>(38)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098529" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Hadoop</a><span>(9)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098530" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">C++</a><span>(7)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098533" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Linux</a><span>(18)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098542" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Lisp</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1098548" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">系统架构</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1103240" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">django</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1122459" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">sql</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123176" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">gdb</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123177" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">emacs</a><span>(2)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123282" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">矩阵</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123283" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">最优化理论</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123284" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">概率统计</a><span>(2)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1123285" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">R语言</a><span>(12)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/liuxincumt/article/category/1127019" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">个性化推荐</a><span>(1)</span>
+            </li>
+</ul>
+</div><div id="panel_Archive" class="panel">
+<ul class="panel_head"><span>文章存档</span></ul>
+<ul class="panel_body">
+<div id="archive_list">
+<!--归档统计-->
+<li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/12">2012年12月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/11">2012年11月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/10">2012年10月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/09">2012年09月</a><span>(23)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/08">2012年08月</a><span>(10)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/07">2012年07月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/06">2012年06月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/05">2012年05月</a><span>(21)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/04">2012年04月</a><span>(12)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2012/03">2012年03月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/11">2011年11月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/10">2011年10月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/08">2011年08月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/07">2011年07月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/03">2011年03月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2011/02">2011年02月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/liuxincumt/article/month/2010/12">2010年12月</a><span>(8)</span></li>
+</div>
+</ul>
+</div>
+<div id="hotarticls" class="panel">
+<ul class="panel_head">
+    <span>       
+阅读排行    </span>
+</ul>
+
+<ul class="panel_body itemlist">
+<li>
+<a href="/liuxincumt/article/details/7945337" title="python 字符串 大小写转换">python 字符串 大小写转换</a><span>(8451)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/6202295" title="shell的read方法使用介绍">shell的read方法使用介绍</a><span>(8284)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/6185705" title="linux shell 字符串操作（长度，查找，替换，匹配）详解">linux shell 字符串操作（长度，查找，替换，匹配）详解</a><span>(4139)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/6076903" title="hadoop 常存问题（一）">hadoop 常存问题（一）</a><span>(4001)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7469920" title="B树">B树</a><span>(2888)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/8020358" title="R中数据集&amp;适用的实验">R中数据集&amp;适用的实验</a><span>(2769)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7527917" title="R语言中的机器学习包">R语言中的机器学习包</a><span>(2722)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/8183391" title="初探python编码">初探python编码</a><span>(2203)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7367952" title="红黑树">红黑树</a><span>(2202)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/8016094" title="Kolmogorov-Smirnov检验">Kolmogorov-Smirnov检验</a><span>(1932)</span>
+</li>
+</ul>
+</div>
+<div id="hotarticls2" class="panel">
+<ul class="panel_head"><span>评论排行</span></ul>
+<ul class="panel_body itemlist">
+<li>
+<a href="/liuxincumt/article/details/6978442" title="c++的点点滴滴(1)----关于宏、inline函数和const">c++的点点滴滴(1)----关于宏、inline函数和const</a><span>(3)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/8016094" title="Kolmogorov-Smirnov检验">Kolmogorov-Smirnov检验</a><span>(2)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7916198" title="Hadoop Streaming 实战： 二次排序">Hadoop Streaming 实战： 二次排序</a><span>(2)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7469920" title="B树">B树</a><span>(1)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/8183391" title="初探python编码">初探python编码</a><span>(1)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7919455" title="来自 Google 的 R 语言编码风格指南">来自 Google 的 R 语言编码风格指南</a><span>(0)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7919490" title="Python语言规范">Python语言规范</a><span>(0)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7919518" title="Python风格规范">Python风格规范</a><span>(0)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7919674" title="R+GoogleVis数据可视化">R+GoogleVis数据可视化</a><span>(0)</span>
+</li>
+<li>
+<a href="/liuxincumt/article/details/7942369" title="Python进制转换（二进制、十进制和十六进制）">Python进制转换（二进制、十进制和十六进制）</a><span>(0)</span>
+</li>
+</ul>
+</div>
+<div id="homepageArticles" class="panel tracking-ad" data-mod="popu_4">
+<ul class="panel_head"><span>推荐文章</span></ul>
+<ul class="panel_body" id="ad_commend"></ul>
+</div>
+<script type="text/javascript">
+ new Ad(12, 'ad_commend');
+</script><div id="newcomments" class="panel">
+<ul class="panel_head"><span>最新评论</span></ul>
+<ul class="panel_body itemlist">
+    <li>
+   
+         <a href="/liuxincumt/article/details/8016094#comments">Kolmogorov-Smirnov检验</a>
+    <p style="margin:0px;"><a href="/baidu_20310789" class="user_name">baidu_20310789</a>:
+学习了
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/8183391#comments">初探python编码</a>
+    <p style="margin:0px;"><a href="/game115" class="user_name">game115</a>:
+给最后的轮询编码点个赞！
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/8183391#comments">Kolmogorov-Smirnov检验</a>
+    <p style="margin:0px;"><a href="/baidu_17201685" class="user_name">baidu_17201685</a>:
+学习了。
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/7916198#comments">Hadoop Streaming 实战： 二次排序</a>
+    <p style="margin:0px;"><a href="/motyeop2008" class="user_name">motyeop2008</a>:
+但是速度速度都是当时
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/7916198#comments">Hadoop Streaming 实战： 二次排序</a>
+    <p style="margin:0px;"><a href="/motyeop2008" class="user_name">motyeop2008</a>:
+三等分
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/7469920#comments">B树</a>
+    <p style="margin:0px;"><a href="/csm_qz" class="user_name">csm_qz</a>:
+谢谢,很透彻...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/6978442#comments">c++的点点滴滴(1)----关于宏、inline函数和const</a>
+    <p style="margin:0px;"><a href="/liuxincumt" class="user_name">liuxincumt</a>:
+@creat_ok:对的，即使有其他文件引用了该头文件，由于const默认作用域是文件，所以其实是在...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/6978442#comments">c++的点点滴滴(1)----关于宏、inline函数和const</a>
+    <p style="margin:0px;"><a href="/creat_ok" class="user_name">creat_ok</a>:
+（2）当中的那个const int x=1234;是局部的文件作用域，所以可以在头文件中。博主看我理...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/liuxincumt/article/details/6978442#comments">c++的点点滴滴(1)----关于宏、inline函数和const</a>
+    <p style="margin:0px;"><a href="/creat_ok" class="user_name">creat_ok</a>:
+那个const修饰的变量默认的是非extern的。这个可以确保是对的。
+    </p>
+    </li>
+</ul>
+</div>
+    </div>
+    <div class="clear">
+    </div>
+</div>
+
+            <div class="clear">
+            </div>
+        </div>
+        
+
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/cnick/cnick.js"></script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/newblog.min.js"></script>
+
+
+<script type="text/javascript" src="http://medal.blog.csdn.net/showblogmedal.ashx?blogid=986350"></script>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://csdnimg.cn/pubfooter/js/publib_footer.js?' + Math.floor(new Date() / 120000).toString(36) + '="></' + 'script>');
+</script>
+<script type="text/javascript">document.write("<img src=http://counter.csdn.net/pv.aspx?id=24 border=0 width=0 height=0>");</script>
+<script type="text/javascript" src="http://www.csdn.net/ui/scripts/Csdn/counter.js"></script>
+<script type="text/javascript" src="http://ad.csdn.net/scripts/ad-blog.js"></script>
+<script type="text/javascript" src="http://zz.csdn.net/js/count.js"></script>
+<script type="text/javascript">
+    $(function () {
+        function __get_code_toolbar(snippet_id) {
+            return $("<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "' target='_blank' title='在CODE上查看代码片' style='text-indent:0;'><img src='https://code.csdn.net/assets/CODE_ico.png' width=12 height=12 alt='在CODE上查看代码片' style='position:relative;top:1px;left:2px;'/></a>"
+                    + "<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "/fork' target='_blank' title='派生到我的代码片'  style='text-indent:0;'><img src='https://code.csdn.net/assets/ico_fork.svg' width=12 height=12 alt='派生到我的代码片' style='position:relative;top:2px;left:2px;'/></a>");
+        }
+        
+        $("[code_snippet_id]").each(function () {
+            __s_id = $(this).attr("code_snippet_id");
+            if (__s_id != null && __s_id != "" && __s_id != 0 && parseInt(__s_id) > 70020) {
+                __code_tool = __get_code_toolbar(__s_id);
+                $(this).prev().find(".tools").append(__code_tool);
+            }
+        });
+    });
+</script>
+
+    </div>
+      <!--new top-->
+    
+    <script id="csdn-toolbar-id" btnId="header_notice_num" wrapId="note1" count="5" subCount="5" type="text/javascript" src="http://static.csdn.net/public/common/toolbar/js/toolbar.js"></script>     <!--new top-->
+</body>
+</html>

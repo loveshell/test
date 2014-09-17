@@ -1,0 +1,3620 @@
+<html xmlns:v="urn:schemas-microsoft-com:vml"
+xmlns:o="urn:schemas-microsoft-com:office:office"
+xmlns:w="urn:schemas-microsoft-com:office:word"
+xmlns:m="http://schemas.microsoft.com/office/2004/12/omml"
+xmlns="http://www.w3.org/TR/REC-html40">
+
+<head>
+<title>Java 6 JVM参数选项大全（中文版）</title>
+<meta http-equiv=Content-Type content="text/html; charset=gb2312">
+<meta name=ProgId content=Word.Document>
+<meta name=Generator content="Microsoft Word 12">
+<meta name=Originator content="Microsoft Word 12">
+<link rel=File-List href="java6-jvm-options-chinese-edition.files/filelist.xml">
+<link rel=Edit-Time-Data
+href="java6-jvm-options-chinese-edition.files/editdata.mso">
+<!--[if !mso]>
+<style>
+v\:* {behavior:url(#default#VML);}
+o\:* {behavior:url(#default#VML);}
+w\:* {behavior:url(#default#VML);}
+.shape {behavior:url(#default#VML);}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:DocumentProperties>
+  <o:Author>Ken Wu</o:Author>
+  <o:LastAuthor>Ken Wu</o:LastAuthor>
+  <o:Revision>2</o:Revision>
+  <o:TotalTime>966</o:TotalTime>
+  <o:Created>2009-12-17T14:13:00Z</o:Created>
+  <o:LastSaved>2009-12-17T14:13:00Z</o:LastSaved>
+  <o:Pages>4</o:Pages>
+  <o:Words>1773</o:Words>
+  <o:Characters>10109</o:Characters>
+  <o:Lines>84</o:Lines>
+  <o:Paragraphs>23</o:Paragraphs>
+  <o:CharactersWithSpaces>11859</o:CharactersWithSpaces>
+  <o:Version>12.00</o:Version>
+ </o:DocumentProperties>
+ <o:OfficeDocumentSettings>
+  <o:RelyOnVML/>
+  <o:AllowPNG/>
+ </o:OfficeDocumentSettings>
+</xml><![endif]-->
+<link rel=themeData
+href="java6-jvm-options-chinese-edition.files/themedata.thmx">
+<link rel=colorSchemeMapping
+href="java6-jvm-options-chinese-edition.files/colorschememapping.xml">
+<!--[if gte mso 9]><xml>
+ <w:WordDocument>
+  <w:TrackMoves>false</w:TrackMoves>
+  <w:TrackFormatting/>
+  <w:PunctuationKerning/>
+  <w:DrawingGridVerticalSpacing>7.8 磅</w:DrawingGridVerticalSpacing>
+  <w:DisplayHorizontalDrawingGridEvery>0</w:DisplayHorizontalDrawingGridEvery>
+  <w:DisplayVerticalDrawingGridEvery>2</w:DisplayVerticalDrawingGridEvery>
+  <w:ValidateAgainstSchemas/>
+  <w:SaveIfXMLInvalid>false</w:SaveIfXMLInvalid>
+  <w:IgnoreMixedContent>false</w:IgnoreMixedContent>
+  <w:AlwaysShowPlaceholderText>false</w:AlwaysShowPlaceholderText>
+  <w:DoNotPromoteQF/>
+  <w:LidThemeOther>EN-US</w:LidThemeOther>
+  <w:LidThemeAsian>ZH-CN</w:LidThemeAsian>
+  <w:LidThemeComplexScript>X-NONE</w:LidThemeComplexScript>
+  <w:Compatibility>
+   <w:SpaceForUL/>
+   <w:BalanceSingleByteDoubleByteWidth/>
+   <w:DoNotLeaveBackslashAlone/>
+   <w:ULTrailSpace/>
+   <w:DoNotExpandShiftReturn/>
+   <w:AdjustLineHeightInTable/>
+   <w:BreakWrappedTables/>
+   <w:SnapToGridInCell/>
+   <w:WrapTextWithPunct/>
+   <w:UseAsianBreakRules/>
+   <w:DontGrowAutofit/>
+   <w:SplitPgBreakAndParaMark/>
+   <w:DontVertAlignCellWithSp/>
+   <w:DontBreakConstrainedForcedTables/>
+   <w:DontVertAlignInTxbx/>
+   <w:Word11KerningPairs/>
+   <w:CachedColBalance/>
+   <w:UseFELayout/>
+  </w:Compatibility>
+  <m:mathPr>
+   <m:mathFont m:val="Cambria Math"/>
+   <m:brkBin m:val="before"/>
+   <m:brkBinSub m:val="&#45;-"/>
+   <m:smallFrac m:val="off"/>
+   <m:dispDef/>
+   <m:lMargin m:val="0"/>
+   <m:rMargin m:val="0"/>
+   <m:defJc m:val="centerGroup"/>
+   <m:wrapIndent m:val="1440"/>
+   <m:intLim m:val="subSup"/>
+   <m:naryLim m:val="undOvr"/>
+  </m:mathPr></w:WordDocument>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <w:LatentStyles DefLockedState="false" DefUnhideWhenUsed="true"
+  DefSemiHidden="true" DefQFormat="false" DefPriority="99"
+  LatentStyleCount="267">
+  <w:LsdException Locked="false" Priority="0" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Normal"/>
+  <w:LsdException Locked="false" Priority="9" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="heading 1"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 2"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 3"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 4"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 5"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 6"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 7"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 8"/>
+  <w:LsdException Locked="false" Priority="9" QFormat="true" Name="heading 9"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 1"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 2"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 3"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 4"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 5"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 6"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 7"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 8"/>
+  <w:LsdException Locked="false" Priority="39" Name="toc 9"/>
+  <w:LsdException Locked="false" Priority="35" Name="caption"/>
+  <w:LsdException Locked="false" Priority="10" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Title"/>
+  <w:LsdException Locked="false" Priority="1" Name="Default Paragraph Font"/>
+  <w:LsdException Locked="false" Priority="11" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtitle"/>
+  <w:LsdException Locked="false" Priority="22" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Strong"/>
+  <w:LsdException Locked="false" Priority="20" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Emphasis"/>
+  <w:LsdException Locked="false" Priority="59" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Table Grid"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Placeholder Text"/>
+  <w:LsdException Locked="false" Priority="1" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="No Spacing"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 1"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 1"/>
+  <w:LsdException Locked="false" UnhideWhenUsed="false" Name="Revision"/>
+  <w:LsdException Locked="false" Priority="34" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="List Paragraph"/>
+  <w:LsdException Locked="false" Priority="29" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Quote"/>
+  <w:LsdException Locked="false" Priority="30" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Quote"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 1"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 1"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 1"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 1"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 1"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 1"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 1"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 2"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 2"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 2"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 2"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 2"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 2"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 2"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 2"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 3"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 3"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 3"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 3"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 3"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 3"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 3"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 3"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 4"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 4"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 4"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 4"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 4"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 4"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 4"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 4"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 5"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 5"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 5"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 5"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 5"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 5"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 5"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 5"/>
+  <w:LsdException Locked="false" Priority="60" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="61" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light List Accent 6"/>
+  <w:LsdException Locked="false" Priority="62" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Light Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="63" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="64" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Shading 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="65" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="66" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium List 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="67" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 1 Accent 6"/>
+  <w:LsdException Locked="false" Priority="68" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 2 Accent 6"/>
+  <w:LsdException Locked="false" Priority="69" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Medium Grid 3 Accent 6"/>
+  <w:LsdException Locked="false" Priority="70" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Dark List Accent 6"/>
+  <w:LsdException Locked="false" Priority="71" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Shading Accent 6"/>
+  <w:LsdException Locked="false" Priority="72" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful List Accent 6"/>
+  <w:LsdException Locked="false" Priority="73" SemiHidden="false"
+   UnhideWhenUsed="false" Name="Colorful Grid Accent 6"/>
+  <w:LsdException Locked="false" Priority="19" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Emphasis"/>
+  <w:LsdException Locked="false" Priority="21" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Emphasis"/>
+  <w:LsdException Locked="false" Priority="31" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Subtle Reference"/>
+  <w:LsdException Locked="false" Priority="32" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Intense Reference"/>
+  <w:LsdException Locked="false" Priority="33" SemiHidden="false"
+   UnhideWhenUsed="false" QFormat="true" Name="Book Title"/>
+  <w:LsdException Locked="false" Priority="37" Name="Bibliography"/>
+  <w:LsdException Locked="false" Priority="39" QFormat="true" Name="TOC Heading"/>
+ </w:LatentStyles>
+</xml><![endif]-->
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;
+	mso-font-charset:1;
+	mso-generic-font-family:roman;
+	mso-font-format:other;
+	mso-font-pitch:variable;
+	mso-font-signature:0 0 0 0 0 0;}
+@font-face
+	{font-family:微软雅黑;
+	panose-1:2 11 5 3 2 2 4 2 2 4;
+	mso-font-charset:134;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-2147483001 672087122 22 0 262175 0;}
+@font-face
+	{font-family:Verdana;
+	panose-1:2 11 6 4 3 5 4 4 2 4;
+	mso-font-charset:0;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-1593833729 1073750107 16 0 415 0;}
+@font-face
+	{font-family:"\@微软雅黑";
+	panose-1:2 11 5 3 2 2 4 2 2 4;
+	mso-font-charset:134;
+	mso-generic-font-family:swiss;
+	mso-font-pitch:variable;
+	mso-font-signature:-2147483001 672087122 22 0 262175 0;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h1
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 1 Char";
+	mso-style-next:正文;
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-font-kerning:0pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h1.CxSpFirst
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 1 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-font-kerning:0pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h1.CxSpMiddle
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 1 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-font-kerning:0pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h1.CxSpLast
+	{mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 1 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:1;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-font-kerning:0pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h2
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 2 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:2;
+	font-size:13.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h3
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 3 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	line-height:112%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:3;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h4
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 4 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:4;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+h5
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 5 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:5;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#7F7F7F;
+	mso-themecolor:text1;
+	mso-themetint:128;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+h6
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 6 Char";
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:112%;
+	mso-pagination:widow-orphan;
+	mso-outline-level:6;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#7F7F7F;
+	mso-themecolor:text1;
+	mso-themetint:128;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+p.MsoHeading7, li.MsoHeading7, div.MsoHeading7
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 7 Char";
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:7;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+p.MsoHeading8, li.MsoHeading8, div.MsoHeading8
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 8 Char";
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:8;
+	font-size:10.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoHeading9, li.MsoHeading9, div.MsoHeading9
+	{mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 9 Char";
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	mso-outline-level:9;
+	font-size:10.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+p.MsoHeader, li.MsoHeader, div.MsoHeader
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"页眉 Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	text-align:center;
+	line-height:12.0pt;
+	mso-pagination:widow-orphan;
+	tab-stops:center 207.65pt right 415.3pt;
+	layout-grid-mode:char;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .75pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:9.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoFooter, li.MsoFooter, div.MsoFooter
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-link:"页脚 Char";
+	margin:0cm;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-pagination:widow-orphan;
+	tab-stops:center 207.65pt right 415.3pt;
+	layout-grid-mode:char;
+	font-size:9.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoCaption, li.MsoCaption, div.MsoCaption
+	{mso-style-noshow:yes;
+	mso-style-priority:35;
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:9.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	color:#4F81BD;
+	mso-themecolor:accent1;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;}
+p.MsoTitle, li.MsoTitle, div.MsoTitle
+	{mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 Char";
+	mso-style-next:正文;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	mso-pagination:widow-orphan;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .5pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:26.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoTitleCxSpFirst, li.MsoTitleCxSpFirst, div.MsoTitleCxSpFirst
+	{mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	mso-pagination:widow-orphan;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .5pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:26.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoTitleCxSpMiddle, li.MsoTitleCxSpMiddle, div.MsoTitleCxSpMiddle
+	{mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	mso-pagination:widow-orphan;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .5pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:26.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoTitleCxSpLast, li.MsoTitleCxSpLast, div.MsoTitleCxSpLast
+	{mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"标题 Char";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	mso-pagination:widow-orphan;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .5pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:26.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoSubtitle, li.MsoSubtitle, div.MsoSubtitle
+	{mso-style-priority:11;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"副标题 Char";
+	mso-style-next:正文;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:30.0pt;
+	margin-left:0cm;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.65pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+a:link, span.MsoHyperlink
+	{mso-style-priority:99;
+	color:blue;
+	mso-themecolor:hyperlink;
+	text-decoration:underline;
+	text-underline:single;}
+a:visited, span.MsoHyperlinkFollowed
+	{mso-style-noshow:yes;
+	mso-style-priority:99;
+	color:purple;
+	mso-themecolor:followedhyperlink;
+	text-decoration:underline;
+	text-underline:single;}
+em
+	{mso-style-priority:20;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	letter-spacing:.5pt;
+	border:none;
+	font-weight:bold;}
+p.MsoNoSpacing, li.MsoNoSpacing, div.MsoNoSpacing
+	{mso-style-priority:1;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-type:export-only;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-type:export-only;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{mso-style-priority:34;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-type:export-only;
+	margin-top:0cm;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:36.0pt;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+p.MsoQuote, li.MsoQuote, div.MsoQuote
+	{mso-style-priority:29;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"引用 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:18.0pt;
+	margin-bottom:0cm;
+	margin-left:18.0pt;
+	margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-style:italic;}
+p.MsoIntenseQuote, li.MsoIntenseQuote, div.MsoIntenseQuote
+	{mso-style-priority:30;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-link:"明显引用 Char";
+	mso-style-next:正文;
+	margin-top:10.0pt;
+	margin-right:57.6pt;
+	margin-bottom:14.0pt;
+	margin-left:50.4pt;
+	text-align:justify;
+	text-justify:inter-ideograph;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	border:none;
+	mso-border-bottom-alt:solid windowtext .5pt;
+	padding:0cm;
+	mso-padding-alt:0cm 0cm 1.0pt 0cm;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;
+	font-style:italic;}
+span.MsoSubtleEmphasis
+	{mso-style-priority:19;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	font-style:italic;}
+span.MsoIntenseEmphasis
+	{mso-style-priority:21;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	font-weight:bold;}
+span.MsoSubtleReference
+	{mso-style-priority:31;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	font-variant:small-caps;}
+span.MsoIntenseReference
+	{mso-style-priority:32;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	font-variant:small-caps;
+	letter-spacing:.25pt;
+	text-decoration:underline;
+	text-underline:single;}
+span.MsoBookTitle
+	{mso-style-priority:33;
+	mso-style-unhide:no;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	font-variant:small-caps;
+	letter-spacing:.25pt;
+	font-style:italic;}
+p.MsoTocHeading, li.MsoTocHeading, div.MsoTocHeading
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
+	mso-style-qformat:yes;
+	mso-style-parent:"标题 1";
+	mso-style-next:正文;
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;}
+p.MsoTocHeadingCxSpFirst, li.MsoTocHeadingCxSpFirst, div.MsoTocHeadingCxSpFirst
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
+	mso-style-qformat:yes;
+	mso-style-parent:"标题 1";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin-top:24.0pt;
+	margin-right:0cm;
+	margin-bottom:0cm;
+	margin-left:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;}
+p.MsoTocHeadingCxSpMiddle, li.MsoTocHeadingCxSpMiddle, div.MsoTocHeadingCxSpMiddle
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
+	mso-style-qformat:yes;
+	mso-style-parent:"标题 1";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;}
+p.MsoTocHeadingCxSpLast, li.MsoTocHeadingCxSpLast, div.MsoTocHeadingCxSpLast
+	{mso-style-noshow:yes;
+	mso-style-priority:39;
+	mso-style-qformat:yes;
+	mso-style-parent:"标题 1";
+	mso-style-next:正文;
+	mso-style-type:export-only;
+	margin:0cm;
+	margin-bottom:.0001pt;
+	mso-add-space:auto;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;
+	font-weight:bold;}
+span.1Char
+	{mso-style-name:"标题 1 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 1";
+	mso-ansi-font-size:14.0pt;
+	mso-bidi-font-size:14.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	font-weight:bold;}
+span.2Char
+	{mso-style-name:"标题 2 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 2";
+	mso-ansi-font-size:13.0pt;
+	mso-bidi-font-size:13.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	font-weight:bold;}
+span.3Char
+	{mso-style-name:"标题 3 Char";
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 3";
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	font-weight:bold;}
+span.4Char
+	{mso-style-name:"标题 4 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 4";
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	font-weight:bold;
+	font-style:italic;}
+span.5Char
+	{mso-style-name:"标题 5 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 5";
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#7F7F7F;
+	mso-themecolor:text1;
+	mso-themetint:128;
+	font-weight:bold;}
+span.6Char
+	{mso-style-name:"标题 6 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 6";
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	color:#7F7F7F;
+	mso-themecolor:text1;
+	mso-themetint:128;
+	font-weight:bold;
+	font-style:italic;}
+span.7Char
+	{mso-style-name:"标题 7 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 7";
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	font-style:italic;}
+span.8Char
+	{mso-style-name:"标题 8 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 8";
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;}
+span.9Char
+	{mso-style-name:"标题 9 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:9;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:"标题 9";
+	mso-ansi-font-size:10.0pt;
+	mso-bidi-font-size:10.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;
+	font-style:italic;}
+span.Char
+	{mso-style-name:"标题 Char";
+	mso-style-priority:10;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:标题;
+	mso-ansi-font-size:26.0pt;
+	mso-bidi-font-size:26.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.25pt;}
+span.Char0
+	{mso-style-name:"副标题 Char";
+	mso-style-priority:11;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:副标题;
+	mso-ansi-font-size:12.0pt;
+	mso-bidi-font-size:12.0pt;
+	font-family:"Verdana","sans-serif";
+	mso-ascii-font-family:Verdana;
+	mso-ascii-theme-font:major-latin;
+	mso-fareast-font-family:微软雅黑;
+	mso-fareast-theme-font:major-fareast;
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:major-latin;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:major-bidi;
+	letter-spacing:.65pt;
+	font-style:italic;}
+span.Char1
+	{mso-style-name:"引用 Char";
+	mso-style-priority:29;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:引用;
+	font-style:italic;}
+span.Char2
+	{mso-style-name:"明显引用 Char";
+	mso-style-priority:30;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:明显引用;
+	font-weight:bold;
+	font-style:italic;}
+span.Char3
+	{mso-style-name:"页眉 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:页眉;
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;}
+span.Char4
+	{mso-style-name:"页脚 Char";
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-unhide:no;
+	mso-style-locked:yes;
+	mso-style-link:页脚;
+	mso-ansi-font-size:9.0pt;
+	mso-bidi-font-size:9.0pt;}
+.MsoChpDefault
+	{mso-style-type:export-only;
+	mso-default-props:yes;
+	font-size:10.0pt;
+	mso-ansi-font-size:10.0pt;
+	mso-ascii-font-family:微软雅黑;
+	mso-fareast-font-family:微软雅黑;
+	mso-bidi-font-family:"Times New Roman";
+	mso-bidi-theme-font:minor-bidi;
+	mso-font-kerning:0pt;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+.MsoPapDefault
+	{mso-style-type:export-only;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;}
+ /* Page Definitions */
+ @page
+	{mso-page-border-surround-header:no;
+	mso-page-border-surround-footer:no;
+	mso-footnote-separator:url("java6-jvm-options-chinese-edition.files/header.htm") fs;
+	mso-footnote-continuation-separator:url("java6-jvm-options-chinese-edition.files/header.htm") fcs;
+	mso-endnote-separator:url("java6-jvm-options-chinese-edition.files/header.htm") es;
+	mso-endnote-continuation-separator:url("java6-jvm-options-chinese-edition.files/header.htm") ecs;}
+@page Section1
+	{size:595.3pt 841.9pt;
+	margin:72.0pt 90.0pt 72.0pt 90.0pt;
+	mso-header-margin:42.55pt;
+	mso-footer-margin:49.6pt;
+	mso-paper-source:0;
+	layout-grid:15.6pt;}
+div.Section1
+	{page:Section1;}
+ /* List Definitions */
+ @list l0
+	{mso-list-id:425417947;
+	mso-list-type:hybrid;
+	mso-list-template-ids:-1486076636 -1743464478 67698713 67698715 67698703 67698713 67698715 67698703 67698713 67698715;}
+@list l0:level1
+	{mso-level-text:%1，;
+	mso-level-tab-stop:none;
+	mso-level-number-position:left;
+	margin-left:18.0pt;
+	text-indent:-18.0pt;}
+ol
+	{margin-bottom:0cm;}
+ul
+	{margin-bottom:0cm;}
+-->
+</style>
+<!--[if gte mso 10]>
+<style>
+ /* Style Definitions */
+ table.MsoNormalTable
+	{mso-style-name:普通表格;
+	mso-tstyle-rowband-size:0;
+	mso-tstyle-colband-size:0;
+	mso-style-noshow:yes;
+	mso-style-priority:99;
+	mso-style-qformat:yes;
+	mso-style-parent:"";
+	mso-padding-alt:0cm 5.4pt 0cm 5.4pt;
+	mso-para-margin:0cm;
+	mso-para-margin-bottom:.0001pt;
+	line-height:12.0pt;
+	mso-line-height-rule:exactly;
+	mso-pagination:widow-orphan;
+	font-size:10.0pt;
+	mso-bidi-font-size:11.0pt;
+	font-family:"微软雅黑","sans-serif";
+	mso-hansi-font-family:Verdana;
+	mso-hansi-theme-font:minor-latin;
+	mso-fareast-language:EN-US;
+	mso-bidi-language:EN-US;}
+</style>
+<![endif]--><!--[if gte mso 9]><xml>
+ <o:shapedefaults v:ext="edit" spidmax="37890"/>
+</xml><![endif]--><!--[if gte mso 9]><xml>
+ <o:shapelayout v:ext="edit">
+  <o:idmap v:ext="edit" data="2"/>
+ </o:shapelayout></xml><![endif]-->
+  <script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-4883503-8']);
+  _gaq.push(['_trackPageview']);
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ga);
+  })();
+</script>
+</head>
+
+<body lang=ZH-CN link=blue vlink=purple style='tab-interval:21.0pt;text-justify-trim:
+punctuation'>
+
+<div class=Section1 style='layout-grid:15.6pt'>
+
+<h1 style='tab-stops:354.2pt'><span lang=EN-US style='mso-fareast-language:
+ZH-CN'>Java 6 JVM</span><span style='font-family:"微软雅黑","sans-serif";
+mso-ascii-font-family:Verdana;mso-ascii-theme-font:major-latin;mso-fareast-font-family:
+微软雅黑;mso-fareast-theme-font:major-fareast;mso-hansi-font-family:Verdana;
+mso-hansi-theme-font:major-latin;mso-fareast-language:ZH-CN'>参数选项大全（中文版）</span><span
+lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></h1>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>作者：</span><span
+lang=EN-US><a href="http://kenwublog.com/about"><span style='mso-fareast-language:
+ZH-CN'>Ken Wu</span></a></span><span lang=EN-US style='mso-fareast-language:
+ZH-CN'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Email:
+ken.wug@gmail.com<o:p></o:p></span></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>转载本文档请注明原文链接 </span><span
+lang=EN-US><a
+href="http://kenwublog.com/docs/java6-jvm-options-chinese-edition.htm"><span
+style='mso-fareast-language:ZH-CN'>http://kenwublog.com/docs/java6-jvm-options-chinese-edition.htm</span></a></span><span
+style='mso-fareast-language:ZH-CN'>！<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US>本文</span><span style='mso-fareast-language:
+ZH-CN'>是基于最新的</span><span lang=EN-US>SUN官方</span><span style='mso-fareast-language:
+ZH-CN'>文档</span><span lang=EN-US><a
+href="http://java.sun.com/javase/technologies/hotspot/vmoptions.jsp"
+target="_blank" title="Java SE 6 Hotspot VM Options">Java SE 6 Hotspot VM
+Options</a></span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+minor-latin'>&nbsp;</span><span style='mso-fareast-language:ZH-CN'>编写的译文。主要介绍<span
+lang=EN-US>JVM</span>中的非稳态选项及其使用说明。<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>为了让读者明白每个选项的含义，作者在原文基础上<b
+style='mso-bidi-font-weight:normal'>补充了大量的资料</b>。希望这份文档，对正在研究<span lang=EN-US>JVM</span>参数的朋友有帮助！<span
+lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>另外，考虑到本文档是初稿，如有描述错误，敬请指正。<span
+lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>非稳态</span></b><b
+style='mso-bidi-font-weight:normal'><span style='mso-fareast-language:ZH-CN'>选项<span
+style='mso-bidi-font-weight:bold'>使用说明<span lang=EN-US><o:p></o:p></span></span></span></b></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:+&lt;option&gt;
+</span><span style='mso-fareast-language:ZH-CN'>启用选项<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:-&lt;option&gt;
+</span><span style='mso-fareast-language:ZH-CN'>不启用选项<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:&lt;option&gt;=&lt;number&gt;
+</span><span style='mso-fareast-language:ZH-CN'>给选项设置一个数字类型值，可跟单位，例如<span
+lang=EN-US> 32k, 1024m, 2g<br>
+-XX:&lt;option&gt;=&lt;string&gt; </span>给选项设置一个字符串值，例如<span lang=EN-US>-XX:HeapDumpPath=./dump.core<o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b><span lang=EN-US>行为</span></b><b><span style='mso-fareast-language:
+ZH-CN'>选项<span lang=EN-US><o:p></o:p></span></span></b></p>
+
+<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;border-collapse:collapse;border:none;mso-border-alt:solid gray .5pt;
+ mso-yfti-tbllook:1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  mso-border-alt:solid gray .5pt;padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>选项<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>默认值与限制<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span lang=EN-US>描述<o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-AllowUserSignalHandlers</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>限于<span
+  lang=EN-US>Linux</span>和<span lang=EN-US>Solaris</span>，默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>允许为<span
+  lang=EN-US>java</span>进程安装信号处理器。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  Java</span><span style='mso-fareast-language:ZH-CN'>信号处理相关知识，详见 </span><span
+  lang=EN-US><a
+  href="http://kenwublog.com/java-asynchronous-notify-based-on-signal"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/java-asynchronous-notify-based-on-signal</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-DisableExplicitGC</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>禁止在运行期显式地调用<span
+  lang=EN-US> System.gc()</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>开启该选项后，<span
+  lang=EN-US>GC</span>的触发时机将由<span lang=EN-US>Garbage Collector</span>全权掌控。<span
+  lang=EN-US><br>
+  </span>注意：你熟悉的代码里没调用<span lang=EN-US>System.gc()</span>，不代表你依赖的框架工具没在使用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如<span
+  lang=EN-US>RMI</span>就在多数用户毫不知情的情况下，显示地调用<span lang=EN-US>GC</span>来防止自身<span
+  lang=EN-US>OOM</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>请仔细权衡禁用带来的影响。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-RelaxAccessControlCheck</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>默认不启用</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在<span
+  lang=EN-US>Class</span>校验器中，放松对访问控制的检查。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>作用与<span
+  lang=EN-US>reflection</span>里的<span lang=EN-US>setAccessible</span>类似。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:-UseConcMarkSweepGC<o:p></o:p></span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用<span
+  lang=EN-US>CMS</span>低停顿垃圾收集器。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>资料详见：</span><span
+  lang=EN-US><a href="http://kenwublog.com/docs/CMS_GC.pdf"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/docs/CMS_GC.pdf</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:5'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:-UseParallelGC<o:p></o:p></span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-server</span><span
+  style='mso-fareast-language:ZH-CN'>时启用<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他情况下，默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>策略为新生代使用并行清除，年老代使用单线程<span
+  lang=EN-US>Mark-Sweep-Compact</span>的垃圾收集器。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:6'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-UseParallelOldGC</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>策略为老年代和新生代都使用并行清除的垃圾收集器。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:7'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-UseSerialGC</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-client</span><span
+  style='mso-fareast-language:ZH-CN'>时启用<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他情况下，默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>使用串行垃圾收集器。</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:8'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseSplitVerifier</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>java5</span><span
+  style='mso-fareast-language:ZH-CN'>默认不启用<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>java6</span><span
+  style='mso-fareast-language:ZH-CN'>默认启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>使用新的<span
+  lang=EN-US>Class</span>类型校验器</span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin;mso-fareast-language:ZH-CN'>&nbsp;</span><span style='mso-fareast-language:
+  ZH-CN'>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><b><span style='mso-fareast-language:ZH-CN'>新<span lang=EN-US>Class</span>类型校验器有什么特点？</span></b><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><span style='mso-fareast-language:ZH-CN'>新<span lang=EN-US>Class</span>类型校验器，将老的校验步骤拆分成了两步：<span
+  lang=EN-US><br>
+  1</span>，类型推断。<span lang=EN-US><br>
+  2</span>，类型校验。<span lang=EN-US><br>
+  <br>
+  </span>新类型校验器通过在<span lang=EN-US>javac</span>编译时嵌入类型信息到<span lang=EN-US>bytecode</span>中，省略了类型推断这一步，从而提升了<span
+  lang=EN-US>classloader</span>的性能。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Classload顺序</span><span style='mso-fareast-language:
+  ZH-CN'>（供参考）</span><span lang=EN-US><br>
+  load -&gt;</span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin'>&nbsp;</span><b><span lang=EN-US>verify</span></b><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span><span
+  lang=EN-US>-&gt; prepare -&gt; resove -&gt; init</span></p>
+  <p class=MsoNormal><span lang=EN-US><br>
+  <b>关联选项：</b><br>
+  -XX:+FailOverToOldVerifier</span><span lang=EN-US style='mso-fareast-language:
+  ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:9'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+FailOverToOldVerifier</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java6</span><span
+  style='mso-fareast-language:ZH-CN'>新引入选项，默认启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>如果新的<span
+  lang=EN-US>Class</span>校验器检查失败，则使用老的校验器。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><b><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></b></p>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>为什么会失败？<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN;mso-bidi-font-weight:
+  bold'>因为<span lang=EN-US>JDK6</span>最高向下兼容到<span lang=EN-US>JDK1.2</span>，而<span
+  lang=EN-US>JDK1.2</span>的<span lang=EN-US>class info </span>与<span
+  lang=EN-US>JDK6</span>的<span lang=EN-US>info</span>存在较大的差异，所以新校验器可能会出现校验失败的情况。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><b><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><span lang=EN-US>关联选项：<br>
+  </span></b><span lang=EN-US>-XX:+UseSplitVerifier</span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:10'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+HandlePromotionFailure</span><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span><span
+  lang=EN-US> </span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin'>&nbsp;</span><span lang=EN-US> </span><span lang=EN-US
+  style='font-family:"Verdana","sans-serif";mso-ascii-font-family:微软雅黑;
+  mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>java5</span><span
+  style='mso-fareast-language:ZH-CN'>以前是默认不启用，<span lang=EN-US>java6</span>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>关闭新生代收集担保。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><b><span lang=EN-US>什么是新生代收集</span></b><b style='mso-bidi-font-weight:
+  normal'><span style='mso-fareast-language:ZH-CN'>担保</span><span lang=EN-US
+  style='mso-bidi-font-weight:bold'>？</span></b><span lang=EN-US><br>
+  在一次理想化的minor gc中，Eden和First Survivor中</span><span style='mso-fareast-language:
+  ZH-CN'>的活跃对象会</span><span lang=EN-US>被复制到Second Survivor。<br>
+  </span><span style='mso-fareast-language:ZH-CN'>然而，<span lang=EN-US>Second
+  Survivor</span>不一定能容纳下所有从<span lang=EN-US>E</span>和<span lang=EN-US>F</span>区<span
+  lang=EN-US>copy</span>过来的活跃对象。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>为了确保<span
+  lang=EN-US>minor gc</span>能够顺利完成，<span lang=EN-US>GC</span>需要在年老代中额外保留一块足以容纳所有活跃对象的内存空间。<span
+  lang=EN-US><br>
+  </span>这个预留操作，就被称之为新生代收集担保（<span lang=EN-US>New Generation <span
+  style='mso-bidi-font-weight:bold'>Guarantee</span></span>）。如果预留操作无法完成时，仍会触发<span
+  lang=EN-US>major gc(full gc)</span>。<span lang=EN-US><br>
+  <br>
+  </span><b>为什么要关闭新生代收集</b><b style='mso-bidi-font-weight:normal'>担保<span
+  style='mso-bidi-font-weight:bold'>？</span></b><span lang=EN-US><br>
+  </span>因为在年老代中预留的空间大小，是无法精确计算的。<b><span lang=EN-US><o:p></o:p></span></b></span></p>
+  <p class=MsoNormal><span lang=EN-US>为了确保极端情况的发生，GC参考了最坏情况下的新生代内存占用，即Eden+First
+  Survivor。</span><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>这种策略无疑是在浪费年老代内存，从时序角度看，还会提前触发<span
+  lang=EN-US>Full GC</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>为了避免如上情况的发生，<span
+  lang=EN-US>JVM</span>允许开发者手动关闭新生代收集担保。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在开启本选项后，<span
+  lang=EN-US>minor gc</span>将不再提供新生代收集担保，而是在出现<span lang=EN-US>survior</span>或年老代不够用时，抛出<span
+  lang=EN-US>promotion failed</span>异常。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:11'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseSpinning</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>java1.4.2</span><span
+  style='mso-fareast-language:ZH-CN'>和<span lang=EN-US>1.5</span>需要手动启用<span
+  lang=EN-US>, java6</span>默认已启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用多线程自旋锁优化。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><b><span style='mso-fareast-language:ZH-CN'>自旋锁优化原理</span></b><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>大家知道，<span
+  lang=EN-US>Java</span>的多线程安全是基于<span lang=EN-US>Lock</span>机制实现的，而<span
+  lang=EN-US>Lock</span>的性能往往不如人意。<span lang=EN-US><br>
+  </span>原因是，<span lang=EN-US>monitorenter</span>与<span lang=EN-US>monitorexit</span>这两个控制多线程同步的<span
+  lang=EN-US>bytecode</span>原语，是<span lang=EN-US>JVM</span>依赖操作系统互斥<span
+  lang=EN-US>(mutex)</span>来实现的。<span lang=EN-US><br>
+  </span>互斥是一种会导致线程挂起，并在较短的时间内又必须重新调度回原线程的，较为消耗资源的操作。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>为了避免进入<span
+  lang=EN-US>OS</span>互斥，<span lang=EN-US>Java6</span>的开发者们提出了自旋锁优化。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>自旋锁优化的原理是在线程进入<span
+  lang=EN-US>OS</span>互斥前，通过<span lang=EN-US>CAS</span>自旋一定的次数来检测锁的释放。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>如果在自旋次数未达到预设值前锁已被释放，则当前线程会立即持有该锁。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>CAS</span><span
+  style='mso-fareast-language:ZH-CN'>检测锁的原理详见<span lang=EN-US>: </span></span><span
+  lang=EN-US><a
+  href="http://kenwublog.com/theory-of-lightweight-locking-upon-cas"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/theory-of-lightweight-locking-upon-cas</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><b><span style='mso-fareast-language:ZH-CN'>关联选项：</span></b><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  -XX:PreBlockSpin=10<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:12'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:PreBlockSpin=10</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:+UseSpinning
+  </span><span style='mso-fareast-language:ZH-CN'>必须先启用，对于<span lang=EN-US>java6</span>来说已经默认启用了，这里默认自旋<span
+  lang=EN-US>10</span>次<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>控制多线程自旋锁优化的自旋次数。<span
+  lang=EN-US>(</span>什么是自旋锁优化？见 </span><span lang=EN-US>-XX:+UseSpinning</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'> </span><span style='mso-fareast-language:
+  ZH-CN'>处的描述<span lang=EN-US>)<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><b><span lang=EN-US>关联选项：</span></b><span lang=EN-US><br>
+  -XX:+UseSpinning</span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:13'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+ScavengeBeforeFullGC</span><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span><span
+  lang=EN-US> </span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin'>&nbsp;</span><span lang=EN-US> </span><span lang=EN-US
+  style='font-family:"Verdana","sans-serif";mso-ascii-font-family:微软雅黑;
+  mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>默认启用</span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>在Full GC前触发一次Minor GC。</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:14'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseGCOverheadLimit</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>限制<span
+  lang=EN-US>GC</span>的运行时间。如果<span lang=EN-US>GC</span>耗时过长，就抛<span
+  lang=EN-US>OOM</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:15'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+<a name="OLE_LINK2"></a><a
+  name="OLE_LINK1"><span style='mso-bookmark:OLE_LINK2'>UseTLAB</span></a></span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2</span><span
+  style='mso-fareast-language:ZH-CN'>以前和使用<span lang=EN-US>-client</span>选项时，默认不启用，其余版本默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用线程本地缓存区（<span
+  lang=EN-US>Thread Local</span>）。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:16'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseThreadPriorities</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>使用本地线程的优先级。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:17'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseAltSigs</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>限于<span
+  lang=EN-US>Solaris</span>，默认启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>为了防止与其他发送信号的应用程序冲突，允许使用候补信号替代<span
+  lang=EN-US> SIGUSR1</span>和<span lang=EN-US>SIGUSR2</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:18'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseBoundThreads</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>限于Solaris</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>, </span><span lang=EN-US>默认启用</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>绑定所有的用户线程到内核线程。<span
+  lang=EN-US><br>
+  </span>减少线程进入饥饿状态（得不到任何<span lang=EN-US>cpu time</span>）的次数。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:19'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseLWPSynchronization</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>限于<span
+  lang=EN-US>solaris</span>，默认启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>使用轻量级进程（内核线程）替换线程同步。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:20'>
+  <td width="15%" style='width:15.12%;border:solid gray 1.0pt;border-top:none;
+  mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;padding:
+  0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+MaxFDLimit</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>限于<span
+  lang=EN-US>Solaris</span>，默认启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="74%" style='width:74.24%;border-top:none;border-left:none;
+  border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>设置<span
+  lang=EN-US>java</span>进程可用文件描述符为操作系统允许的最大值。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:21;mso-yfti-lastrow:yes'>
+  <td width="15%" valign=top style='width:15.12%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseVMInterruptibleIO</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.64%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>限于solaris，默认启用</span></p>
+  </td>
+  <td width="74%" valign=top style='width:74.24%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在<span
+  lang=EN-US>solaris</span>中，允许运行时中断线程 。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+</span><span lang=EN-US><o:p></o:p></span></p>
+
+<div class=MsoNormal align=center style='text-align:center'><span lang=EN-US>
+
+<hr size=2 width="100%" noshade style='color:#CCCCCC' align=center>
+
+</span></div>
+
+<p class=MsoNormal><a name=PerformanceTuning></a><b><span style='mso-fareast-language:
+ZH-CN'>性能选项<span lang=EN-US><o:p></o:p></span></span></b></p>
+
+<p class=MsoNormal><span lang=EN-US><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;border-collapse:collapse;border:none;mso-border-alt:solid gray .5pt;
+ mso-yfti-tbllook:1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  mso-border-alt:solid gray .5pt;padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>选项与默认值</span><span
+  lang=EN-US><o:p></o:p></span></b></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>默认值与限制</span><span
+  lang=EN-US><o:p></o:p></span></b></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>描述<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+<a name="OLE_LINK4"></a><a
+  name="OLE_LINK3"><span style='mso-bookmark:OLE_LINK4'>AggressiveOpts</span></a></span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK 5
+  update 6</span><span style='mso-fareast-language:ZH-CN'>后引入，但需要手动启用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK6</span><span
+  style='mso-fareast-language:ZH-CN'>默认启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用<span
+  lang=EN-US>JVM</span>开发团队最新的调优成果。例如编译优化，偏向锁，并行年老代收集等。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:CompileThreshold=10000</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1000<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>通过<span
+  lang=EN-US>JIT</span>编译器，将方法编译成机器码的触发阀值，可以理解为调用方法的次数，例如调<span lang=EN-US>1000</span>次，将方法编译为机器码。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:<a name="OLE_LINK7"></a><a
+  name="OLE_LINK6"></a><a name="OLE_LINK5"><span style='mso-bookmark:OLE_LINK6'><span
+  style='mso-bookmark:OLE_LINK7'>LargePageSizeInBytes</span></span></a>=4m</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认<span
+  lang=EN-US>4m<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>amd64</span><span
+  style='mso-fareast-language:ZH-CN'>位：<span lang=EN-US>2m<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>设置堆内存的内存页大小。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>调整内存页的方法和性能提升原理，详见
+  </span><span lang=EN-US><a
+  href="http://kenwublog.com/tune-large-page-for-jvm-optimization"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/tune-large-page-for-jvm-optimization</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:<a name="OLE_LINK11"></a><a
+  name="OLE_LINK10"><span style='mso-bookmark:OLE_LINK11'>MaxHeapFreeRatio</span></a>=70</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>70<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>GC</span><span
+  style='mso-fareast-language:ZH-CN'>后，如果发现空闲堆内存占到整个预估上限值的<span lang=EN-US>70%</span>，则收缩预估上限值。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+  style='mso-fareast-language:ZH-CN'>什么是预估上限值？<span lang=EN-US><o:p></o:p></span></span></b></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JVM</span><span
+  style='mso-fareast-language:ZH-CN'>在启动时，会申请最大值（<span lang=EN-US>-Xmx</span>指定的数值）的地址空间，但其中绝大部分空间不会被立即分配<span
+  lang=EN-US>(virtual)</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>它们会一直保留着，直到运行过程中，<span
+  lang=EN-US>JVM</span>发现实际占用接近已分配上限值时，才从<span lang=EN-US>virtual</span>里再分配掉一部分内存。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>这里提到的已分配上限值，也可以叫做预估上限值。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+  </span><span style='mso-fareast-language:ZH-CN'>引入预估上限值的好处是，可以有效地控制堆的大小。堆越小，<span
+  lang=EN-US>GC</span>效率越高嘛。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>注意：预估上限值的大小一定小于或等于最大值。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:5'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:MaxNewSize=size</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>1.3.</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>1</span><span lang=EN-US> Sparc: 32m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>1.3.1</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'> </span><span lang=EN-US>x86: 2.5m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>新生代占整个堆内存的最大值。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:6'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:MaxPermSize=64m</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>5.0</span><span style='mso-fareast-language:
+  ZH-CN'>以后</span><span lang=EN-US>: 64 bit VMs</span><span style='mso-fareast-language:
+  ZH-CN'>会增大预设值的<span lang=EN-US>30%<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US>1.4</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'> </span><span lang=EN-US>amd64: 96m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>1.3.1 -client: 32m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 64m<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Perm</span><span
+  style='mso-fareast-language:ZH-CN'>（俗称方法区）占整个堆内存的最大值。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:7'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:MinHeapFreeRatio=40</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>40<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>GC</span><span
+  style='mso-fareast-language:ZH-CN'>后，如果发现空闲堆内存占到整个预估上限值的<span lang=EN-US>40%</span>，则增大上限值。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>(</span><span
+  style='mso-fareast-language:ZH-CN'>什么是预估上限值？见 <span lang=EN-US>-XX:MaxHeapFreeRatio
+  </span>处的描述<span lang=EN-US>)<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+  style='mso-fareast-language:ZH-CN'>关联选项：<span lang=EN-US><o:p></o:p></span></span></b></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:MaxHeapFreeRatio=70<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:8'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:NewRatio=2</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>Sparc -client: 8</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>x86 -server: 8</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>x86 -client: 12</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>-client: 4 (1.3)</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>8 (1.3.1+)</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>x86: 1</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>2<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 2<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>新生代和年老代的堆内存占用比例。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如<span
+  lang=EN-US>2</span>例如2表示新生代占年老代的1/2，占整个堆内存的1/3。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:9'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:NewSize=2.125m</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>5.0</span><span style='mso-fareast-language:
+  ZH-CN'>以后</span><span lang=EN-US>: 64 bit Vms</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'> </span><span style='mso-fareast-language:
+  ZH-CN'>会增大预设值的<span lang=EN-US>30%<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US>x86: 1m</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>x86, 5.0</span><span style='mso-fareast-language:
+  ZH-CN'>以后</span><span lang=EN-US>: 640k</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 2.125m<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>新生代预估上限的默认值。<span
+  lang=EN-US>(</span>什么是预估上限值？见 </span><span lang=EN-US>-XX:MaxHeapFreeRatio</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'> </span><span style='mso-fareast-language:
+  ZH-CN'>处的描述<span lang=EN-US>)<o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:10'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:<a name="OLE_LINK12">ReservedCodeCacheSize</a>=32m</span><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span><span
+  lang=EN-US> </span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin'>&nbsp;</span><span lang=EN-US> </span><span lang=EN-US
+  style='font-family:"Verdana","sans-serif";mso-ascii-font-family:微软雅黑;
+  mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>Solaris 64-bit, amd64, -server x86: 48m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>1.5.0_06</span><span style='mso-fareast-language:
+  ZH-CN'>之前</span><span lang=EN-US>, Solaris 64-bit a</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>m</span><span lang=EN-US>d64: 1024m</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 32m<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>设置代码缓存的最大值，编译时用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:11'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:SurvivorRatio=8</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>Solaris amd64: 6</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Sparc in 1.3.1: 25</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Solaris platforms </span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'>5.0</span><span
+  style='mso-fareast-language:ZH-CN'>以前</span><span lang=EN-US>: 32</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 8<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Eden</span><span
+  style='mso-fareast-language:ZH-CN'>与<span lang=EN-US>Survivor</span>的占用比例。例如<span
+  lang=EN-US>8</span>表示，一个<span lang=EN-US>survivor</span>区占用<span lang=EN-US>
+  1/8 </span>的Eden内存，即1/10的新生代内存，为什么不是1/9？</p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>因为我们的新生代有2个survivor，即S1和S22。所以survivor总共是占用新生代内存的 2/10，Eden与新生代的占比则为 8/10。</p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:12'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:<a name="OLE_LINK14"></a><a
+  name="OLE_LINK13"><span style='mso-bookmark:OLE_LINK14'>TargetSurvivorRatio</span></a>=50</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>50<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>实际使用的<span
+  lang=EN-US>survivor</span>空间大小占比。默认是<span lang=EN-US>50%</span>，最高<span
+  lang=EN-US>90%</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:13'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:ThreadStackSize=512</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>Sparc: 512</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Solaris x86: 320 </span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>(5.0</span><span style='mso-fareast-language:
+  ZH-CN'>以前</span><span lang=EN-US> 256)</span><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Sparc 64 bit: 1024</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US>Linux amd64: 1024 (</span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'>5.0 </span><span
+  style='mso-fareast-language:ZH-CN'>以前<span lang=EN-US> 0</span></span><span
+  lang=EN-US>)</span><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其他默认<span
+  lang=EN-US> 512.<o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>线程堆栈大小<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:14'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseBiasedLocking</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK 5
+  update 6</span><span style='mso-fareast-language:ZH-CN'>后引入，但需要手动启用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK6</span><span
+  style='mso-fareast-language:ZH-CN'>默认启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用偏向锁。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>偏向锁原理详见 </span><span
+  lang=EN-US><a href="http://kenwublog.com/theory-of-java-biased-locking"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/theory-of-java-biased-locking</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:15'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseFastAccessorMethods</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>优化原始类型的<span
+  lang=EN-US>getter</span>方法性能。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:16'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-UseISM</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用<span
+  lang=EN-US>solaris</span>的<span lang=EN-US>ISM</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见</span><span
+  lang=EN-US><a href="http://java.sun.com/docs/hotspot/ism.html">Intimate
+  Shared Memory</a>.</span><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:17'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><a name="OLE_LINK9"></a><a name="OLE_LINK8"><span
+  style='mso-bookmark:OLE_LINK9'><span lang=EN-US>-XX:+UseLargePages</span></span></a></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK 5
+  update 5</span><span style='mso-fareast-language:ZH-CN'>后引入，但需要手动启用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>JDK6</span><span
+  style='mso-fareast-language:ZH-CN'>默认启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用大内存分页。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>调整内存页的方法和性能提升原理，详见</span><span
+  lang=EN-US><a href="http://kenwublog.com/tune-large-page-for-jvm-optimization"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/tune-large-page-for-jvm-optimization</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+  style='mso-fareast-language:ZH-CN'>关联选项<span lang=EN-US><o:p></o:p></span></span></b></p>
+  <p class=MsoNormal><span lang=EN-US>-XX:LargePageSizeInBytes=4m</span><b
+  style='mso-bidi-font-weight:normal'><span lang=EN-US style='mso-fareast-language:
+  ZH-CN'><o:p></o:p></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:18'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+UseMPSS</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.1 </span><span
+  style='mso-fareast-language:ZH-CN'>之前<span lang=EN-US>: </span>不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>其余版本默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用<span
+  lang=EN-US>solaris</span>的<span lang=EN-US>MPSS</span>，不能与<span lang=EN-US>ISM</span>同时使用。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:19'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+StringCache</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用字符串缓存。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:20'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:<a name="OLE_LINK21"></a><a
+  name="OLE_LINK20"></a><a name="OLE_LINK19"><span style='mso-bookmark:OLE_LINK20'><span
+  style='mso-bookmark:OLE_LINK21'>AllocatePrefetchLines</span></span></a>=1</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>与机器码指令预读相关的一个选项，资料比较少，本文档不做解释。有兴趣的朋友请自行阅读官方<span
+  lang=EN-US>doc</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:21;mso-yfti-lastrow:yes'>
+  <td width="16%" valign=top style='width:16.98%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:AllocatePrefetchStyle=1</span></p>
+  </td>
+  <td width="10%" valign=top style='width:10.68%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1<o:p></o:p></span></p>
+  </td>
+  <td width="72%" valign=top style='width:72.36%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>与机器码指令预读相关的一个选项，资料比较少，本文档不做解释。有兴趣的朋友请自行阅读官方<span
+  lang=EN-US>doc</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><br>
+</span><span lang=EN-US><o:p></o:p></span></p>
+
+<div class=MsoNormal align=center style='text-align:center'><span lang=EN-US>
+
+<hr size=2 width="100%" noshade style='color:#CCCCCC' align=center>
+
+</span></div>
+
+<p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>调试选项<span
+lang=EN-US><o:p></o:p></span></span></b></p>
+
+<p class=MsoNormal><span lang=EN-US><o:p>&nbsp;</o:p></span></p>
+
+<table class=MsoNormalTable border=1 cellspacing=0 cellpadding=0 width="100%"
+ style='width:100.0%;border-collapse:collapse;border:none;mso-border-alt:solid gray .5pt;
+ mso-yfti-tbllook:1184;mso-padding-alt:0cm 0cm 0cm 0cm'>
+ <tr style='mso-yfti-irow:0;mso-yfti-firstrow:yes'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  mso-border-alt:solid gray .5pt;padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>选项与默认值</span><span
+  lang=EN-US><o:p></o:p></span></b></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>默认值与限制<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border:solid gray 1.0pt;
+  border-left:none;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><b><span style='mso-fareast-language:ZH-CN'>描述<span
+  lang=EN-US><o:p></o:p></span></span></b></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:1'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-CITime</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4</span><span
+  style='mso-fareast-language:ZH-CN'>引入。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>JIT</span>编译器编译耗时。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:2'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:ErrorFile=./hs_err_pid&lt;pid&gt;.log</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java 6</span><span
+  style='mso-fareast-language:ZH-CN'>引入。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>如果<span
+  lang=EN-US>JVM crashed</span>，将错误日志输出到指定文件路径。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:3'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-ExtendedDTraceProbes</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java6</span><span
+  style='mso-fareast-language:ZH-CN'>引入，限于<span lang=EN-US>solaris<o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>启用</span><span
+  lang=EN-US><a
+  href="http://java.sun.com/javase/6/docs/technotes/guides/vm/dtrace.html">dtrace</a></span><span
+  style='mso-fareast-language:ZH-CN'>诊断。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:4'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:HeapDumpPath=./java_pid&lt;pid&gt;.hprof</span><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span><span
+  lang=EN-US> </span><span lang=EN-US style='font-family:"Verdana","sans-serif";
+  mso-ascii-font-family:微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:
+  minor-latin'>&nbsp;</span><span lang=EN-US> </span><span lang=EN-US
+  style='font-family:"Verdana","sans-serif";mso-ascii-font-family:微软雅黑;
+  mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin'>&nbsp;</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认是<span
+  lang=EN-US>java</span>进程启动位置，即<span lang=EN-US>user.dir<o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>堆内存快照的存储文件路径。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+  style='mso-fareast-language:ZH-CN'>什么是堆内存快照？<span lang=EN-US><o:p></o:p></span></span></b></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>当<span
+  lang=EN-US>java</span>进程因<span lang=EN-US>OOM</span>或<span lang=EN-US>crash</span>被<span
+  lang=EN-US>OS</span>强制终止后，会生成一个<span lang=EN-US>hprof</span>（<span
+  lang=EN-US>Heap PROFling</span>）格式的堆内存快照文件。该文件用于线下调试，诊断，查找问题。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>文件名一般为<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>java_&lt;pid&gt;_&lt;date&gt;_&lt;time&gt;_heapDump.hprof<o:p></o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>解析快照文件，可以使用<span
+  lang=EN-US> jhat, eclipse MAT</span>，<span lang=EN-US>gdb</span>等工具。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:5'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-HeapDumpOnOutOfMemoryError</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2
+  update12 </span><span style='mso-fareast-language:ZH-CN'>和<span lang=EN-US>
+  5.0 update 7 </span>引入。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在<span
+  lang=EN-US>OOM</span>时，输出一个<span lang=EN-US>dump.core</span>文件，记录当时的堆内存快照（什么是堆内存快照<span
+  lang=EN-US>? </span>见 <span lang=EN-US>-XX:HeapDumpPath </span>处的描述）。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:6'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:OnError=&quot;&lt;cmd
+  args&gt;;&lt;cmd args&gt;&quot;</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2
+  update 9</span><span style='mso-fareast-language:ZH-CN'>引入<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>当<span
+  lang=EN-US>java</span>每抛出一个<span lang=EN-US>ERROR</span>时，运行指定命令行指令集。指令集是与<span
+  lang=EN-US>OS</span>环境相关的，在<span lang=EN-US>linux</span>下多数是<span lang=EN-US>bash</span>脚本，<span
+  lang=EN-US>windows</span>下是<span lang=EN-US>dos</span>批处理。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:7'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:OnOutOfMemoryError=&quot;&lt;cmd
+  args&gt;;<br>
+  &lt;cmd args&gt;&quot;</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2
+  update 12</span><span style='mso-fareast-language:ZH-CN'>和<span lang=EN-US>java6</span>时引入<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>当第一次发生<span
+  lang=EN-US>OOM</span>时，运行指定命令行指令集。指令集是与<span lang=EN-US>OS</span>环境相关的，在<span
+  lang=EN-US>linux</span>下多数是<span lang=EN-US>bash</span>脚本，<span lang=EN-US>windows</span>下是<span
+  lang=EN-US>dos</span>批处理。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:8'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintClassHistogram</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在<span
+  lang=EN-US>Windows</span>下<span lang=EN-US>, </span>按<span lang=EN-US>ctrl-break</span>或<span
+  lang=EN-US>Linux</span>下是执行<span lang=EN-US>kill -3</span>（发送<span
+  lang=EN-US>SIGQUIT</span>信号）时，打印<span lang=EN-US>class</span>柱状图。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Jmap </span><span
+  lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin;
+  mso-fareast-language:ZH-CN'>–</span><span lang=EN-US style='mso-fareast-language:
+  ZH-CN'>histo pid</span><span style='mso-fareast-language:ZH-CN'>也实现了相同的功能。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见 </span><span
+  lang=EN-US><a
+  href="http://java.sun.com/javase/6/docs/technotes/tools/share/jmap.html"><span
+  style='mso-fareast-language:ZH-CN'>http://java.sun.com/javase/6/docs/technotes/tools/share/jmap.html</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:9'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintConcurrentLocks</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>在<span
+  lang=EN-US>thread dump</span>的同时，打印</span><span lang=EN-US>java.util.concurrent</span><span
+  style='mso-fareast-language:ZH-CN'>的锁状态。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Jstack
+  </span><span lang=EN-US style='font-family:"Verdana","sans-serif";mso-ascii-font-family:
+  微软雅黑;mso-hansi-font-family:Verdana;mso-hansi-theme-font:minor-latin;
+  mso-fareast-language:ZH-CN'>–</span><span lang=EN-US style='mso-fareast-language:
+  ZH-CN'>l pid </span><span style='mso-fareast-language:ZH-CN'>也同样实现了同样的功能。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见 </span><span
+  lang=EN-US><a
+  href="http://java.sun.com/javase/6/docs/technotes/tools/share/jstack.html"><span
+  style='mso-fareast-language:ZH-CN'>http://java.sun.com/javase/6/docs/technotes/tools/share/jstack.html</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:10'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintCommandLineFlags</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>5.0 </span><span
+  style='mso-fareast-language:ZH-CN'>引入，默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java</span><span
+  style='mso-fareast-language:ZH-CN'>启动时，往<span lang=EN-US>stdout</span>打印当前启用的非稳态<span
+  lang=EN-US>jvm options</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>-XX:+UseConcMarkSweepGC
+  -XX:+HeapDumpOnOutOfMemoryError -XX:+DoEscapeAnalysis<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:11'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintCompilation</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>往<span
+  lang=EN-US>stdout</span>打印方法被<span lang=EN-US>JIT</span>编译时的信息。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1<span
+  style='mso-spacerun:yes'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  </span>java.lang.String::charAt (33 bytes)<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:12'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintGC</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>开启<span
+  lang=EN-US>GC</span>日志打印。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印格式例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Full
+  GC 131115K-&gt;7482K(1015808K), 0.1633180 secs]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>该选项可通过 <span
+  lang=EN-US>com.sun.management.HotSpotDiagnosticMXBean API </span>和<span
+  lang=EN-US> Jconsole </span>动态启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见 </span><span
+  lang=EN-US><a
+  href="http://java.sun.com/developer/technicalArticles/J2SE/monitoring/%23Heap_Dump"><span
+  style='mso-fareast-language:ZH-CN'>http://java.sun.com/developer/technicalArticles/J2SE/monitoring/#Heap_Dump</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:13'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintGCDetails</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.0</span><span
+  style='mso-fareast-language:ZH-CN'>引入，默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>GC</span>回收的细节。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印格式例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Full
+  GC (System) [Tenured: 0K-&gt;2394K(466048K), 0.0624140 secs]
+  30822K-&gt;2394K(518464K), [Perm : 10443K-&gt;10443K(16384K)], 0.0625410
+  secs] [Times: user=0.05 sys=0.01, real=0.06 secs]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>该选项可通过 <span
+  lang=EN-US>com.sun.management.HotSpotDiagnosticMXBean API </span>和<span
+  lang=EN-US> Jconsole </span>动态启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见 </span><span
+  lang=EN-US><a
+  href="http://java.sun.com/developer/technicalArticles/J2SE/monitoring/%23Heap_Dump"><span
+  style='mso-fareast-language:ZH-CN'>http://java.sun.com/developer/technicalArticles/J2SE/monitoring/#Heap_Dump</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:14'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintGCTimeStamps</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>GC</span>停顿耗时。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印格式例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>2.744</span></b><span lang=EN-US
+  style='mso-fareast-language:ZH-CN'>: [Full GC (System) 2.744: [Tenured:
+  0K-&gt;2441K(466048K), 0.0598400 secs] 31754K-&gt;2441K(518464K), [Perm :
+  10717K-&gt;10717K(16384K)], 0.0599570 secs] [Times: user=0.06 sys=0.00,
+  real=0.06 <o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>secs]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>该选项可通过 <span
+  lang=EN-US>com.sun.management.HotSpotDiagnosticMXBean API </span>和<span
+  lang=EN-US> Jconsole </span>动态启用。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>详见 </span><span
+  lang=EN-US><a
+  href="http://java.sun.com/developer/technicalArticles/J2SE/monitoring/%23Heap_Dump"><span
+  style='mso-fareast-language:ZH-CN'>http://java.sun.com/developer/technicalArticles/J2SE/monitoring/#Heap_Dump</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:15'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-PrintTenuringDistribution</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印对象的存活期限信息。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印格式例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[GC<br>
+  Desired survivor size 4653056 bytes, new threshold 32 (max 32)<br>
+  - age 1: 2330640 bytes, 2330640 total<br>
+  - age 2: 9520 bytes, 2340160 total<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>204009K-&gt;21850K(515200K),
+  0.1563482 secs]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Age1 2</span><span
+  style='mso-fareast-language:ZH-CN'>表示在第<span lang=EN-US>1</span>和<span
+  lang=EN-US>2</span>次<span lang=EN-US>GC</span>后存活的对象大小。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:16'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-TraceClassLoading</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>class</span>装载信息到<span lang=EN-US>stdout</span>。记<span lang=EN-US>Loaded</span>状态。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Loaded
+  java.lang.Object from /opt/taobao/install/jdk1.6.0_07/jre/lib/rt.jar]<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:17'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-TraceClassLoadingPreorder</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2</span><span
+  style='mso-fareast-language:ZH-CN'>引入，默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>按<span
+  lang=EN-US>class</span>的引用<span lang=EN-US>/</span>依赖顺序打印类装载信息到<span
+  lang=EN-US>stdout</span>。不同于 <span lang=EN-US>TraceClassLoading</span>，本选项只记<span
+  lang=EN-US> Loading</span>状态。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Loading
+  java.lang.Object from /home/confsrv/jdk1.6.0_14/jre/lib/rt.jar]<o:p></o:p></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:18'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-TraceClassResolution</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>1.4.2</span><span
+  style='mso-fareast-language:ZH-CN'>引入，默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印所有静态类，常量的代码引用位置。用于<span
+  lang=EN-US>debug</span>。<span lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>RESOLVE
+  java.util.HashMap java.util.HashMap$Entry HashMap.java:209<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>说明<span
+  lang=EN-US>HashMap</span>类的<span lang=EN-US>209</span>行引用了静态类 <span
+  lang=EN-US>java.util.HashMap$Entry<o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:19'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-TraceClassUnloading</span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认不启用</span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>class</span>的卸载信息到<span lang=EN-US>stdout</span>。记<span
+  lang=EN-US>Unloaded</span>状态。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:20'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:-<a name="OLE_LINK18"></a><a
+  name="OLE_LINK17"><span style='mso-bookmark:OLE_LINK18'>TraceLoaderConstraints</span></a></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java6 </span><span
+  style='mso-fareast-language:ZH-CN'>引入，默认不启用<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>打印<span
+  lang=EN-US>class</span>的装载策略变化信息到<span lang=EN-US>stdout</span>。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>例如：<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Adding
+  new constraint for name: java/lang/String, loader[0]:
+  sun/misc/Launcher$ExtClassLoader, loader[1]: &lt;bootloader&gt; ]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Setting
+  class object in existing constraint for name: [Ljava/lang/Object; and loader
+  sun/misc/Launcher$ExtClassLoader ]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Updating
+  constraint for name org/xml/sax/InputSource, loader &lt;bootloader&gt;, by
+  setting class object ]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>[Extending
+  constraint for name java/lang/Object by adding loader[15]:
+  sun/reflect/DelegatingClassLoader<span style='mso-spacerun:yes'>&nbsp;
+  </span>]<o:p></o:p></span></p>
+  <p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>装载策略变化是实现<span
+  lang=EN-US>classloader</span>隔离<span lang=EN-US>/</span>名称空间一致性的关键技术。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>对此感兴趣的朋友，详见 </span><span
+  lang=EN-US><a
+  href="http://kenwublog.com/docs/Dynamic+Class+Loading+in+the+Java+Virtual+Machine.pdf"><span
+  style='mso-fareast-language:ZH-CN'>http://kenwublog.com/docs/Dynamic+Class+Loading+in+the+Java+Virtual+Machine.pdf</span></a></span><span
+  lang=EN-US style='mso-fareast-language:ZH-CN'> </span><span style='mso-fareast-language:
+  ZH-CN'>中的<span lang=EN-US> contraint rules</span>一章。<span lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+ <tr style='mso-yfti-irow:21;mso-yfti-lastrow:yes'>
+  <td width="20%" valign=top style='width:20.86%;border:solid gray 1.0pt;
+  border-top:none;mso-border-top-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span lang=EN-US>-XX:+<a name="OLE_LINK16"></a><a
+  name="OLE_LINK15"><span style='mso-bookmark:OLE_LINK16'>PerfSaveDataToFile</span></a></span></p>
+  </td>
+  <td width="11%" valign=top style='width:11.2%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>默认启用<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+  <td width="67%" valign=top style='width:67.94%;border-top:none;border-left:
+  none;border-bottom:solid gray 1.0pt;border-right:solid gray 1.0pt;mso-border-top-alt:
+  solid gray .5pt;mso-border-left-alt:solid gray .5pt;mso-border-alt:solid gray .5pt;
+  padding:0cm 0cm 0cm 0cm'>
+  <p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>当<span
+  lang=EN-US>java</span>进程因<span lang=EN-US>OOM</span>或<span lang=EN-US>crashed</span>被强制终止后，生成一个堆快照文件（什么是堆内存快照<span
+  lang=EN-US>? </span>见 <span lang=EN-US>-XX:HeapDumpPath </span>处的描述）。<span
+  lang=EN-US><o:p></o:p></span></span></p>
+  </td>
+ </tr>
+</table>
+
+<p class=MsoNormal><span lang=EN-US><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><b style='mso-bidi-font-weight:normal'><span
+style='mso-fareast-language:ZH-CN'>作者敬告<span lang=EN-US><o:p></o:p></span></span></b></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>完善的单元测试，功能回归测试，和性能基准测试可以减少因调整非稳态<span
+lang=EN-US>JVM</span>选项带来的风险。<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span style='mso-fareast-language:ZH-CN'>参考资料<span
+lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java6</span><span
+style='mso-fareast-language:ZH-CN'>性能调优白皮书<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><a
+href="http://java.sun.com/performance/reference/whitepapers/6_performance.html"><span
+style='mso-fareast-language:ZH-CN'>http://java.sun.com/performance/reference/whitepapers/6_performance.html</span></a></span><span
+lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'>Java6 GC</span><span
+style='mso-fareast-language:ZH-CN'>调优指南<span lang=EN-US><o:p></o:p></span></span></p>
+
+<p class=MsoNormal><span lang=EN-US><a
+href="http://java.sun.com/javase/technologies/hotspot/gc/gc_tuning_6.html"><span
+style='mso-fareast-language:ZH-CN'>http://java.sun.com/javase/technologies/hotspot/gc/gc_tuning_6.html</span></a></span><span
+lang=EN-US style='mso-fareast-language:ZH-CN'><o:p></o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US>更</span><span style='mso-fareast-language:
+ZH-CN'>为</span><span lang=EN-US>全面的options列表</span></p>
+
+<p class=MsoNormal><span lang=EN-US><a
+href="http://blogs.sun.com/watt/resource/jvm-options-list.html">http://blogs.sun.com/watt/resource/jvm-options-list.html</a></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+<p class=MsoNormal><span lang=EN-US style='mso-fareast-language:ZH-CN'><o:p>&nbsp;</o:p></span></p>
+
+</div>
+
+</body>
+
+</html>

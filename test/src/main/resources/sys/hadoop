@@ -9,12 +9,14 @@ mapred.task.timeout
 io.sort.mb	
 tasktracker.http.threads	
 mapred.submit.replication
+mapred.tasktracker.map.tasks.maximum	
 
 
 dfs.socket.timeout
 dfs.namenode.handler.count	
 dfs.datanode.handler.count	
 dfs.datanode.max.xcievers, dfs.datanode.max.transfer.threads	
+dfs.datanode.max.xcievers
 
 
 hbase.lease.recovery.dfs.timeout
@@ -26,8 +28,25 @@ Algorithm.SNAPPY
 zookeeper.session.timeout
 hbase.rpc.timeout	
 hbase.hregion.max.filesize
+hbase.regionserver.codecs	=snappy
 
 
+http://tldp.org/LDP/abs/html/exitcodes.html
+-d64 -Xms2g -Xmx20g -XX:MaxPermSize=512M -XX:-UseGCOverheadLimit -Dfile.encoding=UTF-8 -Duser.language=zh -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled
+/usr/java/jdk1.6.0_31/bin/java -XX:OnOutOfMemoryError=kill -9 %p 
+-Xmx55g -Xmn18g -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled
+常见问题5：为什么有服务器进程挂了？
+ regionserver发生abort的场景很多，除了系统bug引起的以外，线上遇到最多的就是fullgc引起的zk节点超时和文件系统异常。
+1、查看regionserver日志查询FATAL异常，确定异常类型
+2、查看gc日志确定是否发生fullgc或者ygc时间过长
+3、如果没有征兆，日志突然中断，首先需要考虑是否发生了OOM（0.94版本会直接kill -9）。
+4、可以通过系统内存监控判断是否出现被占满的情况
+5、查看datanode是否出现异常日志，regionserver可能由于roll log或者flush时的文件系统异常导致abort
+6、排除人为调用stop的情况
+/var/log/messages           lastlog  last
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.200553] java invoked oom-killer: gfp_mask=0xd0, order=1, oom_adj=0, oom_score_adj=0
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.433697] Out of memory: Kill process 29232 (java) score 163 or sacrifice child
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.433727] Killed process 29232 (java) total-vm:13525144kB, anon-rss:10782300kB, file-rss:3024kB
 
 ant
 Warning:  modified in the future.
