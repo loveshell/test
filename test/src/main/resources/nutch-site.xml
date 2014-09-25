@@ -14,15 +14,15 @@
 	<!--分值离散化配置： 每个配置用;隔开，每个配置x,y,n表示从x到y之间使用n个分值，sum(n)必须等于桶数 -->
 	<property>
 		<name>nutch.score.step</name>
-		<value>0,1,1</value>
+		<value>0,1,3</value>
 	</property>	
 	<property>
 	  <name>generate.table.Max</name>
-	  <value>1</value> 
+	  <value>3</value> 
 	</property>
 	<property>
 	  <name>generate.table.depth</name>
-	  <value>1</value> 
+	  <value>3</value> 
 	</property>
 	<property>
   	
@@ -39,11 +39,11 @@
 	</property>
 	<property>
 		<name>fetcher.server.delay</name>
-		<value>2</value>
+		<value>4</value>
 	</property>
 	<property>
 		<name>fetcher.threads.fetch</name>
-		<value>500</value>
+		<value>700</value>
 	</property>
 	<property>
 		<name>fetcher.threads.per.queue</name>
@@ -51,7 +51,7 @@
 	</property>
 	<property>
 	  <name>fetcher.queue.depth.multiplier</name>
-	  <value>1000</value>
+	  <value>100</value>
 	</property>
 	<property>
 	  <name>fetcher.max.exceptions.per.queue</name>
@@ -66,15 +66,15 @@
 		<name>db.ignore.external.links</name>
 		<value>false</value>
 	</property>
-<!--	
+	<!--
 	<property>
 		<name>plugin.folders</name>
 		<value>./build/plugins</value>
 	</property>
--->	
+	-->
 	<property>
 		<name>plugin.includes</name>
-		<value>protocol-http|urlfilter-regex|urlfilter-prefix|parse-(html|tika)|htmlparsefilter-topical|index-(basic|anchor)|indexer-solr|scoring-topic|urlnormalizer-(pass|regex|basic)
+		<value>protocol-http|urlfilter-regex|parse-(html|tika)|htmlparsefilter-topical|index-(basic|anchor)|indexer-solr|scoring-topic|urlnormalizer-(regex|basic)
 		</value>
 	</property>
 	<property>
@@ -89,11 +89,11 @@
 	</property>
 	<property>
 		<name>db.fetch.interval.default</name>
-		<value>21600</value>
+		<value>604800</value>
 	</property>
 	<property>
 		<name>crawl.gen.delay</name>
-		<value>3600000</value>
+		<value>43200000</value>
 	</property>
 	<property>
 		<name>db.max.outlinks.per.page</name>
@@ -117,7 +117,7 @@
 	</property>
 	<property>
 		<name>http.content.limit</name>
-		<value>102400</value>
+		<value>256000</value>
 	</property>
 	<property>
 		<name>parser.timeout</name>
@@ -160,24 +160,35 @@
 	</property>
 	<property>
 		<name>commit.hbase.threshold</name>
-		<value>50000</value>
+		<value>20000</value>
 	</property>
 	
-	<!-- 
+	<!--字符编码默认按UTF-8解析，如发现页面字符为非UTF-8，则先转码再解析-->
 	<property>
-		<name>nutch.testkeywords.dir</name>
-		<value>D:/work/Spider/NutchWork/dir</value>
+		<name>parser.character.encoding.default</name>
+		<value>UTF-8</value>
 	</property>
-	-->	
+	
 	<!--增加网页抓取调度类配置-->
 	<property>
 	  <name>db.fetch.schedule.class</name>
 	  <value>org.apache.nutch.crawl.AdaptiveFetchSchedule</value>
 	</property>
+	
 	<!-- 网页抓取的阀值 -->
 	<property>
 	  <name>job.reduce.num</name>
-	  <value>8</value> 
+	  <value>6</value> 
+	</property>
+	
+	<!-- generator 阀值 ，小于该值则不抓取。 -->
+	<property>
+	  <name>generator.less</name>
+	  <value>10000</value> 
+	</property>
+	<property>
+	  <name>fetcher.out.interval</name>
+	  <value>150000</value> 
 	</property>
 	
 </configuration>

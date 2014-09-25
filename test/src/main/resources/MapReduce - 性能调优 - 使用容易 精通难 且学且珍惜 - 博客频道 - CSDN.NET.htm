@@ -1,0 +1,1038 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+     
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    
+<head>
+
+    <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/46aae4d1e2371e4aa769798941cef698/allmobilize.min.js"></script>
+ <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+
+    <title>MapReduce - 性能调优 - 使用容易 精通难 且学且珍惜
+        - 博客频道 - CSDN.NET</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="MapReduce 性能调优" />
+    <script src="http://static.blog.csdn.net/scripts/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://static.blog.csdn.net/scripts/ad.js?v=1.1"></script>
+        <!--new top-->
+               <link rel="stylesheet" href="http://static.csdn.net/public/common/toolbar/css/index.css">        <!--new top-->
+
+    <link rel="Stylesheet" type="text/css" href="http://static.blog.csdn.net/skin/dark1/css/style.css?v=1.1" />
+    <link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="/Crazy__Programmer/rss/list" />
+    <link rel="shortcut icon" href="http://csdnimg.cn/public/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="http://static.blog.csdn.net/scripts/SyntaxHighlighter/styles/blue_black.css" />
+ 
+
+
+</head>
+<body>
+    
+   
+      <!--new top-->
+    <script id="toolbar-tpl-scriptId" fixed="true" prod="blog" skin="black" src="http://static.csdn.net/public/common/toolbar/js/html.js" type="text/javascript"></script>
+     <!--new top-->
+    <div id="container">
+        <div id="header">
+    <div class="header">
+        <div id="blog_title">
+            <h2>
+                <a href="http://blog.csdn.net/zhangzhebjut">使用容易 精通难 且学且珍惜</a></h2>
+            <h3>个人主页  http://zhangzhe.qiniudn.com</h3>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div id="navigator">
+    <div class="navigator_bg">
+    </div>
+    <div class="navigator">
+        <ul>
+                <li id="btnContents"><a href="http://blog.csdn.net/zhangzhebjut?viewmode=contents"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_mulu'])">
+                    <img src="http://static.blog.csdn.net/images/ico_list.gif">目录视图</span></a></li>
+                <li id="btnView"><a href="http://blog.csdn.net/zhangzhebjut?viewmode=list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_zhaiyao'])">
+                    <img src="http://static.blog.csdn.net/images/ico_summary.gif">摘要视图</span></a></li>
+                <li id="btnRss"><a href="http://blog.csdn.net/zhangzhebjut/rss/list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_RSS'])">
+                    <img src="http://static.blog.csdn.net/images/ico_rss.gif">订阅</span></a></li>                
+
+            </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var username = "Crazy__Programmer";
+    var _blogger = username;
+    var blog_address = "http://blog.csdn.net/zhangzhebjut";
+    var static_host = "http://static.blog.csdn.net";
+    var currentUserName = "";  
+</script>
+
+        <div id="body">
+            <div id="main">
+                <div class="main">
+                        <div class="ad_class">
+<div class="notice tracking-ad" data-mod='popu_3' > 
+
+<a href="http://bbs.csdn.net/topics/390812950?page=2#post-398116601"target="_blank">
+<font color=blue>博客专家福利
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/39498125">
+<font color=red>2015年1月微软MVP申请开始啦</font></a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://www.csdn.net/article/2014-09-10/2821606">
+<font color=blue>专访荣浩：流程的永恒之道
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/38418263">
+<font color=red>推荐有礼--找出您心中的技术大牛
+</font></a>
+
+
+</div>                        </div>
+                        
+
+  
+<link href="http://static.blog.csdn.net/css/comment1.css" type="text/css" rel="stylesheet" />
+<link href="http://static.blog.csdn.net/css/style1.css" type="text/css" rel="stylesheet" />
+<script language='JavaScript' type='text/javascript' src='http://download.csdn.net/js/jquery.cookie.js'></script>
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/search-service/main.js"></script>
+<div id="article_details" class="details">
+    <div class="article_title">   
+         <span class="ico ico_type_Original"></span>
+
+
+    <h1>
+        <span class="link_title"><a href="/zhangzhebjut/article/details/39474621">
+        <font color="red">[置顶]</font>
+        MapReduce - 性能调优
+        </a></span>
+    </h1>
+</div>
+
+    <div class="article_manage">
+        <span class="link_categories">
+        分类：
+            <a href="/Crazy__Programmer/article/category/2064787" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_fenlei']);">Hadoop</a> 
+        </span>
+    <span class="link_postdate">2014-09-22 12:18</span>
+    <span class="link_view" title="阅读次数">378人阅读</span>
+    <span class="link_comments" title="评论次数"><a href="#comments" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_pinglun'])">评论</a>(0)</span>
+    <span class="link_collect"><a href="javascript:void(0);" onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shoucang']);collectArticle('MapReduce - 性能调优','39474621');return false;" title="收藏">收藏</a></span>
+    <span class="link_report"><a href="#report"  onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_jubao']);report(39474621,2);return false;" title="举报">举报</a></span>
+    
+</div>
+<div class="tag2box"><a href='http://www.csdn.net/tag/mapreduce' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">mapreduce</a><a href='http://www.csdn.net/tag/%e6%80%a7%e8%83%bd%e8%b0%83%e4%bc%98' target=_blank onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_tag']);">性能调优</a></div>
+
+  
+    
+<div id="article_content" class="article_content">
+
+<div style="top:0px">
+<div style="margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp; Hadoop为用户作业提供了多种可配置的参数，以允许用户根据作业特点调整这些参数&#20540;使作业运行效率达到最优。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>一 应用程序编写规范</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><strong>1.<span style="line-height:1.428571em">设置Combiner</span></strong></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp; 对于一大批MapReduce程序，如果可以设置一个Combiner,那么对于提高作业性能是十分有帮助的。<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em"><strong>Combiner可减少Map Task中间输出的结果，从而减少各个Reduce Task的远程拷贝数据量</strong></span></span>，最终表现为Map
+ Task和Reduce Task执行时间缩短。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><strong>2.&nbsp;<span style="line-height:1.428571em">选择合理的Writable类型</span></strong></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;在MapReduce模型中，Map Task和Reduce Task的输入和输出类型均为Writable。Hadoop本身已经提供了很多Writable实现，包括IntWritable、FloatWritable。为应用程序处理的数据选择合适的Writable类型可大大提升性能。比如处理整数类型数据时，直接采用IntWritable比先以Text类型读入在转换为整数类型要高效<strong>。<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em">如果输出整数的大部分可用一个或两个字节保存，那么直接采用VIntWritable或者VLongWritable，它们采用了变长整型的编码方式，可以大大减少输出数据量。</span></span></strong></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>二 作业级别参数调优</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋"><span style="line-height:1.428571em"><strong>1.规划合理的任务数目</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp;</span>&nbsp;&nbsp;在Hadoop中，每个Map Task处理一个Input Split。Input Split的划分方式是由用户自定义的InputFormat决定的，默认情况下，有以下三个参数决定。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp; &nbsp;mapred.min.split.size ：Input Split的最小&#20540; 默认&#20540;1</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp; &nbsp;mapred.max.split.szie: &nbsp; Input Split的最大&#20540;</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp; &nbsp;dfs.block.size：HDFS 中一个block大小 &nbsp; 默认&#20540;64MB</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp; &nbsp;golsize:它是用户期望的Input Split数目=totalSize/numSplits ,其中totalSize为文件的总大小；numSplits为用户设定的Map Task个数，默认情况下是1.</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp;&nbsp;<span style="color:#FF0000; line-height:1.428571em">&nbsp; splitSize = max{minSize,min{goalSize,blockSize}} 如果想让InputSize尺寸大于block尺寸，直接增大配置参数mpared.min.split.size即可。</span></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><span style="color:#FF0000; line-height:1.428571em"><br>
+</span></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>2.增加输入文件的副本数</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; 如果一个作业并行执行的任务数目非常多，那么这些任务共同的输入文件可能成为瓶颈。<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em">为防止多个任务并行读取一个文件内容造成瓶颈，用户可根据需要增加输入文件的副本数目。</span></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>3.启动推测执行机制</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp;推测执行是Hadoop对“拖后腿”的任务的一种优化机制，当一个作业的某些任务运行速度明显慢于同作业的其他任务时，Hadoop会在另一个节点上为“慢任务”启动一个备份任务，这样两个任务同时处理一份数据，而Hadoop最终会将优先完成的那个任务的结果作为最终结果，并将另一个任务杀掉。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>4.设置失败容忍度</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp;Hadoop运行设置任务级别和作业级别的失败容忍度。<span style="line-height:1.428571em">作业级别的失败容忍度是指Hadoop允许每个作业有一定比例的任务运行失败，这部分任务对应的输入数据将被忽略；</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp;<span style="line-height:1.428571em">任务级别的失败容忍度是指Hadoop允许任务失败后再在另外节点上尝试运行，如果一个任务经过若干次尝试运行后仍然运行失败，那么Hadoop才会最终认为该任务运行失败。</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; 用户应该根据应用程序的特点设置合理的失败容忍度，以尽快让作业运行完成和避免没必要的资源浪费。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>5.适当打开JVM重用功能</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;为了实现任务隔离，Hadoop将每个任务放到一个单独的JVM中执行，而对于执行时间较短的任务，JVM启动和关闭的时间将占用很大比例时间，为此，用户可以启用JVM重用功能，这样一个JVM可连续启动多个同类型的任务。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>6.设置任务超时时间</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;如果一个任务在一定的时间内未汇报进度，则TaskTracker会主动将其杀死，从而在另一个节点上重新启动执行。用户可根据实际需要配置任务超时时间。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>7.合理使用DistributedCache</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;一般情况下，得到外部文件有两种方法：一种是外部文件与应用程序jar包一起放到客户端，当提交作业时由客户端上传到HDFS的一个目录下，然后通过Distributed Cache分发到各个节点上；另一种方法是事先将外部文件直接放到HDFS上，从效率上讲，第二种方法更高效。第二种方法不仅节省了客户端上传文件的时间，还隐含着告诉DistributedCache:&quot;请将文件下载到各个节点的pubic级别共享目录中”，这样，后续所有的作业可重用已经下载好的文件，不必重复下载。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>8.跳过坏记录</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;Hadoop为用户提供了跳过坏记录的功能，当一条或几条坏数据记录导致任务运行失败时，Hadoop可自动识别并跳过这些坏记录。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>9.提高作业优先级</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp;所有Hadoop作业调度器进行任务调度时均会考虑作业优先级这一因素。作业的优先级越高，它能够获取的资源（slot数目)也越多。Hadoop提供了5种作业优先级，分别为</span><span style="line-height:1.428571em; font-family:华文仿宋">VERY_HIGH、 HIGH、 NORMAL、 LOW、 VERY_LOW。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp; &nbsp;<span style="line-height:1.428571em">注</span>：在生产环境中，管理员已经按照作业重要程度对作业进行了分级，不同重要程度的作业允许配置的优先级不同，用户可以擅自进行调整。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>10.合理控制Reduce Task的启动时机</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;如果Reduce Task启动过早，则可能由于Reduce Task长时间占用Reduce slot资源造成&quot;slot Hoarding&quot;现象，从而降低资源利用率；反之，如果Reduce Task启动过晚，则会导致Reduce Task获取资源延迟，增加了作业的运行时间。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>三 任务级别参数调优</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong><br>
+</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp;hadoop</span><span style="line-height:1.428571em; font-family:华文仿宋">任务级别参数调优</span><span style="line-height:1.428571em; font-family:华文仿宋">分两个方面: Map Task和Reduce Task。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>1.Map Task调优</strong><br>
+</span></span><span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp;&nbsp;<span style="line-height:1.428571em">&nbsp; &nbsp;map运行阶段分为:Read、Map、Collect、Spill、Merge五个阶段</span>。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;map 任务执行会产生中间数据,但这些中间结果并没有直接IO到磁盘上,而是先存储在缓存(buffer)中,并在缓存中进行一些预排序来优化整个map的性能,<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em"><strong>存储map中间数据的缓存默认大小为100M，由io.sort.mb
+ 参数指定。</strong></span></span>这个大小可以根据需要调整。<span style="line-height:1.428571em">当map任务产生了非常大的中间数据时可以适当调大该参数,使缓存能容纳更多的map中间数据，而不至于大频率的IO磁盘</span>,当系统性能的瓶颈在磁盘IO的速度上,可以适当的调大此参数来减少频繁的IO带来的性能障碍。</span><span style="font-family:华文仿宋; line-height:1.428571em"><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 由于<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em"><strong>map任务运行时中间结果首先存储在缓存中,默认当缓存的使用量达到80%(或0.8)的时候就开始写入磁盘,这个过程叫做spill(也叫溢出),进行spill的缓存大小可以通过io.sort.spill.percent 参数调整</strong></span></span>，这个参数可以影响spill的频率。进而可以影响IO的频率。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp; 当map任务计算成功完成之后，如果map任务有输出，则会产生多个spill。<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em"><strong>接下来map必须将些spill进行合并,这个过程叫做merge, merge过程是并行处理spill的,每次并行多少个spill是由参数io.sort.factor指定的默认为10个。</strong></span></span>但是当spill的数量非常大的时候，merge一次并行运行的spill仍然为10个,这样仍然会频繁的IO处理,因此适当的调大每次并行处理的spill数有利于减少merge数因此可以影响map的性能。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; &nbsp; 当map输出中间结果的时候也可以配置压缩。<br>
+&nbsp;&nbsp;<img src="http://img.blog.csdn.net/20140922121315406?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvemhhbmd6aGVianV0/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></span>
+<div class="image-and-hover" style="margin:0px; padding:0px; display:inline-block; max-width:100%; position:relative; border:0px; line-height:1.428571em; font-size:14px; width:1074px">
+<div class="image-hover-container" style=""><a target="_blank" target="_blank" class="hover-download" title="下载" href="https://app.yinxiang.com/shard/s41/sh/f3e3d5e5-fd70-4882-9248-05f79437ebc5/89522d42f49b6ff4?content=#" style=""></a><a target="_blank" target="_blank" class="hover-gallery" title="图片集" href="https://app.yinxiang.com/shard/s41/sh/f3e3d5e5-fd70-4882-9248-05f79437ebc5/89522d42f49b6ff4?content=#" style=""></a></div>
+</div>
+<span style="font-family:华文仿宋; line-height:1.428571em"><br>
+</span><span style="line-height:1.428571em; font-family:华文仿宋"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋"><span style="line-height:1.428571em"><strong>2. Reduce Task调优</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp;&nbsp;<span style="line-height:1.428571em">&nbsp; reduce 运行阶段分为shuflle(copy) merge&nbsp;</span></span><span style="line-height:1.428571em; font-family:华文仿宋"><span style="line-height:1.428571em">sort &nbsp;&nbsp;</span></span><span style="line-height:1.428571em; font-family:华文仿宋"><span style="line-height:1.428571em">reduce
+ write五个阶段。</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp; shuffle 阶段为reduce 全面拷贝map任务成功结束之后产生的中间结果,如果上面map任务采用了压缩的方式,那么reduce 将map任务中间结果拷贝过来后首先进行解压缩,这一切是在reduce的缓存中做的,当然也会占用一部分cpu。为了优化reduce的执行时间,reduce也不是等到所有的map数据都拷贝过来的时候才开始运行reduce任务，而是当job执行完第一个map任务时开始运行的。<span style="line-height:1.428571em">reduce
+ 在shuffle阶段 实际上是从不同的并且已经完成的map上去下载属于自己的数据,由于map任务数很多,所有这个copy过程是并行的,既同时有许多个reduce取拷贝map，这个并行的线程是通过<strong><span style="color:#FF0000; line-height:1.428571em">mapred.reduce.parallel.copies</span>&nbsp;</strong>参数指定，默认为5个</span>,也就是说无论map的任务数是多少个，默认情况下一次只能有5个reduce的线程去拷贝map任务的执行结果。所以当map任务数很多的情况下可以适当的调整该参数，这样可以让reduce快速的获得运行数据来完成任务。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;reduce线程在下载map数据的时候也可能因为各种各样的原因(网络原因、系统原因等），<span style="line-height:1.428571em">存储该map数据所在的datannode 发生了故障，这种情况下reduce任务将得不到该datanode上的数据了,同时该 download thread 会尝试从别的datanode下载,可以通过<span style="color:#FF0000; line-height:1.428571em"><strong>mapred.reduce.copy.backoff</strong></span>&nbsp;(默认为30秒)</span>来调整下载线程的下载时间，如果网络不好的集群可以通过增加该参数的&#20540;来增加下载时间,以免因为下载时间过长reduce将该线程判断为下载失败。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; reduce 下载线程在map结果下载到本地时,由于是多线程并行下载，所以也需要对下载回来的数据进行merge,所以<strong><span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em">map阶段设置的io.sort.factor 也同样会影响这个reduce</span></span>的</strong>。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em">&nbsp; &nbsp; &nbsp; 同map一样 该缓冲区大小也不是等到完全被占满的时候才写入磁盘而是默认当完成0.66的时候就开始写磁盘操作,该参数是通过<span style="color:#FF0000; line-height:1.428571em"><strong>mapred.job.shuffle.merge.percent</strong></span>&nbsp;指定的</span>。</span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp; &nbsp; 当reduce 开始进行计算的时候通过<span style="line-height:1.428571em"><span style="color:#E30000; line-height:1.428571em"><strong>mapred.job.reduce.input.buffer.percent</strong></span></span>&nbsp;来指定需要多少的内存百分比来作为reduce读已经sort好的数据的buffer百分比,该&#20540;默认为0。Hadoop假设用户的reduce()函数需要所有的JVM内存，因此执行reduce()函数前要释放所有内存。如果设置了该&#20540;，可将部分文件保存在内存中(不必写到磁盘上)。<br>
+<br>
+</span></div>
+<div style="margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-size:19px; font-family:华文仿宋; line-height:1.428571em">&nbsp; &nbsp;<img src="http://img.blog.csdn.net/20140922121533266?watermark/2/text/aHR0cDovL2Jsb2cuY3Nkbi5uZXQvemhhbmd6aGVianV0/font/5a6L5L2T/fontsize/400/fill/I0JBQkFCMA==/dissolve/70/gravity/Center" alt=""></span>
+<div class="image-and-hover" style="font-size:14px; margin:0px; padding:0px; display:inline-block; max-width:100%; position:relative; border:0px; line-height:1.428571em; width:983px">
+<div class="image-hover-container" style=""><a target="_blank" target="_blank" class="hover-download" title="下载" href="https://app.yinxiang.com/shard/s41/sh/f3e3d5e5-fd70-4882-9248-05f79437ebc5/89522d42f49b6ff4?content=#" style=""></a><a target="_blank" target="_blank" class="hover-gallery" title="图片集" href="https://app.yinxiang.com/shard/s41/sh/f3e3d5e5-fd70-4882-9248-05f79437ebc5/89522d42f49b6ff4?content=#" style=""></a></div>
+</div>
+<span style="font-size:19px; font-family:华文仿宋; line-height:1.428571em"><br>
+</span>
+<div style="font-size:14px; margin:0px; padding:0px; border:0px; line-height:1.428571em">
+<span style="line-height:1.428571em; font-family:华文仿宋">&nbsp; &nbsp; &nbsp;</span></div>
+<div style="margin:0px; padding:0px; border:0px; line-height:1.428571em"><span style="line-height:1.428571em"><span style="color:rgb(227,0,0); line-height:1.428571em"><span style="line-height:1.428571em; font-family:华文仿宋"><span style="font-size:14px">&nbsp;</span><span style="font-size:18px">&nbsp;
+ &nbsp; <strong>总之，Map Task和Reduce Task调优的一个原则就是减少数据的传输量、尽量使用内存、减少磁盘IO的次数、增大</strong></span></span><span style="line-height:1.428571em; font-family:华文仿宋"><span style="font-size:18px"><strong>任务</strong></span></span></span><span style="font-size:18px"><strong><span style="color:rgb(227,0,0); line-height:1.428571em"><span style="line-height:1.428571em; font-family:华文仿宋">并行</span></span><span style="color:rgb(227,0,0); line-height:1.428571em"><span style="line-height:1.428571em; font-family:华文仿宋">数，除此之外还有</span><span style="line-height:1.428571em; font-family:华文仿宋">根据自己集群及网络的实际情况来调优。</span></span></strong></span></span></div>
+</div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><br>
+</span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong>三 管理员角度调优</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<span style="font-family:华文仿宋; line-height:1.428571em"><span style="line-height:1.428571em"><strong><br>
+</strong></span></span></div>
+<div style="font-size:19px; margin:0px; padding:0px; border:0px; line-height:1.428571em; font-family:Helvetica,Arial,'Droid Sans',sans-serif">
+<div>
+<div style="font-family:Tahoma; font-size:19px">
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;管理员负责为用户作业提供一个高效的运行环境。管理员需要从全局出发，通过调整一些关键参数提高系统的吞吐率和性能。总体上来看，<strong><span style="color:#E30000">管理员需从硬件选择、操作系统参数调优、JVM参数调优和Hadoop参数调优</span></strong>等四个角度入手，为Hadoop用户提供一个高效的作业运行环境。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><strong><span style="font-family:华文仿宋">硬件选择</span></strong></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;Hadoop自身架构的基本特点决定了其硬件配置的选项。Hadoop采用了Master/Slave架构，其中，master维护了全局元数据信息，重要性远远大于slave。在较低Hadoop版本中，master存在单点故障问题，因此，master的配置应远远好于各个slave。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><strong><span style="font-family:华文仿宋">操作系统参数调优</span></strong></div>
+<div><strong><span style="font-family:华文仿宋"><br>
+</span></strong></div>
+<div><span style="font-family:华文仿宋"><strong>&nbsp; &nbsp; &nbsp;1.增大同时打开的文件描述符和网络连接上限</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;使用ulimit命令将允许同时打开的文件描述符数目上限增大至一个合适的&#20540;。同时调整内核参数net.core.somaxconn网络连接数目至一个足够大的&#20540;。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><strong><span style="font-family:华文仿宋">&nbsp; &nbsp; 补充：</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">net.core.somaxconn的作用&nbsp;</span></strong></div>
+<div><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">&nbsp; &nbsp; &nbsp;</span><span style="color:#FF0000"><strong><span style="font-family:华文仿宋; line-height:26px">net.core.somaxconn</span><span style="font-family:华文仿宋; line-height:26px">是Linux中的一个kernel参数，表示socket监听（listen）的backlog上限。</span></strong></span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">什么是backlog呢？backlog就是socket的监听队列，当一个请求（request）尚未被处理或建立时，它会进入backlog。而socket
+ server可以一次性处理backlog中的所有请求，处理后的请求不再位于监听队列中。当server处理请求较慢，以至于监听队列被填满后，新来的请求会被拒绝。</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">在Hadoop 1.0中，参数</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px"><em>ipc.server.listen.queue.size</em></span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">控制了服务端socket的监听队列长度，即backlog长度，默认&#20540;是128。而Linux的参数</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px"><em>net.core.somaxconn</em></span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">默认&#20540;同样为128。当服务端繁忙时，如NameNode或JobTracker，128是远远不够的。这样就需要增大backlog，例如我们的3000台集群就将</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">ipc.server.listen.queue.size</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">设成了32768，为了使得整个参数达到预期效果，同样需要将kernel参数</span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px"><em>net.core.somaxconn</em></span><span style="font-family:华文仿宋; color:rgb(51,51,51); line-height:26px">设成一个大于等于32768的&#20540;。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><span style="font-family:华文仿宋"><strong>2.关闭swap分区</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;避免使用swap分区，提供程序的执行效率。</span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;除此之外，设置合理的预读取缓冲区的大小、</span><span style="font-family:华文仿宋">文件系统选择与配置及</span><span style="font-family:华文仿宋">I/O调度器选择等</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><strong><span style="font-family:华文仿宋">JVM参数调优</span></strong></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;由于Hadoop中的每个服务和任务均会运行在一个单独的JVM中，因此，JVM的一些重要参数也会影响Hadoop性能。管理员可通过调整JVM FLAGS和JVM垃圾回收机制提高Hadoop性能。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><strong><span style="font-family:华文仿宋">Hadoop参数调优</span></strong></div>
+<div><span style="font-family:华文仿宋"><strong>&nbsp; 1.合理规划资源</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp;&nbsp; &nbsp;<strong>设置合理的槽位数目</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; 在Hadoop中，计算资源是用槽位表示的。slot分为两种：Map &nbsp;Slot和Reduce Slot。每种slot代表一定量的资源，且同种slot是同质的，也就是说，同种slot代表的资源量是相同的。管理员需要根据实际需要为TaskTracker配置一定数目的Map Slot和Reduce Slot数目，从而限制每个TaskTracker上并发执行的Map Task和Reduce Task的数目。</span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;&nbsp;<strong>编写健康监测脚本</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;Hadoop允许管理员为每个TaskTracker配置一个节点健康状况监测脚本。TaskTracker中包含一个专门的线程周期性执行该脚本，并将脚本执行结果通过心跳机制汇报给JobTracker。一旦JobTracker发现某个TaskTracker的当前状况为“不健康”，则会将其加入黑名单，从此不再为它分配任务。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><span style="font-family:华文仿宋"><strong>&nbsp; 2. 调整心跳配置</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;<strong>调整心跳的间隔 因根据自己集群的规模适度的调整心跳间隔</strong></span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;<strong>启用带外心跳</strong>&nbsp;&nbsp;&nbsp;</span><span style="font-family:华文仿宋">为了减少任务分配延迟，Hadoop引入了带外心跳<strong>。<span style="color:#E30000">带外心跳不同于常规心跳，它是任务运行结束或者任务运行失败时触发的</span></strong>，能够在出现空闲资源时第一时间通知JobTracker,以便它能够迅速为空闲资源分配新的任务。</span></div>
+<div><span style="font-family:华文仿宋"><br>
+</span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; 除此之外，还包括</span><span style="font-family:华文仿宋">磁盘块配置、</span><span style="font-family:华文仿宋">设置合理的RPC Handler和HTTP线程数目、</span><span style="font-family:华文仿宋">慎用黑名单机制、</span><span style="font-family:华文仿宋">启用批量任务调度、</span><span style="font-family:华文仿宋">选择合适的压缩算法、</span><span style="font-family:华文仿宋">启用预读取机制等。</span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp;&nbsp;<strong>注：当一个集群的规模较小时，如果一定数量的节点被频繁的加入系统黑名单中，则会大大降低集群的吞吐率和计算能力。</strong></span></div>
+<div><span style="font-family:华文仿宋"><strong><br>
+</strong></span></div>
+</div>
+<div style="font-family:Tahoma; font-size:19px"><span style="font-family:华文仿宋"><strong>四 小结</strong></span></div>
+<div style="font-family:Tahoma; font-size:19px">
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;Hadoop 性能调优是一项工程浩大的工作，它不仅涉及Hadoop本身的性能调优，还涉及更底层的硬件、操作系统和Java虚拟机等系统的调优。</span></div>
+<div><span style="font-family:华文仿宋">&nbsp; &nbsp; &nbsp; &nbsp;总体来说，提高作业运行效率需要Hadoop管理员和作业拥有者共同的努力，其中，管理员负责为用户提供一个高效的作业运行环境，而用户则根据自己作业的特点让它尽可能快地运行完成。</span></div>
+</div>
+</div>
+<br>
+</div>
+</div>
+</div>
+
+</div>
+
+
+
+
+<!-- Baidu Button BEGIN -->
+
+<div class="bdsharebuttonbox" style="float: right;">
+<a href="#" class="bds_more" data-cmd="more" style="background-position:0 0 !important; background-image: url(http://bdimg.share.baidu.com/static/api/img/share/icons_0_16.png?v=d754dcc0.png) !important"></a>
+<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"  style="background-position:0 -52px !important"></a>
+<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"style="background-position:0 -104px !important"></a>
+<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"style="background-position:0 -260px !important"></a>
+<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"style="background-position:0 -208px !important"></a>
+<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"style="background-position:0 -1612px !important" ></a>
+</div>
+<script>window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "1", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "16" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+<!-- Baidu Button END -->
+
+<!--192.168.100.33-->
+<ul class="article_next_prev">
+            <li class="prev_article"><span  onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian']);location.href='/zhangzhebjut/article/details/39275497';">上一篇</span><a href="/zhangzhebjut/article/details/39275497" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian'])">Hive - 常用命令</a></li>
+</ul>
+
+<!-- Baidu Button BEGIN -->
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=1536434" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+
+        <div id="digg" ArticleId="39474621">
+            <dl id="btnDigg" class="digg digg_disable">
+                <dt onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_ding'])">顶</dt>
+                <dd>0</dd>
+            </dl>
+            <dl id="btnBury" class="digg digg_disable">
+                <dt onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_cai'])">踩</dt>
+                <dd>0</dd>
+            </dl>
+        </div>
+</div>
+      <dl class="blog-associat-tag">
+        <dt>主题推荐</dt>
+        <dd>
+                <a href="http://www.csdn.net/tag/mapreduce" target="_blank" class="blog-tage-red" >mapreduce</a> 
+                <a href="http://www.csdn.net/tag/性能" target="_blank" class="blog-tage-red" >性能</a> 
+                <a href="http://www.csdn.net/tag/应用程序" target="_blank" class="blog-tage-red" >应用程序</a> 
+                <a href="http://www.csdn.net/tag/操作系统" target="_blank" class="blog-tage-red" >操作系统</a> 
+                <a href="http://www.csdn.net/tag/任务调度" target="_blank" class="blog-tage-red" >任务调度</a> 
+        </dd>
+    </dl> 
+
+
+<dl class="blog-ass-articl tracking-ad"  data-mod="popu_36" id="res-relatived"> 
+     <dt><span>猜你在找</span></dt>    
+</dl>
+
+<script type="text/javascript">
+    var searchtitletags = 'MapReduce - 性能调优' + ',' + 'mapreduce,性能,应用程序,操作系统,任务调度';
+    searchService({
+        index: 'blog',
+        query: searchtitletags,
+        from: 10,
+        size: 10,
+        appendTo: '#res-relatived',
+        url: 'recommend',
+        his: 2,
+        client: "blog_cf_enhance",
+        tmpl: '<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="#{ url }" title="#{ title }" strategy="#{ strategy }">#{ title }</a></dd>'
+    });
+
+ </script>   
+
+
+    <div id="ad_cen">
+   
+          <script type="text/javascript">
+              new Ad(4, 'ad_cen');
+          </script>
+    </div>
+<div class="comment_class">
+    <div id="comment_title" class="panel_head">
+        <span class="see_comment">查看评论</span><a name="comments"></a></div>
+    <div id="comment_list">
+    </div>
+    <div id="comment_bar">
+    </div>
+    <div id="comment_form">
+    </div>
+
+    <div class="announce">
+        * 以上用户言论只代表其个人观点，不代表CSDN网站的观点或立场<a name="reply"></a><a name="quote"></a></div>
+</div>
+
+<script type="text/javascript">
+    var fileName = '39474621';
+    var commentscount = 0;
+    var islock = false
+</script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/comment.js"></script>
+    <div id="ad_bot">
+    </div>
+    <script type="text/javascript">
+    new Ad(5, 'ad_bot');
+    </script>
+<div id="report_dialog">
+</div>
+
+<div id="d-top"  style="bottom:60px;">
+      
+
+       <a id="quick-reply" class="btn btn-top q-reply" title="快速回复" style="display:none;">
+            <img src="http://static.blog.csdn.net/images/blog-icon-reply.png" alt="快速回复">
+        </a>    
+
+    <a id="d-top-a" class="btn btn-top backtop"  style="display: none;" title="返回顶部" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_huidaodingbu'])" style="">         
+         <img src="http://static.blog.csdn.net/images/top.png" alt="TOP">
+    </a>
+</div>
+<script type="text/javascript">
+    $(function ()
+    {
+        $("#ad_frm_0").height("90px");
+        
+        setTimeout(function(){
+            $("#ad_frm_2").height("200px");
+        },1000);
+        
+
+        if($("#comment_content").length>0)
+        {
+            $("#quick-reply").show();
+
+            $("#quick-reply").click(function(){
+                setEditorFocus();
+            });
+        }       
+     
+        var d_top = $('#d-top-a');
+        document.onscroll = function ()
+        {
+            var scrTop = (document.body.scrollTop || document.documentElement.scrollTop);
+            if (scrTop > 500)
+            {
+                d_top.show();
+            } else
+            {
+                d_top.hide();
+            }
+        }
+        $('#d-top-a').click(function ()
+        {
+            scrollTo(0, 0);
+            this.blur();
+            return false;
+        });
+    });
+  
+</script>
+<style type="text/css">
+    .tag_list
+    {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #D7CBC1;
+        color: #000000;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none outside none;
+        margin: 10px 2% 0 1%;
+        padding: 1px;
+    }
+    .tag_list h5
+    {
+        background: none repeat scroll 0 0 #E0DBD3;
+        color: #47381C;
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .tag_list h5 a
+    {
+        color: #47381C;
+    }
+    .classify
+    {
+        margin: 10px 0;
+        padding: 4px 12px 8px;
+    }
+    .classify a
+    {
+        margin-right: 20px;
+        white-space: nowrap;
+    }
+</style>
+<div class="tag_list">
+    <h5>
+        <a href="http://www.csdn.net/tag/" target="_blank">核心技术类目</a></h5>
+    <div class="classify">
+<a title="全部主题" href="http://www.csdn.net/tag" target="_blank" onclick="LogClickCount(this,336);">全部主题</a>
+<a title="Hadoop" href="http://g.csdn.net/5272865" target="_blank" onclick="LogClickCount(this,336);">Hadoop</a>
+<a title="AWS" href="http://g.csdn.net/5272866" target="_blank" onclick="LogClickCount(this,336);">AWS</a>
+<a title="移动游戏" href="http://g.csdn.net/5272870" target="_blank" onclick="LogClickCount(this,336);">移动游戏</a>
+<a title="Java" href="http://g.csdn.net/5272871" target="_blank" onclick="LogClickCount(this,336);">Java</a>
+<a title="Android" href="http://g.csdn.net/5272872" target="_blank" onclick="LogClickCount(this,336);">Android</a>
+<a title="iOS" href="http://g.csdn.net/5272873" target="_blank" onclick="LogClickCount(this,336);">iOS</a>
+<a title="Swift" href="http://g.csdn.net/5272868" target="_blank" onclick="LogClickCount(this,336);">Swift</a>
+<a title="智能硬件" href="http://g.csdn.net/5272869" target="_blank" onclick="LogClickCount(this,336);">智能硬件</a>
+<a title="Docker" href="http://g.csdn.net/5272867" target="_blank" onclick="LogClickCount(this,336);">Docker</a>
+<a title="OpenStack" href="http://g.csdn.net/5272925" target="_blank" onclick="LogClickCount(this,336);">OpenStack</a>
+<a title="VPN" href="http://www.csdn.net/tag/vpn" target="_blank" onclick="LogClickCount(this,336);">VPN</a>
+<a title="Spark" href="http://g.csdn.net/5272924" target="_blank" onclick="LogClickCount(this,336);">Spark</a>
+<a title="ERP" href="http://www.csdn.net/tag/erp" target="_blank" onclick="LogClickCount(this,336);">ERP</a>
+<a title="IE10" href="http://www.csdn.net/tag/ie10" target="_blank" onclick="LogClickCount(this,336);">IE10</a>
+<a title="Eclipse" href="http://www.csdn.net/tag/eclipse" target="_blank" onclick="LogClickCount(this,336);">Eclipse</a>
+<a title="CRM" href="http://www.csdn.net/tag/crm" target="_blank" onclick="LogClickCount(this,336);">CRM</a>
+<a title="JavaScript" href="http://www.csdn.net/tag/javascript" target="_blank" onclick="LogClickCount(this,336);">JavaScript</a>
+<a title="数据库" href="http://www.csdn.net/tag/数据库" target="_blank" onclick="LogClickCount(this,336);">数据库</a>
+<a title="Ubuntu" href="http://www.csdn.net/tag/ubuntu" target="_blank" onclick="LogClickCount(this,336);">Ubuntu</a>
+<a title="NFC" href="http://www.csdn.net/tag/nfc" target="_blank" onclick="LogClickCount(this,336);">NFC</a>
+<a title="WAP" href="http://www.csdn.net/tag/wap" target="_blank" onclick="LogClickCount(this,336);">WAP</a>
+<a title="jQuery" href="http://www.csdn.net/tag/jquery" target="_blank" onclick="LogClickCount(this,336);">jQuery</a>
+<a title="BI" href="http://www.csdn.net/tag/bi" target="_blank" onclick="LogClickCount(this,336);">BI</a>
+<a title="HTML5" href="http://www.csdn.net/tag/html5" target="_blank" onclick="LogClickCount(this,336);">HTML5</a>
+<a title="Spring" href="http://www.csdn.net/tag/spring" target="_blank" onclick="LogClickCount(this,336);">Spring</a>
+<a title="Apache" href="http://www.csdn.net/tag/apache" target="_blank" onclick="LogClickCount(this,336);">Apache</a>
+<a title=".NET" href="http://www.csdn.net/tag/.net" target="_blank" onclick="LogClickCount(this,336);">.NET</a>
+<a title="API" href="http://www.csdn.net/tag/api" target="_blank" onclick="LogClickCount(this,336);">API</a>
+<a title="HTML" href="http://www.csdn.net/tag/html" target="_blank" onclick="LogClickCount(this,336);">HTML</a>
+<a title="SDK" href="http://www.csdn.net/tag/sdk" target="_blank" onclick="LogClickCount(this,336);">SDK</a>
+<a title="IIS" href="http://www.csdn.net/tag/iis" target="_blank" onclick="LogClickCount(this,336);">IIS</a>
+<a title="Fedora" href="http://www.csdn.net/tag/fedora" target="_blank" onclick="LogClickCount(this,336);">Fedora</a>
+<a title="XML" href="http://www.csdn.net/tag/xml" target="_blank" onclick="LogClickCount(this,336);">XML</a>
+<a title="LBS" href="http://www.csdn.net/tag/lbs" target="_blank" onclick="LogClickCount(this,336);">LBS</a>
+<a title="Unity" href="http://www.csdn.net/tag/unity" target="_blank" onclick="LogClickCount(this,336);">Unity</a>
+<a title="Splashtop" href="http://www.csdn.net/tag/splashtop" target="_blank" onclick="LogClickCount(this,336);">Splashtop</a>
+<a title="UML" href="http://www.csdn.net/tag/uml" target="_blank" onclick="LogClickCount(this,336);">UML</a>
+<a title="components" href="http://www.csdn.net/tag/components" target="_blank" onclick="LogClickCount(this,336);">components</a>
+<a title="Windows Mobile" href="http://www.csdn.net/tag/windowsmobile" target="_blank" onclick="LogClickCount(this,336);">Windows Mobile</a>
+<a title="Rails" href="http://www.csdn.net/tag/rails" target="_blank" onclick="LogClickCount(this,336);">Rails</a>
+<a title="QEMU" href="http://www.csdn.net/tag/qemu" target="_blank" onclick="LogClickCount(this,336);">QEMU</a>
+<a title="KDE" href="http://www.csdn.net/tag/kde" target="_blank" onclick="LogClickCount(this,336);">KDE</a>
+<a title="Cassandra" href="http://www.csdn.net/tag/cassandra" target="_blank" onclick="LogClickCount(this,336);">Cassandra</a>
+<a title="CloudStack" href="http://www.csdn.net/tag/cloudstack" target="_blank" onclick="LogClickCount(this,336);">CloudStack</a>
+<a title="FTC" href="http://www.csdn.net/tag/ftc" target="_blank" onclick="LogClickCount(this,336);">FTC</a>
+<a title="coremail" href="http://www.csdn.net/tag/coremail" target="_blank" onclick="LogClickCount(this,336);">coremail</a>
+<a title="OPhone " href="http://www.csdn.net/tag/ophone " target="_blank" onclick="LogClickCount(this,336);">OPhone </a>
+<a title="CouchBase" href="http://www.csdn.net/tag/couchbase" target="_blank" onclick="LogClickCount(this,336);">CouchBase</a>
+<a title="云计算" href="http://www.csdn.net/tag/云计算" target="_blank" onclick="LogClickCount(this,336);">云计算</a>
+<a title="iOS6" href="http://www.csdn.net/tag/iOS6" target="_blank" onclick="LogClickCount(this,336);">iOS6</a>
+<a title="Rackspace " href="http://www.csdn.net/tag/rackspace " target="_blank" onclick="LogClickCount(this,336);">Rackspace </a>
+<a title="Web App" href="http://www.csdn.net/tag/webapp" target="_blank" onclick="LogClickCount(this,336);">Web App</a>
+<a title="SpringSide" href="http://www.csdn.net/tag/springside" target="_blank" onclick="LogClickCount(this,336);">SpringSide</a>
+<a title="Maemo" href="http://www.csdn.net/tag/maemo" target="_blank" onclick="LogClickCount(this,336);">Maemo</a>
+<a title="Compuware" href="http://www.csdn.net/tag/compuware" target="_blank" onclick="LogClickCount(this,336);">Compuware</a>
+<a title="大数据" href="http://www.csdn.net/tag/大数据" target="_blank" onclick="LogClickCount(this,336);">大数据</a>
+<a title="aptech" href="http://www.csdn.net/tag/aptech" target="_blank" onclick="LogClickCount(this,336);">aptech</a>
+<a title="Perl" href="http://www.csdn.net/tag/perl" target="_blank" onclick="LogClickCount(this,336);">Perl</a>
+<a title="Tornado" href="http://www.csdn.net/tag/tornado" target="_blank" onclick="LogClickCount(this,336);">Tornado</a>
+<a title="Ruby" href="http://www.csdn.net/tag/ruby" target="_blank" onclick="LogClickCount(this,336);">Ruby</a>
+<a title="Hibernate" href="http://www.csdn.net/hibernate" target="_blank" onclick="LogClickCount(this,336);">Hibernate</a>
+<a title="ThinkPHP" href="http://www.csdn.net/tag/thinkphp" target="_blank" onclick="LogClickCount(this,336);">ThinkPHP</a>
+<a title="HBase" href="http://www.csdn.net/tag/hbase" target="_blank" onclick="LogClickCount(this,336);">HBase</a>
+<a title="Pure" href="http://www.csdn.net/tag/pure" target="_blank" onclick="LogClickCount(this,336);">Pure</a>
+<a title="Solr" href="http://www.csdn.net/tag/solr" target="_blank" onclick="LogClickCount(this,336);">Solr</a>
+<a title="Angular" href="http://www.csdn.net/tag/angular" target="_blank" onclick="LogClickCount(this,336);">Angular</a>
+<a title="Cloud Foundry" href="http://www.csdn.net/tag/cloudfoundry" target="_blank" onclick="LogClickCount(this,336);">Cloud Foundry</a>
+<a title="Redis" href="http://www.csdn.net/tag/redis" target="_blank" onclick="LogClickCount(this,336);">Redis</a>
+<a title="Scala" href="http://www.csdn.net/tag/scala" target="_blank" onclick="LogClickCount(this,336);">Scala</a>
+<a title="Django" href="http://www.csdn.net/tag/django" target="_blank" onclick="LogClickCount(this,336);">Django</a>
+<a title="Bootstrap" href="http://www.csdn.net/tag/bootstrap" target="_blank" onclick="LogClickCount(this,336);">Bootstrap</a>
+    </div>
+</div>
+
+
+                        <div class="clear">
+                        </div>
+                    </div>                   
+                
+            </div>
+            <div id="side">
+    <div class="side">
+<div id="panel_Profile" class="panel">
+<ul class="panel_head"><span>个人资料</span></ul>
+<ul class="panel_body profile">
+<div id="blog_userface">
+    <a href="http://my.csdn.net/Crazy__Programmer" target="_blank">
+    <img src="http://avatar.csdn.net/F/8/2/1_crazy__programmer.jpg" title="访问我的空间" style="max-width:90%"/>
+    </a>
+    <br />
+    <span><a href="http://my.csdn.net/Crazy__Programmer" class="user_name" target="_blank">Crazy__Programmer</a></span>
+</div>
+<div class="interact">
+<a href="javascript:void(0);" class="attent" id="span_add_follow" title="[加关注]" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_guanzhu'])"></a>
+
+ <a href="javascript:void(0);" class="letter"  title="[发私信]" onclick="window.open('http://msg.csdn.net/letters/model?receiver=Crazy__Programmer','_blank','height=350,width=700');_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_sixin'])"></a>  
+</div>
+<div id="blog_medal">
+</div>
+<ul id="blog_rank">
+    <li>访问：<span>113788次</span></li>
+    <li>积分：<span>2175分</span></li>
+    <li>排名：<span>第6096名</span></li>
+</ul>
+<ul id="blog_statistics">
+    <li>原创：<span>95篇</span></li>
+    <li>转载：<span>17篇</span></li>
+    <li>译文：<span>1篇</span></li>
+    <li>评论：<span>27条</span></li>
+</ul>
+</ul>
+</div>
+
+
+<div id="panel_Category" class="panel">
+    <ul class="panel_head"><span>博客专栏</span></ul>
+    <ul class="panel_body" id="sp_column">
+    <table cellpadding="0" cellspacing="0"><tr>
+    <td style="padding:10px 10px 0 0;">
+    <a href="http://blog.csdn.net/column/details/zzwebdev.html" target="_blank"><img src="http://avatar.csdn.net/blogpic/20140709205033593.jpg" style="width:75px;height:75px;" /></a>
+    </td>
+    <td style="padding:10px 0; vertical-align:top;">
+    <a href="http://blog.csdn.net/column/details/zzwebdev.html" target="_blank">Web Development</a>
+    <p>文章：20篇</p>
+    <span>阅读：20590</span>
+    </td>
+    </tr></table>
+    <table cellpadding="0" cellspacing="0"><tr>
+    <td style="padding:10px 10px 0 0;">
+    <a href="http://blog.csdn.net/column/details/zzbigdata.html" target="_blank"><img src="http://avatar.csdn.net/blogpic/20140708220127812.jpg" style="width:75px;height:75px;" /></a>
+    </td>
+    <td style="padding:10px 0; vertical-align:top;">
+    <a href="http://blog.csdn.net/column/details/zzbigdata.html" target="_blank">邂逅大数据</a>
+    <p>文章：19篇</p>
+    <span>阅读：16239</span>
+    </td>
+    </tr></table>
+    <table cellpadding="0" cellspacing="0"><tr>
+    <td style="padding:10px 10px 0 0;">
+    <a href="http://blog.csdn.net/column/details/zzios.html" target="_blank"><img src="http://avatar.csdn.net/blogpic/20140411191326859.jpg" style="width:75px;height:75px;" /></a>
+    </td>
+    <td style="padding:10px 0; vertical-align:top;">
+    <a href="http://blog.csdn.net/column/details/zzios.html" target="_blank">IOS开发</a>
+    <p>文章：21篇</p>
+    <span>阅读：22847</span>
+    </td>
+    </tr></table>
+    <table cellpadding="0" cellspacing="0"><tr>
+    <td style="padding:10px 10px 0 0;">
+    <a href="http://blog.csdn.net/column/details/zzmongodb.html" target="_blank"><img src="http://avatar.csdn.net/blogpic/20140409143639078.jpg" style="width:75px;height:75px;" /></a>
+    </td>
+    <td style="padding:10px 0; vertical-align:top;">
+    <a href="http://blog.csdn.net/column/details/zzmongodb.html" target="_blank">深入浅出 MongoDB</a>
+    <p>文章：18篇</p>
+    <span>阅读：30405</span>
+    </td>
+    </tr></table>
+    </ul>
+</div><div class="panel" id="panel_Search">
+    <ul class="panel_head"><span>文章搜索</span></ul>
+    <ul class="panel_body">
+        <form id="frmSearch" action="http://so.csdn.net/search" class="form_search" target="_blank">
+        <span><input id="inputSearch" type="text" class="blogsearch" title="请输入关键字" /></span>
+        <input id="btnSubmit" type="button" value="搜索" title="search in blog" />
+        <input type="hidden" name="q" id="inputQ" />
+        <input type="hidden" name="t" value="blog" />
+        <a id="btnSearchBlog" target="_blank"></a>
+        </form>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {           
+            search();
+        });
+
+        $("#frmSearch").submit(function () {
+            search();
+            return false;
+        });
+
+        function search()
+        {
+            var url = "http://so.csdn.net/so/search/s.do?q=" + encodeURIComponent($("#inputSearch").val()) + "&u=" + username + "&t=blog";
+            window.location.href = url;
+        }   
+    });
+</script><div id="panel_Category" class="panel">
+<ul class="panel_head"><span>文章分类</span></ul>
+<ul class="panel_body">
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1656541" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">IOS Development</a><span>(21)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1692545" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Protocol Buffers</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1696783" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">ZeroMQ</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1711961" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">MongoDB</a><span>(18)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1716413" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Golang</a><span>(11)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1741571" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">架构设计</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1772599" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">数据结构</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1870263" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">HBase</a><span>(0)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1872233" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">编程语言</a><span>(15)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1936465" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">C＋＋</a><span>(8)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/1936487" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Python</a><span>(7)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2064787" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Hadoop</a><span>(20)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2131171" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Web相关</a><span>(5)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2137457" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Linux</a><span>(8)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2150159" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">积累</a><span>(7)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2167373" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">数据库</a><span>(6)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2188619" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">设计模式</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/zhangzhebjut/article/category/2467391" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">Storm</a><span>(4)</span>
+            </li>
+</ul>
+</div><div id="panel_Archive" class="panel">
+<ul class="panel_head"><span>文章存档</span></ul>
+<ul class="panel_body">
+<div id="archive_list">
+<!--归档统计-->
+<li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/09">2014年09月</a><span>(10)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/08">2014年08月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/07">2014年07月</a><span>(9)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/06">2014年06月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/05">2014年05月</a><span>(15)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/04">2014年04月</a><span>(15)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/03">2014年03月</a><span>(17)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/02">2014年02月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2014/01">2014年01月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2013/12">2013年12月</a><span>(6)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2013/11">2013年11月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2013/10">2013年10月</a><span>(13)</span></li><li><a href="http://blog.csdn.net/zhangzhebjut/article/month/2013/09">2013年09月</a><span>(2)</span></li>
+</div>
+</ul>
+</div>
+<div id="hotarticls" class="panel">
+<ul class="panel_head">
+    <span>       
+阅读排行    </span>
+</ul>
+
+<ul class="panel_body itemlist">
+<li>
+<a href="/zhangzhebjut/article/details/16984229" title="MongoDB 自动分片 (一) (Auto-Sharding)">MongoDB 自动分片 (一) (Auto-Sharding)</a><span>(3623)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/16984745" title="MongoDB 自动分片 (二) (Auto-Sharding)">MongoDB 自动分片 (二) (Auto-Sharding)</a><span>(3450)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/16848045" title="MongoDB 聚合管道(一)（Aggregation Pipeline）">MongoDB 聚合管道(一)（Aggregation Pipeline）</a><span>(3026)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/16341823" title="MongoDB MapReduce 使用（一）">MongoDB MapReduce 使用（一）</a><span>(2373)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/17059217" title="MongoDB 复制集 (三) 内部数据同步">MongoDB 复制集 (三) 内部数据同步</a><span>(1925)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/21632015" title="golang 使用mgo 连接MongoDB">golang 使用mgo 连接MongoDB</a><span>(1849)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/12868447" title="IOS Block 代码块使用 （二）">IOS Block 代码块使用 （二）</a><span>(1748)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/38455961" title="storm - 简介">storm - 简介</a><span>(1726)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/24272565" title="IOS －运行时 （消息传递 ）">IOS －运行时 （消息传递 ）</a><span>(1699)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/38467145" title="storm - 可靠机制">storm - 可靠机制</a><span>(1696)</span>
+</li>
+</ul>
+</div>
+<div id="hotarticls2" class="panel">
+<ul class="panel_head"><span>评论排行</span></ul>
+<ul class="panel_body itemlist">
+<li>
+<a href="/zhangzhebjut/article/details/24272565" title="IOS －运行时 （消息传递 ）">IOS －运行时 （消息传递 ）</a><span>(6)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/37730065" title="Hadoop -YARN  ResourceManager 剖析">Hadoop -YARN  ResourceManager 剖析</a><span>(4)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/17059217" title="MongoDB 复制集 (三) 内部数据同步">MongoDB 复制集 (三) 内部数据同步</a><span>(4)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/17334505" title="IOS GCD 使用 (二)">IOS GCD 使用 (二)</a><span>(4)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/19680325" title="MarkDown 语法快速入门">MarkDown 语法快速入门</a><span>(4)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/23210085" title="MonogDB －索引（一）概述">MonogDB －索引（一）概述</a><span>(2)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/13727121" title="go  安装与使用">go  安装与使用</a><span>(2)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/22496083" title="C++内存地址分配和内存区划分简介">C++内存地址分配和内存区划分简介</a><span>(1)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/25875827" title="Python －面向对象（一 基本概念）">Python －面向对象（一 基本概念）</a><span>(1)</span>
+</li>
+<li>
+<a href="/zhangzhebjut/article/details/37742887" title="Hadoop - YARN 通信协议">Hadoop - YARN 通信协议</a><span>(1)</span>
+</li>
+</ul>
+</div>
+<div id="homepageArticles" class="panel tracking-ad" data-mod="popu_4">
+<ul class="panel_head"><span>推荐文章</span></ul>
+<ul class="panel_body" id="ad_commend"></ul>
+</div>
+<script type="text/javascript">
+ new Ad(12, 'ad_commend');
+</script><div id="newcomments" class="panel">
+<ul class="panel_head"><span>最新评论</span></ul>
+<ul class="panel_body itemlist">
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/17059217#comments">MongoDB 复制集 (三) 内部数据同步</a>
+    <p style="margin:0px;"><a href="/Crazy__Programmer" class="user_name">Crazy__Programmer</a>:
+@YorkCai:这方面的资料确实比较少，这是参考的一篇英文的资料写的。
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/17059217#comments">MongoDB 复制集 (三) 内部数据同步</a>
+    <p style="margin:0px;"><a href="/YorkCai" class="user_name">YorkCai</a>:
+请问你这篇帖子有参考什么资料吗？网上深入介绍mongodb集群中mongod之间数据同步的机制比较少...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/37730065#comments">Hadoop -YARN  ResourceManager 剖析</a>
+    <p style="margin:0px;"><a href="/Crazy__Programmer" class="user_name">Crazy__Programmer</a>:
+@lzdwlhn:Container是由NodeManager中的container-executo...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/37730065#comments">Hadoop -YARN  ResourceManager 剖析</a>
+    <p style="margin:0px;"><a href="/lzdwlhn" class="user_name">lzdwlhn</a>:
+你好，请教一个问题，为什么yarn中Container对应执行的用户的身份是yarn而不是安装had...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/37742887#comments">Hadoop - YARN 通信协议</a>
+    <p style="margin:0px;"><a href="/xiafeixiao" class="user_name">xiafeixiao</a>:
+突然发现NodeManager虽然作为节点的代理，但它的功能并不比ResourceManager简单...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/37742887#comments">Hadoop -YARN  ResourceManager 剖析</a>
+    <p style="margin:0px;"><a href="/nanfenglei22" class="user_name">nanfenglei22</a>:
+写的很好，楼主很牛逼
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/37742887#comments">Hadoop -YARN  ResourceManager 剖析</a>
+    <p style="margin:0px;"><a href="/xiafeixiao" class="user_name">xiafeixiao</a>:
+思路很清晰，分析的很到位！楼主好强！
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/25875827#comments">Python －面向对象（一 基本概念）</a>
+    <p style="margin:0px;"><a href="/jgl5981" class="user_name">jgl5981</a>:
+zhzjgl5987 csdn sourceshttp://http://download.csdn...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/17334505#comments">IOS GCD 使用 (二)</a>
+    <p style="margin:0px;"><a href="/Crazy__Programmer" class="user_name">Crazy__Programmer</a>:
+@ftxbird:承让啊 希望多提意见！
+    </p>
+    </li>
+    <li>
+   
+         <a href="/zhangzhebjut/article/details/17334505#comments">IOS GCD 使用 (二)</a>
+    <p style="margin:0px;"><a href="/ftxbird" class="user_name">ftxbird</a>:
+博主 写的很好! 赞!
+    </p>
+    </li>
+</ul>
+</div>
+    </div>
+    <div class="clear">
+    </div>
+</div>
+
+            <div class="clear">
+            </div>
+        </div>
+        
+
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/cnick/cnick.js"></script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/newblog.min.js"></script>
+
+
+<script type="text/javascript" src="http://medal.blog.csdn.net/showblogmedal.ashx?blogid=1288773"></script>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://csdnimg.cn/pubfooter/js/publib_footer.js?' + Math.floor(new Date() / 120000).toString(36) + '="></' + 'script>');
+</script>
+    <script type="text/javascript" src="http://passport.csdn.net/content/loginbox/login.js"></script>
+<script type="text/javascript">document.write("<img src=http://counter.csdn.net/pv.aspx?id=24 border=0 width=0 height=0>");</script>
+<script type="text/javascript" src="http://www.csdn.net/ui/scripts/Csdn/counter.js"></script>
+<script type="text/javascript" src="http://ad.csdn.net/scripts/ad-blog.js"></script>
+<script type="text/javascript" src="http://zz.csdn.net/js/count.js"></script>
+<script type="text/javascript">
+    $(function () {
+        function __get_code_toolbar(snippet_id) {
+            return $("<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "' target='_blank' title='在CODE上查看代码片' style='text-indent:0;'><img src='https://code.csdn.net/assets/CODE_ico.png' width=12 height=12 alt='在CODE上查看代码片' style='position:relative;top:1px;left:2px;'/></a>"
+                    + "<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "/fork' target='_blank' title='派生到我的代码片'  style='text-indent:0;'><img src='https://code.csdn.net/assets/ico_fork.svg' width=12 height=12 alt='派生到我的代码片' style='position:relative;top:2px;left:2px;'/></a>");
+        }
+        
+        $("[code_snippet_id]").each(function () {
+            __s_id = $(this).attr("code_snippet_id");
+            if (__s_id != null && __s_id != "" && __s_id != 0 && parseInt(__s_id) > 70020) {
+                __code_tool = __get_code_toolbar(__s_id);
+                $(this).prev().find(".tools").append(__code_tool);
+            }
+        });
+    });
+</script>
+
+    </div>
+      <!--new top-->
+    
+    <script id="csdn-toolbar-id" btnId="header_notice_num" wrapId="note1" count="5" subCount="5" type="text/javascript" src="http://static.csdn.net/public/common/toolbar/js/toolbar.js"></script>     <!--new top-->
+</body>
+</html>

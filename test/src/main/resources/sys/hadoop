@@ -1,6 +1,10 @@
 maxClientCnxns
 maxSessionTimeout
 
+dfs.socket.timeout
+dfs.namenode.handler.count	
+dfs.datanode.handler.count	
+dfs.datanode.max.xcievers, dfs.datanode.max.transfer.threads	
 
 mapred.job.tracker.handler.count	
 mapred.reduce.parallel.copies
@@ -10,14 +14,6 @@ io.sort.mb
 tasktracker.http.threads	
 mapred.submit.replication
 mapred.tasktracker.map.tasks.maximum	
-
-
-dfs.socket.timeout
-dfs.namenode.handler.count	
-dfs.datanode.handler.count	
-dfs.datanode.max.xcievers, dfs.datanode.max.transfer.threads	
-dfs.datanode.max.xcievers
-
 
 hbase.lease.recovery.dfs.timeout
 hbase.master.handler.count	
@@ -31,8 +27,13 @@ hbase.hregion.max.filesize
 hbase.regionserver.codecs	=snappy
 
 
+JVM error code 143 means Internal field must be valid. This is discussed on the OTN discussion forums. However, 
+the conclusion seems to be something killed your process.I suspect this could indeed be caused by a user logging off.
+
+
 http://tldp.org/LDP/abs/html/exitcodes.html
--d64 -Xms2g -Xmx20g -XX:MaxPermSize=512M -XX:-UseGCOverheadLimit -Dfile.encoding=UTF-8 -Duser.language=zh -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled
+-d64 -Xms2g -Xmx5g -Xmn1g -XX:MaxPermSize=512M -Dfile.encoding=UTF-8 -Duser.language=zh
+ -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:-UseGCOverheadLimit
 /usr/java/jdk1.6.0_31/bin/java -XX:OnOutOfMemoryError=kill -9 %p 
 -Xmx55g -Xmn18g -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled
 常见问题5：为什么有服务器进程挂了？
@@ -85,3 +86,7 @@ java.io.EOFException: Premature EOF: no length prefix available
 
 （1） dfs.namenode.handler.count或mapred.job.tracker.handler.count
 （2） dfs.datanode.handler.count
+
+
+同时开启N个线程抓取一个网站，相信很快就会被对方网站封掉；因此抓取的频率也很重要；抓取网站同时不对对方网站造成压力；在robot.txt协议里面定义Crawl-delay来确定抓取的频率也是一种网站的通用的做法，对于一般的抓取而言，10到20秒抓取一次是一个比较保险的频率，也有提出10*t的抓取间隔（t是download时间）比较合理
+

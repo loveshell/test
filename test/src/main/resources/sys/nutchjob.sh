@@ -13,8 +13,7 @@
 curTime=`date +%Y%m%d%H%k`;
 curDate=`date +%Y%m%d`;
 mv nutch.log nutch.log.$curTime;
-nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase -dir /nutchdata$curDate -threads 500 >nutch.log 2>&1 &
-
+nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase -dir /nutchdata$curDate -threads 700 -topN 200000 >nutch.log 2>&1 &
 
 nohup hadoop jar /opt/software/nutchjob/apache-nutch-1.7.job org.apache.nutch.wind.WindCrawlHbase /nutchurl -dir /nutchdata1 >nutch.log 2>&1 &
 java -Xmx1024m -jar test.urlinsert-1.0.0-jar-with-dependencies.jar --countcrawldb 1;
