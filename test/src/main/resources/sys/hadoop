@@ -1,19 +1,23 @@
+crawl.gen.delay
+
 maxClientCnxns
 maxSessionTimeout
 
-dfs.socket.timeout
+dfs.socket.timeout | dfs.client.socket-timeout
 dfs.namenode.handler.count	
 dfs.datanode.handler.count	
 dfs.datanode.max.xcievers, dfs.datanode.max.transfer.threads	
+ha.failover-controller.cli-check.rpc-timeout.ms
+ipc.client.connect.timeout
 
 mapred.job.tracker.handler.count	
 mapred.reduce.parallel.copies
 mapred.task.timeout  
--d64 -Xms2g -Xmx8g -XX:MaxPermSize=512M -XX:+UseParallelGC -XX:-UseGCOverheadLimit -Dfile.encoding=UTF-8 -Duser.language=zh
 io.sort.mb	
 tasktracker.http.threads	
 mapred.submit.replication
 mapred.tasktracker.map.tasks.maximum	
+mapred.userlog.retain.hours
 
 hbase.lease.recovery.dfs.timeout
 hbase.master.handler.count	
@@ -30,6 +34,10 @@ hbase.regionserver.codecs	=snappy
 JVM error code 143 means Internal field must be valid. This is discussed on the OTN discussion forums. However, 
 the conclusion seems to be something killed your process.I suspect this could indeed be caused by a user logging off.
 
+你只能修改系统的charset, 或者jvm的启动参数里加上 -Dfile.encoding="UTF-8" 来指定，你运行时 setProperty("file.encoding","ISO-8859-1"); 这样是没用的
+WARN org.apache.hadoop.ha.HealthMonitor: Transport-level exception trying to monitor health of NameNode at njhadoopmaster1.wind.com.cn/192.168.201.11:8022: Failed on local exception: java.io.IOException: Connection reset by peer; Host Details : local host is: "njhadoopmaster1.wind.com.cn/192.168.201.11"; destination host is: "njhadoopmaster1.wind.com.cn":8022; 
+org.apache.hadoop.hdfs.qjournal.protocol.JournalNotFormattedException: Journal Storage Directory /data/dfs/jn/journalhdfs1 not formatted
+chown -R hdfs:hdfs journalhdfs1/
 
 http://tldp.org/LDP/abs/html/exitcodes.html
 -d64 -Xms2g -Xmx5g -Xmn1g -XX:MaxPermSize=512M -Dfile.encoding=UTF-8 -Duser.language=zh

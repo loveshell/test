@@ -7,6 +7,7 @@ import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,10 +34,14 @@ import org.apache.hadoop.hbase.client.Put;
 import org.apache.hadoop.hbase.client.Result;
 import org.apache.hadoop.hbase.client.ResultScanner;
 import org.apache.hadoop.hbase.client.Scan;
+import org.apache.hadoop.hbase.filter.ColumnPrefixFilter;
+import org.apache.hadoop.hbase.filter.CompareFilter.CompareOp;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
+import org.apache.hadoop.hbase.filter.FilterList.Operator;
 import org.apache.hadoop.hbase.filter.FirstKeyOnlyFilter;
 import org.apache.hadoop.hbase.filter.PageFilter;
+import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.io.hfile.Compression.Algorithm;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.Text;
@@ -83,7 +88,13 @@ public class HbaseClient {
 			return;
 		}
 		for (int i = 0; i < args.length; i++) {
-			if ("--createUrlid".equals(args[i])) {
+			if ("--urlStatusStats".equals(args[i])) {
+				urlStatusStats(Integer.parseInt(args[++i]));
+			} else if ("--urlTopicCnt".equals(args[i])) {
+				urlTopicCnt();
+			} else if ("--urlDayCnt".equals(args[i])) {
+				urlDayCnt(Integer.parseInt(args[++i]), Integer.parseInt(args[++i]));
+			} else if ("--createUrlid".equals(args[i])) {
 				createUrlid();
 			} else if ("--createCrawldbIdx".equals(args[i])) {
 				createCrawldbIdx();
@@ -115,14 +126,196 @@ public class HbaseClient {
 	}
 
 	public static void help() {
-		System.out
-				.println("useage: --createUrlid, --createCrawldbIdx, --createCrawldb i, --createCrawldbs i, --droptable name, --tableInit, --countcrawldb i");
+		System.out.println("useage: --method var");
+	}
+
+	public static void urlStatusStats(int status) throws Exception {
+		// public static final byte STATUS_DB_GONE = 0x03;
+		for (int i = 1; i < 4; i++) {
+			HConnection connection = HConnectionManager.createConnection(conf);
+			HTableInterface table = connection.getTable(T_CRAWLDBPRE + i);
+
+			Scan scan = new Scan();
+			scan.setCaching(1000000);
+			List<Filter> filters = new ArrayList<Filter>();
+			Filter filter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Status"), CompareOp.EQUAL,
+					new byte[] { Bytes.toBytes(status)[3] });
+			filters.add(filter);
+			filter = new FirstKeyOnlyFilter();
+			filters.add(filter);
+
+			FilterList filterList = new FilterList(filters);
+			scan.setFilter(filterList);
+			ResultScanner rs = table.getScanner(scan);
+
+			long cnt = 0;
+			for (Result r : rs) {
+				if (++cnt % 1000000 == 0)
+					System.out.println("current=" + cnt);
+			}
+			rs.close();
+
+			System.out.println("STATUS_DB_GONE=" + cnt);
+
+			table.close();
+			connection.close();
+		}
+	}
+
+	public static void urlTopicCnt() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBIDX);
+
+		Scan scan = new Scan();
+		scan.setCaching(1000000);
+		List<Filter> filters = new ArrayList<Filter>();
+		// Filter filter = new FirstKeyOnlyFilter();
+		// filters.add(filter);
+
+		Filter filter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), CompareOp.EQUAL,
+				Bytes.toBytes(0f));
+		filters.add(filter);
+		filter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Score"), CompareOp.EQUAL,
+				Bytes.toBytes(0.1f));
+		filters.add(filter);
+
+		FilterList filterList = new FilterList(Operator.MUST_PASS_ONE, filters);
+		scan.setFilter(filterList);
+		ResultScanner rs = table.getScanner(scan);
+
+		long cnt = 0;
+		for (Result r : rs) {
+			if (++cnt % 1000000 == 0)
+				System.out.println("current=" + cnt);
+		}
+		rs.close();
+
+		System.out.println("notopic=" + cnt);
+
+		table.close();
+		connection.close();
+	}
+
+	public static void urlDayCnt(int month, int first) throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBIDX);
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2014, month - 1, first, 0, 0, 0);
+		long start = calendar.getTimeInMillis();
+		long day = 3600l * 24l * 1000l;
+
+		Scan scan = new Scan();
+		scan.setCaching(1000000);
+		List<Filter> filters = new ArrayList<Filter>();
+		Filter filter = new FirstKeyOnlyFilter();
+		filters.add(filter);
+		FilterList filterList = new FilterList(filters);
+		scan.setFilter(filterList);
+		ResultScanner rs = table.getScanner(scan);
+
+		long cnt = 0;
+		long[] dayCnt = new long[31];
+		for (Result r : rs) {
+			for (int i = 0; i < 31; i++) {
+				if (start + day * i <= r.raw()[0].getTimestamp() && r.raw()[0].getTimestamp() < start + day * (i + 1)) {
+					dayCnt[i]++;
+					break;
+				}
+			}
+
+			if (++cnt % 1000000 == 0)
+				System.out.println("current=" + cnt);
+		}
+		rs.close();
+
+		System.out.println("total=" + cnt);
+		for (int i = 0; i < dayCnt.length; i++) {
+			System.out.println((i + first) + " url count=" + dayCnt[i]);
+		}
+
+		table.close();
+		connection.close();
+	}
+
+	@Deprecated
+	public static void urlDayCnt2() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBIDX);
+
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2014, 9, 1, 0, 0, 0);
+		long start = calendar.getTimeInMillis();
+		long day = 3600l * 24l * 1000l;
+
+		for (int i = 0; i < Calendar.getInstance().get(Calendar.DAY_OF_MONTH); i++) {
+			Scan scan = new Scan();
+			scan.setCaching(1000000);
+			scan.setTimeRange(start + i * day, start + (i + 1) * day);
+			List<Filter> filters = new ArrayList<Filter>();
+			Filter filter = new FirstKeyOnlyFilter();
+			filters.add(filter);
+			FilterList filterList = new FilterList(filters);
+			scan.setFilter(filterList);
+
+			ResultScanner rs = table.getScanner(scan);
+
+			long cnt = 0;
+			for (Result r : rs) {
+				if (++cnt % 1000000 == 0)
+					System.out.println("current=" + cnt);
+			}
+			rs.close();
+
+			System.out.println((i + 1) + " url count=" + cnt);
+
+		}
+
+		table.close();
+		connection.close();
 	}
 
 	public static void dropTable(String name) throws Exception {
 		HBaseAdmin admin = new HBaseAdmin(conf);
 		deleteTable(admin, name);
 		admin.close();
+	}
+
+	@Deprecated
+	public static void urlTopicCnt2() throws Exception {
+		HConnection connection = HConnectionManager.createConnection(conf);
+		HTableInterface table = connection.getTable(T_CRAWLDBIDX);
+
+		Scan scan = new Scan();
+		scan.setCaching(1000000);
+		List<Filter> filters = new ArrayList<Filter>();
+		Filter filter = new ColumnPrefixFilter(Bytes.toBytes("Score"));
+		filters.add(filter);
+		FilterList filterList = new FilterList(filters);
+		scan.setFilter(filterList);
+		ResultScanner rs = table.getScanner(scan);
+
+		long cnt = 0;
+		long notopic = 0;
+		for (Result r : rs) {
+			NavigableMap<byte[], byte[]> map = r.getFamilyMap(Bytes.toBytes("cf1"));
+			byte[] value = map.get(Bytes.toBytes("Score"));
+			if (value != null) {
+				float score = Bytes.toFloat(value);
+				if (score == 0.1f || score == 0f)
+					notopic++;
+			}
+
+			if (++cnt % 1000000 == 0)
+				System.out.println("current=" + cnt);
+		}
+		rs.close();
+
+		System.out.println("total=" + cnt);
+		System.out.println("notopic=" + notopic);
+
+		table.close();
+		connection.close();
 	}
 
 	public static void modifyIdx() throws Exception {

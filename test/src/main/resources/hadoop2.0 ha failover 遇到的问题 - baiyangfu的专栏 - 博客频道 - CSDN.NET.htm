@@ -1,0 +1,774 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+     
+    <html xmlns="http://www.w3.org/1999/xhtml">
+    
+<head>
+
+    <script id="allmobilize" charset="utf-8" src="http://a.yunshipei.com/46aae4d1e2371e4aa769798941cef698/allmobilize.min.js"></script>
+ <meta http-equiv="Cache-Control" content="no-siteapp" /><link rel="alternate" media="handheld" href="#" />
+
+    <title>hadoop2.0 ha failover 遇到的问题 - baiyangfu的专栏
+        - 博客频道 - CSDN.NET</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="description" content="最近在测试hadoop2.0 的ha，当failover的时候，standby namenode 会同步active namenode的edit日志。如果edit文件比较多的时候，standby namenode会频繁的访问journalnode，由于没有同步带宽没有限制，standby namenode会将journalnode的带宽占完，导致active namenode 无法访问jour" />
+    <script src="http://static.blog.csdn.net/scripts/jquery.js" type="text/javascript"></script>
+    <script type="text/javascript" src="http://static.blog.csdn.net/scripts/ad.js?v=1.1"></script>
+        <!--new top-->
+               <link rel="stylesheet" href="http://static.csdn.net/public/common/toolbar/css/index.css">        <!--new top-->
+
+    <link rel="Stylesheet" type="text/css" href="http://static.blog.csdn.net/skin/dark1/css/style.css?v=1.1" />
+    <link id="RSSLink" title="RSS" type="application/rss+xml" rel="alternate" href="/baiyangfu/rss/list" />
+    <link rel="shortcut icon" href="http://csdnimg.cn/public/favicon.ico" />
+    <link type="text/css" rel="stylesheet" href="http://static.blog.csdn.net/scripts/SyntaxHighlighter/styles/default_relax.css" />
+ 
+
+
+</head>
+<body>
+    
+   
+      <!--new top-->
+    <script id="toolbar-tpl-scriptId" fixed="true" prod="blog" skin="black" src="http://static.csdn.net/public/common/toolbar/js/html.js" type="text/javascript"></script>
+     <!--new top-->
+    <div id="container">
+        <div id="header">
+    <div class="header">
+        <div id="blog_title">
+            <h2>
+                <a href="http://blog.csdn.net/baiyangfu_love">baiyangfu的专栏</a></h2>
+            <h3>hadoop storm 数据</h3>
+            <div class="clear">
+            </div>
+        </div>
+        <div class="clear">
+        </div>
+    </div>
+</div>
+<div id="navigator">
+    <div class="navigator_bg">
+    </div>
+    <div class="navigator">
+        <ul>
+                <li id="btnContents"><a href="http://blog.csdn.net/baiyangfu_love?viewmode=contents"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_mulu'])">
+                    <img src="http://static.blog.csdn.net/images/ico_list.gif">目录视图</span></a></li>
+                <li id="btnView"><a href="http://blog.csdn.net/baiyangfu_love?viewmode=list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_zhaiyao'])">
+                    <img src="http://static.blog.csdn.net/images/ico_summary.gif">摘要视图</span></a></li>
+                <li id="btnRss"><a href="http://blog.csdn.net/baiyangfu_love/rss/list"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_RSS'])">
+                    <img src="http://static.blog.csdn.net/images/ico_rss.gif">订阅</span></a></li>                
+
+            </ul>
+    </div>
+</div>
+<script type="text/javascript">
+    var username = "baiyangfu";
+    var _blogger = username;
+    var blog_address = "http://blog.csdn.net/baiyangfu_love";
+    var static_host = "http://static.blog.csdn.net";
+    var currentUserName = "";  
+</script>
+
+        <div id="body">
+            <div id="main">
+                <div class="main">
+                        <div class="ad_class">
+<div class="notice tracking-ad" data-mod='popu_3' > 
+
+<a href="http://bbs.csdn.net/topics/390812950?page=2#post-398116601"target="_blank">
+<font color=blue>博客专家福利
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/39498125">
+<font color=red>2015年1月微软MVP申请开始啦</font></a>
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://www.csdn.net/article/2014-09-24/2821834">
+<font color=blue>专访李智勇：一个老程序员的哲学思考
+</font></a>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+<a href="http://blog.csdn.net/blogdevteam/article/details/38418263">
+<font color=red>推荐有礼--找出您心中的技术大牛
+</font></a>
+
+
+</div>                        </div>
+                        
+
+  
+<link href="http://static.blog.csdn.net/css/comment1.css" type="text/css" rel="stylesheet" />
+<link href="http://static.blog.csdn.net/css/style1.css" type="text/css" rel="stylesheet" />
+<script language='JavaScript' type='text/javascript' src='http://download.csdn.net/js/jquery.cookie.js'></script>
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/search-service/main.js"></script>
+<div id="article_details" class="details">
+    <div class="article_title">   
+         <span class="ico ico_type_Original"></span>
+
+
+    <h1>
+        <span class="link_title"><a href="/baiyangfu_love/article/details/16344811">
+        hadoop2.0 ha failover 遇到的问题
+        </a></span>
+    </h1>
+</div>
+
+    <div class="article_manage">
+        <span class="link_categories">
+        分类：
+            <a href="/baiyangfu/article/category/1186336" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_fenlei']);">hadoop</a> 
+        </span>
+    <span class="link_postdate">2013-11-15 20:11</span>
+    <span class="link_view" title="阅读次数">416人阅读</span>
+    <span class="link_comments" title="评论次数"><a href="#comments" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_pinglun'])">评论</a>(0)</span>
+    <span class="link_collect"><a href="javascript:void(0);" onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shoucang']);collectArticle('hadoop2.0 ha failover 遇到的问题','16344811');return false;" title="收藏">收藏</a></span>
+    <span class="link_report"><a href="#report"  onclick="javascript:_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_jubao']);report(16344811,2);return false;" title="举报">举报</a></span>
+    
+</div>
+
+  
+    
+<div id="article_content" class="article_content">
+
+<p>最近在测试hadoop2.0 的ha，当failover的时候，standby namenode 会同步active namenode的edit日志。</p>
+<p>如果edit文件比较多的时候，standby namenode会频繁的访问journalnode，由于没有同步带宽没有限制，standby namenode会将journalnode的带宽占完，导致active namenode 无法访问journalnode，到了timeout的时间就会导致activenamenode挂掉。 active&nbsp; namenode的日志如下：</p>
+<p><pre name="code" class="html">192.168.24.71:8485: Call From l-datalogm2.data.cn1/192.168.24.73 to l-datalog3.data.cn1:8485 failed on connection exception: java.net.ConnectException: Connection refused; For more details see:  http://wiki.apache.org/hadoop/ConnectionRefused
+        at org.apache.hadoop.hdfs.qjournal.client.QuorumException.create(QuorumException.java:81)
+        at org.apache.hadoop.hdfs.qjournal.client.QuorumCall.rethrowException(QuorumCall.java:223)
+        at org.apache.hadoop.hdfs.qjournal.client.AsyncLoggerSet.waitForWriteQuorum(AsyncLoggerSet.java:142)
+        at org.apache.hadoop.hdfs.qjournal.client.QuorumJournalManager.selectInputStreams(QuorumJournalManager.java:460)
+        at org.apache.hadoop.hdfs.server.namenode.JournalSet.selectInputStreams(JournalSet.java:252)
+        at org.apache.hadoop.hdfs.server.namenode.FSEditLog.selectInputStreams(FSEditLog.java:1237)
+        at org.apache.hadoop.hdfs.server.namenode.FSEditLog.selectInputStreams(FSEditLog.java:1265)
+        at org.apache.hadoop.hdfs.server.namenode.FSEditLog.selectInputStreams(FSEditLog.java:1249)
+        at org.apache.hadoop.hdfs.server.namenode.FSImage.loadFSImage(FSImage.java:609)
+        at org.apache.hadoop.hdfs.server.namenode.FSImage.recoverTransitionRead(FSImage.java:264)
+        at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.loadFSImage(FSNamesystem.java:787)
+        at org.apache.hadoop.hdfs.server.namenode.FSNamesystem.loadFromDisk(FSNamesystem.java:568)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.loadNamesystem(NameNode.java:443)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.initialize(NameNode.java:491)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.&lt;init&gt;(NameNode.java:684)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.&lt;init&gt;(NameNode.java:669)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.createNameNode(NameNode.java:1254)
+        at org.apache.hadoop.hdfs.server.namenode.NameNode.main(NameNode.java:1320)</pre></p>
+<p>测试几次总是出现这个问题。</p>
+<p>既然跟时间限制和带宽有关，那就到配置文件找这两个相关的配置。经过仔细查找，找到几个有关的配置：</p>
+<p><pre name="code" class="html">        &lt;property&gt;
+                &lt;name&gt;ha.failover-controller.cli-check.rpc-timeout.ms&lt;/name&gt;
+                &lt;value&gt;60000&lt;/value&gt;
+        &lt;/property&gt;
+        &lt;property&gt;
+                &lt;name&gt;ipc.client.connect.timeout&lt;/name&gt;
+                &lt;value&gt;60000&lt;/value&gt;
+        &lt;/property&gt;
+
+//上面的是timeout相关配置，下面这个是拷贝image 和 edit文件的带宽限制，这里设置的是1M
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;property&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;name&gt;dfs.image.transfer.bandwidthPerSec&lt;/name&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;value&gt;1048576&lt;/value&gt;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;/property&gt;
+
+
+</pre>重新启动两个namenode，再进行各种failover，问题没有再出现。keep moving！<br>
+<br>
+</p>
+
+</div>
+
+
+
+
+<!-- Baidu Button BEGIN -->
+
+<div class="bdsharebuttonbox" style="float: right;">
+<a href="#" class="bds_more" data-cmd="more" style="background-position:0 0 !important; background-image: url(http://bdimg.share.baidu.com/static/api/img/share/icons_0_16.png?v=d754dcc0.png) !important"></a>
+<a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"  style="background-position:0 -52px !important"></a>
+<a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"style="background-position:0 -104px !important"></a>
+<a href="#" class="bds_tqq" data-cmd="tqq" title="分享到腾讯微博"style="background-position:0 -260px !important"></a>
+<a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"style="background-position:0 -208px !important"></a>
+<a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"style="background-position:0 -1612px !important" ></a>
+</div>
+<script>window._bd_share_config = { "common": { "bdSnsKey": {}, "bdText": "", "bdMini": "1", "bdMiniList": false, "bdPic": "", "bdStyle": "0", "bdSize": "16" }, "share": {} }; with (document) 0[(getElementsByTagName('head')[0] || body).appendChild(createElement('script')).src = 'http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion=' + ~(-new Date() / 36e5)];</script>
+<!-- Baidu Button END -->
+
+<!--192.168.100.35-->
+<ul class="article_next_prev">
+            <li class="prev_article"><span  onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian']);location.href='/baiyangfu_love/article/details/16118369';">上一篇</span><a href="/baiyangfu_love/article/details/16118369" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_shangyipian'])">hadoop2.20 和 hbase0.96 metrics 配置</a></li>
+            <li class="next_article"><span onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_xiayipian']);location.href='/baiyangfu_love/article/details/16864047';">下一篇</span><a href="/baiyangfu_love/article/details/16864047" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_xiayipian'])">hive 优化遇到的一个问题：hive.auto.convert.join</a></li>
+</ul>
+
+<!-- Baidu Button BEGIN -->
+<script type="text/javascript" id="bdshare_js" data="type=tools&amp;uid=1536434" ></script>
+<script type="text/javascript" id="bdshell_js"></script>
+<script type="text/javascript">
+    document.getElementById("bdshell_js").src = "http://bdimg.share.baidu.com/static/js/shell_v2.js?cdnversion=" + Math.ceil(new Date()/3600000)
+</script>
+<!-- Baidu Button END -->
+
+
+</div>
+      <dl class="blog-associat-tag">
+        <dt>主题推荐</dt>
+        <dd>
+                <a href="http://www.csdn.net/tag/hadoop" target="_blank" class="blog-tage-red" >hadoop</a> 
+                <a href="http://www.csdn.net/tag/exception" target="_blank" class="blog-tage-red" >exception</a> 
+                <a href="http://www.csdn.net/tag/测试" target="_blank" class="blog-tage-red" >测试</a> 
+                <a href="http://www.csdn.net/tag/class" target="_blank" class="blog-tage-red" >class</a> 
+                <a href="http://www.csdn.net/tag/html" target="_blank" class="blog-tage-red" >html</a> 
+        </dd>
+    </dl> 
+
+
+<dl class="blog-ass-articl tracking-ad"  data-mod="popu_36" id="res-relatived"> 
+     <dt><span>猜你在找</span></dt>    
+</dl>
+
+<script type="text/javascript">
+    var searchtitletags = 'hadoop2.0 ha failover 遇到的问题' + ',' + 'hadoop,exception,测试,class,html';
+    searchService({
+        index: 'blog',
+        query: searchtitletags,
+        from: 10,
+        size: 10,
+        appendTo: '#res-relatived',
+        url: 'recommend',
+        his: 2,
+        client: "blog_cf_enhance",
+        tmpl: '<dd style="background:url(http://static.blog.csdn.net/skin/default/images/blog-dot-red3.gif) no-repeat 0 10px;"><a href="#{ url }" title="#{ title }" strategy="#{ strategy }">#{ title }</a></dd>'
+    });
+
+ </script>   
+
+
+    <div id="ad_cen">
+   
+          <script type="text/javascript">
+              new Ad(4, 'ad_cen');
+          </script>
+    </div>
+<div class="comment_class">
+    <div id="comment_title" class="panel_head">
+        <span class="see_comment">查看评论</span><a name="comments"></a></div>
+    <div id="comment_list">
+    </div>
+    <div id="comment_bar">
+    </div>
+    <div id="comment_form">
+    </div>
+
+    <div class="announce">
+        * 以上用户言论只代表其个人观点，不代表CSDN网站的观点或立场<a name="reply"></a><a name="quote"></a></div>
+</div>
+
+<script type="text/javascript">
+    var fileName = '16344811';
+    var commentscount = 0;
+    var islock = false
+</script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/comment.js"></script>
+    <div id="ad_bot">
+    </div>
+    <script type="text/javascript">
+    new Ad(5, 'ad_bot');
+    </script>
+<div id="report_dialog">
+</div>
+
+<div id="d-top"  style="bottom:60px;">
+      
+
+       <a id="quick-reply" class="btn btn-top q-reply" title="快速回复" style="display:none;">
+            <img src="http://static.blog.csdn.net/images/blog-icon-reply.png" alt="快速回复">
+        </a>    
+
+    <a id="d-top-a" class="btn btn-top backtop"  style="display: none;" title="返回顶部" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_huidaodingbu'])" style="">         
+         <img src="http://static.blog.csdn.net/images/top.png" alt="TOP">
+    </a>
+</div>
+<script type="text/javascript">
+    $(function ()
+    {
+        $("#ad_frm_0").height("90px");
+        
+        setTimeout(function(){
+            $("#ad_frm_2").height("200px");
+        },1000);
+        
+
+        if($("#comment_content").length>0)
+        {
+            $("#quick-reply").show();
+
+            $("#quick-reply").click(function(){
+                setEditorFocus();
+            });
+        }       
+     
+        var d_top = $('#d-top-a');
+        document.onscroll = function ()
+        {
+            var scrTop = (document.body.scrollTop || document.documentElement.scrollTop);
+            if (scrTop > 500)
+            {
+                d_top.show();
+            } else
+            {
+                d_top.hide();
+            }
+        }
+        $('#d-top-a').click(function ()
+        {
+            scrollTo(0, 0);
+            this.blur();
+            return false;
+        });
+    });
+  
+</script>
+<style type="text/css">
+    .tag_list
+    {
+        background: none repeat scroll 0 0 #FFFFFF;
+        border: 1px solid #D7CBC1;
+        color: #000000;
+        font-size: 12px;
+        line-height: 20px;
+        list-style: none outside none;
+        margin: 10px 2% 0 1%;
+        padding: 1px;
+    }
+    .tag_list h5
+    {
+        background: none repeat scroll 0 0 #E0DBD3;
+        color: #47381C;
+        font-size: 12px;
+        height: 24px;
+        line-height: 24px;
+        padding: 0 5px;
+        margin: 0;
+    }
+    .tag_list h5 a
+    {
+        color: #47381C;
+    }
+    .classify
+    {
+        margin: 10px 0;
+        padding: 4px 12px 8px;
+    }
+    .classify a
+    {
+        margin-right: 20px;
+        white-space: nowrap;
+    }
+</style>
+<div class="tag_list">
+    <h5>
+        <a href="http://www.csdn.net/tag/" target="_blank">核心技术类目</a></h5>
+    <div class="classify">
+<a title="全部主题" href="http://www.csdn.net/tag" target="_blank" onclick="LogClickCount(this,336);">全部主题</a>
+<a title="Hadoop" href="http://g.csdn.net/5272865" target="_blank" onclick="LogClickCount(this,336);">Hadoop</a>
+<a title="AWS" href="http://g.csdn.net/5272866" target="_blank" onclick="LogClickCount(this,336);">AWS</a>
+<a title="移动游戏" href="http://g.csdn.net/5272870" target="_blank" onclick="LogClickCount(this,336);">移动游戏</a>
+<a title="Java" href="http://g.csdn.net/5272871" target="_blank" onclick="LogClickCount(this,336);">Java</a>
+<a title="Android" href="http://g.csdn.net/5272872" target="_blank" onclick="LogClickCount(this,336);">Android</a>
+<a title="iOS" href="http://g.csdn.net/5272873" target="_blank" onclick="LogClickCount(this,336);">iOS</a>
+<a title="Swift" href="http://g.csdn.net/5272868" target="_blank" onclick="LogClickCount(this,336);">Swift</a>
+<a title="智能硬件" href="http://g.csdn.net/5272869" target="_blank" onclick="LogClickCount(this,336);">智能硬件</a>
+<a title="Docker" href="http://g.csdn.net/5272867" target="_blank" onclick="LogClickCount(this,336);">Docker</a>
+<a title="OpenStack" href="http://g.csdn.net/5272925" target="_blank" onclick="LogClickCount(this,336);">OpenStack</a>
+<a title="VPN" href="http://www.csdn.net/tag/vpn" target="_blank" onclick="LogClickCount(this,336);">VPN</a>
+<a title="Spark" href="http://g.csdn.net/5272924" target="_blank" onclick="LogClickCount(this,336);">Spark</a>
+<a title="ERP" href="http://www.csdn.net/tag/erp" target="_blank" onclick="LogClickCount(this,336);">ERP</a>
+<a title="IE10" href="http://www.csdn.net/tag/ie10" target="_blank" onclick="LogClickCount(this,336);">IE10</a>
+<a title="Eclipse" href="http://www.csdn.net/tag/eclipse" target="_blank" onclick="LogClickCount(this,336);">Eclipse</a>
+<a title="CRM" href="http://www.csdn.net/tag/crm" target="_blank" onclick="LogClickCount(this,336);">CRM</a>
+<a title="JavaScript" href="http://www.csdn.net/tag/javascript" target="_blank" onclick="LogClickCount(this,336);">JavaScript</a>
+<a title="数据库" href="http://www.csdn.net/tag/数据库" target="_blank" onclick="LogClickCount(this,336);">数据库</a>
+<a title="Ubuntu" href="http://www.csdn.net/tag/ubuntu" target="_blank" onclick="LogClickCount(this,336);">Ubuntu</a>
+<a title="NFC" href="http://www.csdn.net/tag/nfc" target="_blank" onclick="LogClickCount(this,336);">NFC</a>
+<a title="WAP" href="http://www.csdn.net/tag/wap" target="_blank" onclick="LogClickCount(this,336);">WAP</a>
+<a title="jQuery" href="http://www.csdn.net/tag/jquery" target="_blank" onclick="LogClickCount(this,336);">jQuery</a>
+<a title="BI" href="http://www.csdn.net/tag/bi" target="_blank" onclick="LogClickCount(this,336);">BI</a>
+<a title="HTML5" href="http://www.csdn.net/tag/html5" target="_blank" onclick="LogClickCount(this,336);">HTML5</a>
+<a title="Spring" href="http://www.csdn.net/tag/spring" target="_blank" onclick="LogClickCount(this,336);">Spring</a>
+<a title="Apache" href="http://www.csdn.net/tag/apache" target="_blank" onclick="LogClickCount(this,336);">Apache</a>
+<a title=".NET" href="http://www.csdn.net/tag/.net" target="_blank" onclick="LogClickCount(this,336);">.NET</a>
+<a title="API" href="http://www.csdn.net/tag/api" target="_blank" onclick="LogClickCount(this,336);">API</a>
+<a title="HTML" href="http://www.csdn.net/tag/html" target="_blank" onclick="LogClickCount(this,336);">HTML</a>
+<a title="SDK" href="http://www.csdn.net/tag/sdk" target="_blank" onclick="LogClickCount(this,336);">SDK</a>
+<a title="IIS" href="http://www.csdn.net/tag/iis" target="_blank" onclick="LogClickCount(this,336);">IIS</a>
+<a title="Fedora" href="http://www.csdn.net/tag/fedora" target="_blank" onclick="LogClickCount(this,336);">Fedora</a>
+<a title="XML" href="http://www.csdn.net/tag/xml" target="_blank" onclick="LogClickCount(this,336);">XML</a>
+<a title="LBS" href="http://www.csdn.net/tag/lbs" target="_blank" onclick="LogClickCount(this,336);">LBS</a>
+<a title="Unity" href="http://www.csdn.net/tag/unity" target="_blank" onclick="LogClickCount(this,336);">Unity</a>
+<a title="Splashtop" href="http://www.csdn.net/tag/splashtop" target="_blank" onclick="LogClickCount(this,336);">Splashtop</a>
+<a title="UML" href="http://www.csdn.net/tag/uml" target="_blank" onclick="LogClickCount(this,336);">UML</a>
+<a title="components" href="http://www.csdn.net/tag/components" target="_blank" onclick="LogClickCount(this,336);">components</a>
+<a title="Windows Mobile" href="http://www.csdn.net/tag/windowsmobile" target="_blank" onclick="LogClickCount(this,336);">Windows Mobile</a>
+<a title="Rails" href="http://www.csdn.net/tag/rails" target="_blank" onclick="LogClickCount(this,336);">Rails</a>
+<a title="QEMU" href="http://www.csdn.net/tag/qemu" target="_blank" onclick="LogClickCount(this,336);">QEMU</a>
+<a title="KDE" href="http://www.csdn.net/tag/kde" target="_blank" onclick="LogClickCount(this,336);">KDE</a>
+<a title="Cassandra" href="http://www.csdn.net/tag/cassandra" target="_blank" onclick="LogClickCount(this,336);">Cassandra</a>
+<a title="CloudStack" href="http://www.csdn.net/tag/cloudstack" target="_blank" onclick="LogClickCount(this,336);">CloudStack</a>
+<a title="FTC" href="http://www.csdn.net/tag/ftc" target="_blank" onclick="LogClickCount(this,336);">FTC</a>
+<a title="coremail" href="http://www.csdn.net/tag/coremail" target="_blank" onclick="LogClickCount(this,336);">coremail</a>
+<a title="OPhone " href="http://www.csdn.net/tag/ophone " target="_blank" onclick="LogClickCount(this,336);">OPhone </a>
+<a title="CouchBase" href="http://www.csdn.net/tag/couchbase" target="_blank" onclick="LogClickCount(this,336);">CouchBase</a>
+<a title="云计算" href="http://www.csdn.net/tag/云计算" target="_blank" onclick="LogClickCount(this,336);">云计算</a>
+<a title="iOS6" href="http://www.csdn.net/tag/iOS6" target="_blank" onclick="LogClickCount(this,336);">iOS6</a>
+<a title="Rackspace " href="http://www.csdn.net/tag/rackspace " target="_blank" onclick="LogClickCount(this,336);">Rackspace </a>
+<a title="Web App" href="http://www.csdn.net/tag/webapp" target="_blank" onclick="LogClickCount(this,336);">Web App</a>
+<a title="SpringSide" href="http://www.csdn.net/tag/springside" target="_blank" onclick="LogClickCount(this,336);">SpringSide</a>
+<a title="Maemo" href="http://www.csdn.net/tag/maemo" target="_blank" onclick="LogClickCount(this,336);">Maemo</a>
+<a title="Compuware" href="http://www.csdn.net/tag/compuware" target="_blank" onclick="LogClickCount(this,336);">Compuware</a>
+<a title="大数据" href="http://www.csdn.net/tag/大数据" target="_blank" onclick="LogClickCount(this,336);">大数据</a>
+<a title="aptech" href="http://www.csdn.net/tag/aptech" target="_blank" onclick="LogClickCount(this,336);">aptech</a>
+<a title="Perl" href="http://www.csdn.net/tag/perl" target="_blank" onclick="LogClickCount(this,336);">Perl</a>
+<a title="Tornado" href="http://www.csdn.net/tag/tornado" target="_blank" onclick="LogClickCount(this,336);">Tornado</a>
+<a title="Ruby" href="http://www.csdn.net/tag/ruby" target="_blank" onclick="LogClickCount(this,336);">Ruby</a>
+<a title="Hibernate" href="http://www.csdn.net/hibernate" target="_blank" onclick="LogClickCount(this,336);">Hibernate</a>
+<a title="ThinkPHP" href="http://www.csdn.net/tag/thinkphp" target="_blank" onclick="LogClickCount(this,336);">ThinkPHP</a>
+<a title="HBase" href="http://www.csdn.net/tag/hbase" target="_blank" onclick="LogClickCount(this,336);">HBase</a>
+<a title="Pure" href="http://www.csdn.net/tag/pure" target="_blank" onclick="LogClickCount(this,336);">Pure</a>
+<a title="Solr" href="http://www.csdn.net/tag/solr" target="_blank" onclick="LogClickCount(this,336);">Solr</a>
+<a title="Angular" href="http://www.csdn.net/tag/angular" target="_blank" onclick="LogClickCount(this,336);">Angular</a>
+<a title="Cloud Foundry" href="http://www.csdn.net/tag/cloudfoundry" target="_blank" onclick="LogClickCount(this,336);">Cloud Foundry</a>
+<a title="Redis" href="http://www.csdn.net/tag/redis" target="_blank" onclick="LogClickCount(this,336);">Redis</a>
+<a title="Scala" href="http://www.csdn.net/tag/scala" target="_blank" onclick="LogClickCount(this,336);">Scala</a>
+<a title="Django" href="http://www.csdn.net/tag/django" target="_blank" onclick="LogClickCount(this,336);">Django</a>
+<a title="Bootstrap" href="http://www.csdn.net/tag/bootstrap" target="_blank" onclick="LogClickCount(this,336);">Bootstrap</a>
+    </div>
+</div>
+
+
+                        <div class="clear">
+                        </div>
+                    </div>                   
+                
+            </div>
+            <div id="side">
+    <div class="side">
+<div id="panel_Profile" class="panel">
+<ul class="panel_head"><span>个人资料</span></ul>
+<ul class="panel_body profile">
+<div id="blog_userface">
+    <a href="http://my.csdn.net/baiyangfu" target="_blank">
+    <img src="http://avatar.csdn.net/3/A/1/1_baiyangfu.jpg" title="访问我的空间" style="max-width:90%"/>
+    </a>
+    <br />
+    <span><a href="http://my.csdn.net/baiyangfu" class="user_name" target="_blank">baiyangfu</a></span>
+</div>
+<div class="interact">
+<a href="javascript:void(0);" class="attent" id="span_add_follow" title="[加关注]" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_guanzhu'])"></a>
+
+ <a href="javascript:void(0);" class="letter"  title="[发私信]" onclick="window.open('http://msg.csdn.net/letters/model?receiver=baiyangfu','_blank','height=350,width=700');_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_sixin'])"></a>  
+</div>
+<div id="blog_medal">
+</div>
+<ul id="blog_rank">
+    <li>访问：<span>68580次</span></li>
+    <li>积分：<span>1488分</span></li>
+    <li>排名：<span>第10342名</span></li>
+</ul>
+<ul id="blog_statistics">
+    <li>原创：<span>76篇</span></li>
+    <li>转载：<span>22篇</span></li>
+    <li>译文：<span>1篇</span></li>
+    <li>评论：<span>67条</span></li>
+</ul>
+</ul>
+</div>
+
+
+<div class="panel" id="panel_Search">
+    <ul class="panel_head"><span>文章搜索</span></ul>
+    <ul class="panel_body">
+        <form id="frmSearch" action="http://so.csdn.net/search" class="form_search" target="_blank">
+        <span><input id="inputSearch" type="text" class="blogsearch" title="请输入关键字" /></span>
+        <input id="btnSubmit" type="button" value="搜索" title="search in blog" />
+        <input type="hidden" name="q" id="inputQ" />
+        <input type="hidden" name="t" value="blog" />
+        <a id="btnSearchBlog" target="_blank"></a>
+        </form>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    $(function () {
+        $("#btnSubmit").click(function () {           
+            search();
+        });
+
+        $("#frmSearch").submit(function () {
+            search();
+            return false;
+        });
+
+        function search()
+        {
+            var url = "http://so.csdn.net/so/search/s.do?q=" + encodeURIComponent($("#inputSearch").val()) + "&u=" + username + "&t=blog";
+            window.location.href = url;
+        }   
+    });
+</script><div id="panel_Category" class="panel">
+<ul class="panel_head"><span>文章分类</span></ul>
+<ul class="panel_body">
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1186336" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">hadoop</a><span>(26)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1198077" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">mysql</a><span>(11)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1200930" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">前端</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1203377" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">shell</a><span>(5)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1217778" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">moosefs</a><span>(1)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1217884" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">数据相关</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1219857" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">java</a><span>(6)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1244640" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">storm</a><span>(9)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1297111" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">python</a><span>(2)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1321135" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">clojure</a><span>(3)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1434029" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">hive</a><span>(4)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1687545" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">linux</a><span>(2)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/1823465" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">hbase</a><span>(8)</span>
+            </li>
+             <li>
+                <a href="http://blog.csdn.net/baiyangfu_love/article/category/2182371" onclick="_gaq.push(['_trackEvent','function', 'onclick', 'blog_articles_wenzhangfenlei']); ">spark</a><span>(7)</span>
+            </li>
+</ul>
+</div><div id="panel_Archive" class="panel">
+<ul class="panel_head"><span>文章存档</span></ul>
+<ul class="panel_body">
+<div id="archive_list">
+<!--归档统计-->
+<li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/09">2014年09月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/08">2014年08月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/07">2014年07月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/06">2014年06月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/04">2014年04月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/02">2014年02月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2014/01">2014年01月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/12">2013年12月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/11">2013年11月</a><span>(10)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/10">2013年10月</a><span>(7)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/09">2013年09月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/08">2013年08月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/07">2013年07月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/05">2013年05月</a><span>(4)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/04">2013年04月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2013/01">2013年01月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/12">2012年12月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/11">2012年11月</a><span>(3)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/10">2012年10月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/09">2012年09月</a><span>(5)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/08">2012年08月</a><span>(18)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/07">2012年07月</a><span>(12)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/05">2012年05月</a><span>(1)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2012/03">2012年03月</a><span>(2)</span></li><li><a href="http://blog.csdn.net/baiyangfu_love/article/month/2011/12">2011年12月</a><span>(1)</span></li>
+</div>
+</ul>
+</div>
+<div id="hotarticls" class="panel">
+<ul class="panel_head">
+    <span>       
+阅读排行    </span>
+</ul>
+
+<ul class="panel_body itemlist">
+<li>
+<a href="/baiyangfu_love/article/details/8096088" title="flume+kafka+storm+mysql 数据流">flume+kafka+storm+mysql 数据流</a><span>(9574)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/8096084" title="Kafka学习笔记">Kafka学习笔记</a><span>(6586)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/13304625" title="Hadoop HDFS 升级到2.0 笔记">Hadoop HDFS 升级到2.0 笔记</a><span>(2058)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/7381686" title="安装配置storm机群　-&gt;　启动,监控">安装配置storm机群　-&gt;　启动,监控</a><span>(1919)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/13504849" title="hadoop2.0 遇到的问题 （持续更新）">hadoop2.0 遇到的问题 （持续更新）</a><span>(1888)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/23769147" title="shark 安装 遇到的问题">shark 安装 遇到的问题</a><span>(1724)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/7974948" title="jqgrid一些特殊用法">jqgrid一些特殊用法</a><span>(1444)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/8229022" title="storm trident 笔记">storm trident 笔记</a><span>(1406)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/8227085" title="storm 的一个drpc例子">storm 的一个drpc例子</a><span>(1329)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/12713675" title="hadoop2.0 安全配置 kerberos">hadoop2.0 安全配置 kerberos</a><span>(1318)</span>
+</li>
+</ul>
+</div>
+<div id="hotarticls2" class="panel">
+<ul class="panel_head"><span>评论排行</span></ul>
+<ul class="panel_body itemlist">
+<li>
+<a href="/baiyangfu_love/article/details/8096088" title="flume+kafka+storm+mysql 数据流">flume+kafka+storm+mysql 数据流</a><span>(37)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/23769147" title="shark 安装 遇到的问题">shark 安装 遇到的问题</a><span>(7)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/17583587" title="hadoop2.2.0 和 hbase0.94.12 平台使用phoenix">hadoop2.2.0 和 hbase0.94.12 平台使用phoenix</a><span>(5)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/8919699" title="kafka.common.OffsetOutOfRangeException 问题处理">kafka.common.OffsetOutOfRangeException 问题处理</a><span>(4)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/9697349" title="4clojure">4clojure</a><span>(3)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/12519903" title="hadoop2.0 相关问题（持续更新）">hadoop2.0 相关问题（持续更新）</a><span>(2)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/16114725" title="ganglia3.6 监控 hadoop2.2.0">ganglia3.6 监控 hadoop2.2.0</a><span>(2)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/23379267" title="spark任务error 一例">spark任务error 一例</a><span>(2)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/17615711" title="hbase  调优">hbase  调优</a><span>(1)</span>
+</li>
+<li>
+<a href="/baiyangfu_love/article/details/17174005" title="BDTC 参会总结">BDTC 参会总结</a><span>(1)</span>
+</li>
+</ul>
+</div>
+<div id="homepageArticles" class="panel tracking-ad" data-mod="popu_4">
+<ul class="panel_head"><span>推荐文章</span></ul>
+<ul class="panel_body" id="ad_commend"></ul>
+</div>
+<script type="text/javascript">
+ new Ad(12, 'ad_commend');
+</script><div id="newcomments" class="panel">
+<ul class="panel_head"><span>最新评论</span></ul>
+<ul class="panel_body itemlist">
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/8096088#comments">flume+kafka+storm+mysql 数据流</a>
+    <p style="margin:0px;"><a href="/baiyangfu" class="user_name">baiyangfu</a>:
+@wl101yjx:我弄的时候版本还比较旧，已经不适合现在的版本，我当时是在github上搜的相关代...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/8096088#comments">flume+kafka+storm+mysql 数据流</a>
+    <p style="margin:0px;"><a href="/wl101yjx" class="user_name">wl101yjx</a>:
+可以学习一下你的源码吗 ，正在研究啊  15093079959@163.com  望分享啊
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/23379267#comments">spark任务error 一例</a>
+    <p style="margin:0px;"><a href="/baiyangfu" class="user_name">baiyangfu</a>:
+@tegon:通过 --addJars 指定的路径
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/23379267#comments">spark任务error 一例</a>
+    <p style="margin:0px;"><a href="/tegon" class="user_name">tegon</a>:
+我也碰到这个问题，上传jar包到指定目录  是那个目录？
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/17615711#comments">hbase  调优</a>
+    <p style="margin:0px;"><a href="/yebai" class="user_name">yebai</a>:
+学习。
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/23769147#comments">shark 安装 遇到的问题</a>
+    <p style="margin:0px;"><a href="/fsadfasfas" class="user_name">fsadfasfas</a>:
+我也遇到楼上同样的问题啊，我把shark 安装目录下所有的Jar包都拷贝出来，放到了一个/shark...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/23769147#comments">shark 安装 遇到的问题</a>
+    <p style="margin:0px;"><a href="/fsadfasfas" class="user_name">fsadfasfas</a>:
+我也遇到楼上同样的问题啊，我把shark 安装目录下所有的Jar包都拷贝出来，放到了一个/shark...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/17583587#comments">hadoop2.2.0 和 hbase0.94.12 平台使用phoenix</a>
+    <p style="margin:0px;"><a href="/u012185296" class="user_name">u012185296</a>:
+大哥，怎么编译源码啊？跪求解释，饿qq:2664370010 谢谢了，自己 Hadoop-2.2.0...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/17583587#comments">hadoop2.2.0 和 hbase0.94.12 平台使用phoenix</a>
+    <p style="margin:0px;"><a href="/u012185296" class="user_name">u012185296</a>:
+大哥，怎么编译源码啊？跪求解释，饿qq:2664370010 谢谢了，自己 Hadoop-2.2.0...
+    </p>
+    </li>
+    <li>
+   
+         <a href="/baiyangfu_love/article/details/17583587#comments">hadoop2.2.0 和 hbase0.94.12 平台使用phoenix</a>
+    <p style="margin:0px;"><a href="/u012185296" class="user_name">u012185296</a>:
+大哥，怎么编译源码啊？跪求解释，饿qq:2664370010 谢谢了，自己 Hadoop-2.2.0...
+    </p>
+    </li>
+</ul>
+</div>
+    </div>
+    <div class="clear">
+    </div>
+</div>
+
+            <div class="clear">
+            </div>
+        </div>
+        
+
+<script type="text/javascript" src="http://csdnimg.cn/rabbit/cnick/cnick.js"></script>
+<script type="text/javascript" src="http://static.blog.csdn.net/scripts/newblog.min.js"></script>
+
+
+<script type="text/javascript" src="http://medal.blog.csdn.net/showblogmedal.ashx?blogid=1223452"></script>
+<script type="text/javascript">
+    document.write('<script type="text/javascript" src="http://csdnimg.cn/pubfooter/js/publib_footer.js?' + Math.floor(new Date() / 120000).toString(36) + '="></' + 'script>');
+</script>
+    <script type="text/javascript" src="http://passport.csdn.net/content/loginbox/login.js"></script>
+<script type="text/javascript">document.write("<img src=http://counter.csdn.net/pv.aspx?id=24 border=0 width=0 height=0>");</script>
+<script type="text/javascript" src="http://www.csdn.net/ui/scripts/Csdn/counter.js"></script>
+<script type="text/javascript" src="http://ad.csdn.net/scripts/ad-blog.js"></script>
+<script type="text/javascript" src="http://zz.csdn.net/js/count.js"></script>
+<script type="text/javascript">
+    $(function () {
+        function __get_code_toolbar(snippet_id) {
+            return $("<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "' target='_blank' title='在CODE上查看代码片' style='text-indent:0;'><img src='https://code.csdn.net/assets/CODE_ico.png' width=12 height=12 alt='在CODE上查看代码片' style='position:relative;top:1px;left:2px;'/></a>"
+                    + "<a href='https://code.csdn.net/snippets/"
+                    + snippet_id
+                    + "/fork' target='_blank' title='派生到我的代码片'  style='text-indent:0;'><img src='https://code.csdn.net/assets/ico_fork.svg' width=12 height=12 alt='派生到我的代码片' style='position:relative;top:2px;left:2px;'/></a>");
+        }
+        
+        $("[code_snippet_id]").each(function () {
+            __s_id = $(this).attr("code_snippet_id");
+            if (__s_id != null && __s_id != "" && __s_id != 0 && parseInt(__s_id) > 70020) {
+                __code_tool = __get_code_toolbar(__s_id);
+                $(this).prev().find(".tools").append(__code_tool);
+            }
+        });
+    });
+</script>
+
+    </div>
+      <!--new top-->
+    
+    <script id="csdn-toolbar-id" btnId="header_notice_num" wrapId="note1" count="5" subCount="5" type="text/javascript" src="http://static.csdn.net/public/common/toolbar/js/toolbar.js"></script>     <!--new top-->
+</body>
+</html>
