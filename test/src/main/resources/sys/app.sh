@@ -1,3 +1,9 @@
+最后附上几种修改缓存时间的方法：
+1.	jvm启动参数里面配置-Dsun.net.inetaddr.ttl=value
+2.	修改 配置文件JAVA_HOME/jre/lib/security/java.security相应的参数networkaddress.cache.ttl=value
+3.	代码里直接设置：java.security.Security.setProperty(”networkaddress.cache.ttl” , “value”);
+java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+
 1.静态内部类跟静态方法一样，只能访问静态的成员变量和方法，不能访问非静态的方法和属性，但是普通内部类可以访问任意外部类的成员变量和方法
 hbase:    split 'regionName', 'splitKey'  
 split 'crawldb1,0,1409282923319.7b4d78091f202c8a2d24048fbac9fe6f.', '0a'

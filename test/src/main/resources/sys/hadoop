@@ -61,6 +61,8 @@ ant
 Warning:  modified in the future.
 测试的时候将系统时间往前调了下，完后忘记改回来了，就直接编辑现在的代码，使得修改的文件的修改时间比真实的时间晚，当现在日期正常的时候就会报哪个警告
 
+hadoop sequencefile 往同一目录里面写data、index，会在下面建个子目录写
+/content/201410111834/m_000001_0_0/m_000001_0
 
 遇到的一个问题：如果没有mos.close(), 程序运行中会出现异常：
 　　12/05/21 20:12:47 WARN hdfs.DFSClient: DataStreamer Exception:
