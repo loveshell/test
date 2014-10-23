@@ -11,6 +11,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import org.apache.hadoop.hbase.util.Bytes;
+import org.apache.nutch.crawl.CrawlDatum;
+
 public class Test {
 	private static Lock dbLock = new ReentrantLock();
 
@@ -24,8 +27,24 @@ public class Test {
 		// System.out.println(Arrays.asList(getHostSplits()));
 		// System.out.println(getHost("http://www.sina.com"));
 
-		String a = "attempt_201408261602_0068_m_000001_0".substring(26);
-		System.out.println(a.substring(0, a.length() - 2));
+		// String a = "attempt_201408261602_0068_m_000001_0".substring(26);
+		// System.out.println(a.substring(0, a.length() - 2));
+
+		System.out.println(Bytes.toBytes(3)[3] == CrawlDatum.STATUS_DB_GONE);
+		// Calendar calendar = Calendar.getInstance();
+		// calendar.set(2014, 9, 1, 0, 0, 0);
+		// long start = calendar.getTimeInMillis();
+		// long day = 3600l * 24l * 1000l;
+		// System.out.println(calendar.getTime());
+		// System.out.println(start <= 1412742483910l);
+		// System.out.println(start + day * (1) > 1412742483910l);
+		// System.out.println(new Date(1412742483910l));
+
+		// System.out.println(System.currentTimeMillis());
+		// 0000015988055a06
+		// 000000mVqDA06
+
+		// System.out.println(Hex.encodeHex(Bytes.toBytes(1484045769222L)));
 	}
 
 	public static String[] getHostSplits() {

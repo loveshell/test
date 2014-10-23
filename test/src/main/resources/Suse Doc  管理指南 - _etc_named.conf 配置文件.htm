@@ -1,0 +1,265 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML Basic 1.1//EN" "http://www.w3.org/TR/xhtml-basic/xhtml-basic11.dtd">
+
+<!-- saved from url=(0014)about:internet -->
+<html xml:lang="zh-cn" lang="zh-cn">
+<head>
+
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta http-equiv="Content-Language" content="zh-cn" />
+<meta name="Generation-Date" content="Thursday, July 04, 2013 09:38" />
+<meta name="Content-Date" content="Mon, 01 Jan 192004 12:00:00 GMT" />
+<meta name="Document_Number" content="zHTML xE.9186.0010.0001.0004.0004.0005." />
+<meta name="Product_and_Version" content="SUSE Linux Enterprise Server 11" />
+<meta name="Copyright" content="Copyright SUSE LINUX AG 2013" />
+
+<style type="text/css">
+  @import url(../../../docui_a/docmain.css);
+</style>
+
+<title>Suse Doc: 
+        管理指南
+       - /etc/named.conf 配置文件</title>
+<script type="text/javascript">
+  var prod_name = "SUSE Linux Enterprise Server 11";
+  var prev_link = "sec_dns_bind.html";
+  var next_link = "sec_dns_zonefile.html";
+  var parentfile = "../sles11/book_sle_admin/data/cha_dns.html";
+  var parenttoc = "../sles11/book_sle_admin/data/toc_cha_dns.html";
+  if(parent.location != location) { parent.loadMenu(); }
+</script>
+<script type="text/javascript" src="../../../docui_a/jsglobal.js"></script>
+</head>
+
+<body>
+<script type="text/javascript" src="../../../docui_a/topnav.js"></script>
+
+<div class="sect1" id="sec_dns_named">
+
+<h2 class="title"><span class="number">24.5</span> /etc/named.conf 配置文件</h2>
+
+<p class="para">
+   BIND 名称服务器本身的所有设置都储存在文件 <span class="filename">/etc/named.conf</span> 中。但是，将要处理的域的区域数据（由主机名、IP 地址等组成）储存在目录 <span class="filename">/var/lib/named</span> 下单独的文件中。稍后将介绍其详细信息。
+  </p>
+<p class="para">
+   <span class="filename">/etc/named.conf</span> 大致分为两部分。一部分是存放常规设置的 <span class="systemitem">options</span> 部分，另一部分由各个域的 <span class="systemitem">zone</span> 项组成。而 <span class="systemitem">logging</span> 部分和 <span class="systemitem">acl</span>（访问控制列表）项是可选的。注释行以 <span class="literal">#</span> 符号或 <span class="literal">//</span> 开头。<a href="sec_dns_named.html#ex_named_mini" class="xref">示例 24-2</a>显示了一个最小的 <span class="filename">/etc/named.conf</span>。
+  </p>
+<div class="example" id="ex_named_mini">
+            <p class="title"><em class="num">示例 24-2 </em>基本的 /etc/named.conf</p>
+            <pre class="screen">options { 
+        directory "/var/lib/named"; 
+        forwarders { 10.0.0.1; };
+        notify no;
+};
+
+zone "localhost" in {
+       type master;
+       file "localhost.zone";
+};
+
+zone "0.0.127.in-addr.arpa" in {
+        type master;
+        file "127.0.0.zone";
+};
+
+zone "." in {
+        type hint;
+        file "root.hint";
+};</pre>
+          </div>
+
+<div class="sect2" id="sec_dns_named_options">
+
+<h3 class="title"><span class="number">24.5.1</span> 重要的配置选项</h3>
+<dl class="variablelist">
+              
+<dt class="term">directory "<span class="replaceable">filename</span>";</dt>
+<dd class="listitem">
+<p class="listitem">
+       指定目录，BIND 可以在该目录中找到包含区域数据的文件。通常，此目录是 <span class="filename">/var/lib/named</span>。
+      </p></dd>
+
+              
+<dt class="term">forwarders { <span class="replaceable">ip-address</span>; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       指定在无法直接解析 DNS 请求的情况下应将其转发到的名称服务器（大多数情况下是提供商的名称服务器）。将 <span class="replaceable">ip-address</span> 替换为 IP 地址，如 <span class="literal">192.168.1.116</span>。
+      </p></dd>
+
+              
+<dt class="term">forward first;</dt>
+<dd class="listitem">
+<p class="listitem">
+       在尝试通过 root 名称服务器解析 DNS 请求前，对 DNS 请求进行转发。可以写入 <span class="systemitem">forward only</span>（而不是 <span class="systemitem">forward first</span>）转发所有请求并且不将任何请求发送到 root 名称服务器。这可以用于防火墙配置。
+      </p></dd>
+
+              
+<dt class="term">listen-on port 53 { 127.0.0.1; <span class="replaceable">IP 地址</span>; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       指示 BIND 通过哪些网络接口和哪个端口来接受客户端查询。不需要显式指定 <span class="literal">port 53</span>，因为 <span class="literal">53</span> 是默认端口。输入 <span class="literal">127.0.0.1</span> 允许接收来自 Localhost 的请求。如果完全省略此项，则在默认情况下使用所有接口。
+      </p></dd>
+
+              
+<dt class="term">listen-on-v6 port 53 {any; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       指示 BIND 应通过哪个端口侦听 IPv6 客户端请求。唯一可以替代 <span class="literal">any</span> 的是 <span class="literal">none</span>。就 IPv6 而言，服务器只接受通配符地址。
+      </p></dd>
+
+              
+<dt class="term">query-source address * port 53;</dt>
+<dd class="listitem">
+<p class="listitem">
+       如果防火墙阻止外发的 DNS 请求，则需要此项。此项指示 BIND 从端口 53 向外部发送请求，而不使用端口号大于 1024 的任何端口。
+      </p></dd>
+
+              
+<dt class="term">query-source-v6 address * port 53;</dt>
+<dd class="listitem">
+<p class="listitem">
+       指示 BIND 将哪个端口用于 IPv6 查询。
+      </p></dd>
+
+              
+<dt class="term">allow-query { 127.0.0.1; <span class="replaceable">net</span>; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       定义客户端可以自此发送 DNS 请求的网络。将 <span class="replaceable">net</span> 替换为地址信息，如 <span class="literal">192.168.2.0/24</span>。末尾的 <span class="systemitem">/24</span> 是网络掩码的缩写表示（在本例中为 <span class="systemitem">255.255.255.0</span>）。
+      </p></dd>
+
+              
+<dt class="term">allow-transfer ! *;;</dt>
+<dd class="listitem">
+<p class="listitem">
+       控制哪些主机可以请求区域传送。在本例中，用 <span class="systemitem">! *</span>. 如果没有此项，则可以从没有限制的任何位置请求区域传送。
+      </p></dd>
+
+              
+<dt class="term">statistics-interval 0;</dt>
+<dd class="listitem">
+<p class="listitem">
+       如果缺少此项，则 BIND 每小时在 <span class="filename">/var/log/messages</span> 中生成几行统计信息。将其设置为 0 可以完全禁止生成此类统计信息，也可以设置时间间隔（以分钟为单位）。
+      </p></dd>
+
+              
+<dt class="term">cleaning-interval 720;</dt>
+<dd class="listitem">
+<p class="listitem">
+       此选项定义 BIND 间隔多长时间清除其缓存。每次出现此选项都会在 <span class="filename">/var/log/messages</span> 中触发一项。时间是以分钟为单位指定的。默认值为 60 分钟。
+      </p></dd>
+
+              
+<dt class="term">interface-interval 0;</dt>
+<dd class="listitem">
+<p class="listitem">
+       BIND 定期在网络接口中搜索新接口或不存在的接口。如果将该值设置为 <span class="systemitem">0</span>，则不执行搜索，BIND 只侦听启动时检测到的接口。否则，采用分钟定义时间间隔。默认值是 60 分钟。
+      </p></dd>
+
+              
+<dt class="term">notify no;</dt>
+<dd class="listitem">
+<p class="listitem">
+       指定 <span class="option">no</span> 将阻止其他名称服务器在区域数据被更改或名称服务器被重启动时得到通知。
+      </p></dd>
+
+            </dl>
+<p class="para">
+    有关可用选项的列表，请阅读手册页 <span class="command">man 5 named.conf</span>。
+   </p>
+</div>
+
+<div class="sect2" id="sec_dns_named_log">
+
+<h3 class="title"><span class="number">24.5.2</span> 日志记录</h3>
+
+<p class="para">
+    可以在 BIND 中详细配置日志记录的内容、方式和位置。通常，默认设置就已足够。<a href="sec_dns_named.html#ex_no_log" class="xref">示例 24-3</a>显示了此项最简单的形式，并完全抑制任何日志记录。
+   </p>
+<div class="example" id="ex_no_log">
+              <p class="title"><em class="num">示例 24-3 </em>禁用日志记录的项</p>
+              <pre class="screen">logging {
+        category default { null; };
+};</pre>
+            </div>
+
+</div>
+
+<div class="sect2" id="sec_dns_named_zones">
+
+<h3 class="title"><span class="number">24.5.3</span> 区域项</h3>
+
+<div class="example" id="ex_meine_domain">
+              <p class="title"><em class="num">示例 24-4 </em>example.com 的区域项</p>
+              <pre class="screen">zone "example.com" in {
+      type master;
+      file "example.com.zone";
+      notify no;
+};</pre>
+            </div>
+
+<p class="para">
+    在 <span class="systemitem">zone</span> 后，指定要管理的域的名称 (<span class="systemitem">example.com</span>)，后跟 <span class="systemitem">in</span> 和用花括号括起来的相关选项块，如<a href="sec_dns_named.html#ex_meine_domain" class="xref">示例 24-4</a>所示。要定义<span class="emphasis">从属区域</span>，请将 <span class="systemitem">type</span> 切换为 <span class="literal">slave</span> 并将管理此区域的名称服务器指定为 <span class="literal">master</span>（它可能是另一个主区域的从属区域），如 <a href="sec_dns_named.html#ex_andere_domain" class="xref">示例 24-5</a> 所示。
+   </p>
+<div class="example" id="ex_andere_domain">
+              <p class="title"><em class="num">示例 24-5 </em>example.net 的区域项</p>
+              <pre class="screen">zone "example.net" in {
+      type slave;
+      file "slave/example.net.zone";
+      masters { 10.0.0.1; }; 
+};</pre>
+            </div>
+
+<p class="para">
+    区域选项：
+   </p><dl class="variablelist">
+              
+<dt class="term">type master;</dt>
+<dd class="listitem">
+<p class="listitem">
+       通过指定 <span class="literal">master</span>，指示 BIND 由本地名称服务器对区域进行处理。这假定已用正确的格式创建了区域文件。
+      </p></dd>
+
+              
+<dt class="term">type slave;</dt>
+<dd class="listitem">
+<p class="listitem">
+       从另一个名称服务器传送此区域。必须将它与 <span class="systemitem">masters</span> 一起使用。
+      </p></dd>
+
+              
+<dt class="term">type hint;</dt>
+<dd class="listitem">
+<p class="listitem">
+       区域 <span class="literal">.</span>（<span class="literal">hint</span> 类型）用于设置 root 名称服务器。此区域定义可以保留原样。
+      </p></dd>
+
+              
+<dt class="term">文件 <span class="filename">example.com.zone</span> 或文件 <q class="quote">slave/example.net.zone</q>；</dt>
+<dd class="listitem">
+<p class="listitem">
+       此项指定域的区域数据所在的文件。从属区域不需要此文件，因为此数据是从另一个名称服务器中获取的。要区分主文件和从属文件，请对从属文件使用目录 <span class="filename">slave</span>。
+      </p></dd>
+
+              
+<dt class="term">masters { <span class="replaceable">server-ip-address</span>; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       只有从属区域需要此项。它指定应从哪个名称服务器传送区域文件。
+      </p></dd>
+
+              
+<dt class="term">allow-update {! *; };</dt>
+<dd class="listitem">
+<p class="listitem">
+       此选项控制外部写访问，这将允许客户端创建 DNS 项 － 出于安全原因，通常不希望出现这种情况。没有此项，就不允许进行区域更新。上述项可以实现相同的结果，因为 <span class="literal">! *</span> 有效地禁止了此类操作。
+      </p></dd>
+
+            </dl>
+</div>
+
+</div>
+
+
+<script type="text/javascript" src="../../../docui_a/bottomnav.js"></script>
+</body>
+</html>

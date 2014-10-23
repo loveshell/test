@@ -22,10 +22,8 @@ import java.io.DataOutput;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -54,6 +52,7 @@ import org.apache.hadoop.hbase.filter.PageFilter;
 import org.apache.hadoop.hbase.filter.SingleColumnValueFilter;
 import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.MapWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
@@ -129,7 +128,6 @@ public class GeneratorHbase extends Generator {
 			byte[] key = (byte[]) iterator.next();
 			byte[] value = map.get(key);
 			String skey = Bytes.toString(key);
-
 			if ("url".equals(skey)) {
 				// nothing
 			} else if ("Score".equals(skey)) {
@@ -153,6 +151,10 @@ public class GeneratorHbase extends Generator {
 			} else if ("Signature".equals(skey)) {
 				if (value != null)
 					datum.setSignature(value);
+			} else if (Nutch.GENERATE_TIME_KEY.equals(skey)) {// mfang,2014/10/13
+				if (value != null) {
+					metaData.put(new Text(key), new LongWritable(Bytes.toLong(value)));
+				}
 			} else
 				metaData.put(new Text(key), new Text(value));
 		}
@@ -209,8 +211,6 @@ public class GeneratorHbase extends Generator {
 				HBaseConfiguration.merge(this.job, HBaseConfiguration.create(this.job));
 				// this.job.setLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY,
 				// HBASE_REGIONSERVER_LEASE_PERIOD);
-				LOG.info(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY + "==============="
-						+ job.getLong(HConstants.HBASE_REGIONSERVER_LEASE_PERIOD_KEY, 0));
 				tableCacheSize = job.getInt("commit.hbase.threshold", tableCacheSize);
 				try {
 					connection = HConnectionManager.createConnection(this.job);
@@ -421,7 +421,12 @@ public class GeneratorHbase extends Generator {
 			long topn = job.getLong(Generator.GENERATOR_TOP_N, 0);
 
 			List<Filter> tmp = new ArrayList<Filter>();
-			if (!job.getBoolean("generate.test", true)) {
+
+			// mfang 2014/09/29: isSmart=true 时执行的是特殊网站的generator
+			// 特殊网站的过滤规则有所不同，不在这里过滤
+			boolean isSmart = job.getBoolean("nutch.smart.is", false);
+
+			if (!isSmart && !job.getBoolean("generate.test", true)) {
 				// 抓取时间限制 // check fetch schedule
 				SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
 						Bytes.toBytes("Fetchtime"), CompareOp.LESS_OR_EQUAL, Bytes.toBytes(curTime));
@@ -439,7 +444,15 @@ public class GeneratorHbase extends Generator {
 							CompareOp.LESS_OR_EQUAL, Bytes.toBytes(intervalThreshold));
 					tmp.add(columnFilter);
 				}
+				// 分值限制，特殊
+				columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Score"),
+						CompareOp.GREATER, Bytes.toBytes(0f));
+				tmp.add(columnFilter);
 			}
+			// 状态限制
+			SingleColumnValueFilter columnFilter = new SingleColumnValueFilter(Bytes.toBytes("cf1"),
+					Bytes.toBytes("Status"), CompareOp.NOT_EQUAL, new byte[] { CrawlDatum.STATUS_DB_GONE });
+			tmp.add(columnFilter);
 			if (hostn > 0) {
 				// topn限制
 				Filter filter = new HostFilter(hostn);
@@ -555,20 +568,22 @@ public class GeneratorHbase extends Generator {
 		private long cnt = 0;
 
 		private long curTimeMillis = 0;
-		private long lastGenTimeMillis = 0;
+		// private long lastGenTimeMillis = 0;
 		private boolean isSmart = false;
 
-		static long GetZeroTimeSeconds() {
-			Calendar c = Calendar.getInstance();
-			try {
-				c.setTime(new SimpleDateFormat("yyyy-MM-dd").parse("2014-01-01"));
-			} catch (ParseException e) {
-				e.printStackTrace();
-			}
-			return c.getTimeInMillis() / 1000L;
-		}
+		// static long GetZeroTimeSeconds() {
+		// Calendar c = Calendar.getInstance();
+		// try {
+		// c.setTime(new SimpleDateFormat("yyyy-MM-dd")
+		// .parse("2014-01-01"));
+		// } catch (ParseException e) {
+		// e.printStackTrace();
+		// }
+		// return c.getTimeInMillis() / 1000L;
+		// }
 
-		static final long ZeroTimeMillis = GetZeroTimeSeconds() * 1000L; // 单位秒;
+		// static final long ZeroTimeMillis = GetZeroTimeSeconds() * 1000L; //
+		// 单位秒;
 
 		public void configure(JobConf job) {
 			filter = job.getBoolean(GENERATOR_FILTER, true);
@@ -600,7 +615,14 @@ public class GeneratorHbase extends Generator {
 			conf = job;
 
 			isSmart = job.getBoolean("nutch.smart.is", false);
-			if (isSmart) {
+			if (isSmart) {// 是否是特殊网站抓取
+				// 按照时间间隔过滤
+				// 获取上次抓取时间
+				curTimeMillis = job.getLong(Nutch.GENERATE_TIME_KEY, System.currentTimeMillis());
+				// - ZeroTimeMillis;
+				// lastGenTimeMillis = job.getLong(Nutch.LAST_GENERATE_TIME_KEY,
+				// curTimeMillis - 5 * 60 * 1000L) - ZeroTimeMillis;
+				// 获取在[lastGenTime,curTime]之间应该抓取的URL
 			}
 		}
 
@@ -628,8 +650,31 @@ public class GeneratorHbase extends Generator {
 					}
 				}
 			}
+			LOG.info("**** isSmart :" + isSmart);
+			// mfang 2014/09/29 是否是特殊网站 Generator
+			if (isSmart) {
+				long lastGenTimeMillis = 0;
+				Writable temp = value.getMetaData().get(new Text(Nutch.GENERATE_TIME_KEY));
+				if (temp != null) {
+					lastGenTimeMillis = ((LongWritable) temp).get();
+				}
+				// else {
+				// LOG.info("**** GENERATE_TIME is null");
+				// }
+				LOG.info("**** URL :" + key.toString());
+				LOG.info("**** getFetchInterval :" + value.getFetchInterval());
+				LOG.info("**** lastGenTimeMillis :" + lastGenTimeMillis);
+				LOG.info("**** curTimeMillis :" + curTimeMillis);
 
-			if (!hostFilte(key.toString()))
+				// 更新周期为 X1//上次JOB运行时间为T1 //当前时间为T2
+				// (T1-T0)%X1 < (T2-T0)%X1 成立时则更新
+				long x1 = value.getFetchInterval() * 1000;
+				if ((curTimeMillis - lastGenTimeMillis) < x1)
+					// || lastGenTimeMillis % x1 >= curTimeMillis % x1)
+					return;
+			}
+
+			if (!isSmart && !hostFilte(key.toString()))
 				return;
 
 			Put put = createGenerateTime(Bytes.toBytes(key.toString()), value, generateTime);
@@ -702,17 +747,7 @@ public class GeneratorHbase extends Generator {
 				reporter.incrCounter("Generator", "records", 1);
 			}
 
-		}
-
-		private boolean smartFilter(CrawlDatum value) throws IOException {
-			if (isSmart) {// 是否是特殊网站抓取
-				// 获取在[lastGenTime,curTime]之间应该抓取的URL
-				int interval = value.getFetchInterval();
-				if (curTimeMillis / interval <= lastGenTimeMillis / interval)
-					return false;// 不满足抓取条件
-			}
-
-			return true;
+			rs.close();
 		}
 
 		private boolean filteUrl(String url, int part) {
@@ -866,9 +901,14 @@ public class GeneratorHbase extends Generator {
 			RunningJob r = generateJob(table, segment, topN, reduceCnt, filter, norm, force);
 			Counter counter = r.getCounters().findCounter("Generator", "records");
 			cnt = counter.getValue();
+			if (r.isSuccessful()) {
+				// LOG.info(Nutch.GEN_JOB_SUCCESS + "=1;");
+			} else {
+				// LOG.info(Nutch.GEN_JOB_FAIL + "=1;");
+			}
 			LOG.info("Generator: " + segment + " records: " + cnt + " current table=" + table + " timeused="
 					+ (System.currentTimeMillis() - start) / 1000 + "s");
-		} catch (Exception e) {
+		} catch (Throwable e) {
 			removePath(segment);
 			LOG.error("generateAll:", e);
 		}
@@ -877,13 +917,15 @@ public class GeneratorHbase extends Generator {
 		if (cnt == 0) {
 			removePath(segment);
 			return null;
-		} else if (topN == 0 && cnt <= less) {// too less : && cnt <= 10000
+		} else if (cnt <= less) {// too less : && cnt <= 10000
 			removePath(segment);
 			return null;
 		}
 
 		long end = System.currentTimeMillis();
+		// LOG.info(Nutch.GEN_TIME + "=" + (end - start) + ";");
 		// have records
+		GenerateInfos.topn = topN;
 		GenerateInfos.hostn = getConf().getInt(Generator.GENERATOR_MAX_COUNT, -1);
 		GenerateInfo genInfo = GenerateInfos.getGenerateInfo();
 		genInfo.start = start;
@@ -903,8 +945,8 @@ public class GeneratorHbase extends Generator {
 			if (!fs.exists(segment))
 				return false;
 			return fs.delete(segment, true);
-		} catch (Exception e) {
-			LOG.error("removePath:" + segment, e);
+		} catch (Throwable e) {
+			LOG.error("generator removePath=" + segment, e);
 		}
 		return false;
 	}
@@ -914,7 +956,7 @@ public class GeneratorHbase extends Generator {
 		LOG.info("Generator: from table=" + table + " segment=" + segment);
 
 		JobConf job = new NutchJob(getConf());
-		job.setJarByClass(GeneratorHbase.class);
+		// job.setJarByClass(GeneratorHbase.class);
 		job.setJobName("generate:" + table + " "
 				+ (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " path=" + segment);
 
@@ -1014,9 +1056,8 @@ public class GeneratorHbase extends Generator {
 				genInfo.endTime = sdf.format(genInfo.end);
 			}
 		}
-
-		LOG.info(GenerateInfos.printString());
 		long end = System.currentTimeMillis();
+		LOG.info(GenerateInfos.printString());
 		LOG.info("Generator: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
 
 		if (generatedSegments.size() > 0)
@@ -1030,7 +1071,7 @@ public class GeneratorHbase extends Generator {
 		LOG.info("Generator: segment=" + segment);
 
 		JobConf job = new NutchJob(getConf());
-		job.setJarByClass(GeneratorHbase.class);
+		// job.setJarByClass(GeneratorHbase.class);
 		job.setJobName("generate:" + table + " "
 				+ (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " path=" + segment);
 		// job.setLong(HConstants.HBASE_CLIENT_SCANNER_TIMEOUT_PERIOD, 300000);

@@ -13,7 +13,6 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Random;
 import java.util.TreeSet;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
@@ -68,6 +67,7 @@ import org.apache.nutch.wind.WindParallelUtilHBase;
 import org.apache.nutch.wind.WindParallelUtilHBase.FetchNotify;
 import org.apache.nutch.wind.stat.FetchInfo;
 import org.apache.nutch.wind.stat.FetchInfos;
+import org.apache.nutch.wind.util.UrlFilters;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
@@ -82,7 +82,8 @@ public class WindFetcher extends Fetcher {
 
 	protected String fetchOutDir;
 	protected String subMapId;
-	protected long writeHold = 10000;
+	protected long writeHold = 15000;
+	protected int totalThread = 0;
 	protected int pathIdx = 0;
 	protected CompressionType compType;
 	protected boolean notifyEnded = false;
@@ -313,7 +314,7 @@ public class WindFetcher extends Fetcher {
 		super(conf);
 	}
 
-	public void fetch(Path segment, int threads) throws IOException {
+	public void fetch(Path segment, int threads) {
 		checkConfiguration();
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -355,6 +356,7 @@ public class WindFetcher extends Fetcher {
 		job.setJobName("fetch " + (new SimpleDateFormat("HH:mm:ss")).format(System.currentTimeMillis()) + " " + segment);
 		job.setInt("fetcher.threads.fetch", threads);
 		job.set(Nutch.SEGMENT_NAME_KEY, segment.getName());
+		job.setMaxMapAttempts(1);
 		// for politeness, don't permit parallel execution of a single task
 		job.setSpeculativeExecution(false);
 		FileInputFormat.addInputPath(job, new Path(segment, CrawlDatum.GENERATE_DIR_NAME));
@@ -365,30 +367,56 @@ public class WindFetcher extends Fetcher {
 		job.setOutputFormat(FetcherOutputFormatForIO.class);
 		job.setOutputKeyClass(Text.class);
 		job.setOutputValueClass(NutchWritable.class);
-		RunningJob runningJob = JobClient.runJob(job);
+
+		RunningJob runningJob;
+		try {
+			runningJob = JobClient.runJob(job);
+		} catch (Throwable e) {
+			e.printStackTrace();
+			return;
+		}
 
 		long end = System.currentTimeMillis();
-		if (runningJob.isSuccessful()) {
-			FetchInfo info = FetchInfos.getFetchInfo();
-			info.start = start;
-			info.end = end;
-			info.name = job.getJobName();
-			Counter counter = runningJob.getCounters().findCounter("Map-Reduce Framework", "Map output records");
-			if (counter != null)
-				info.pageTotal = counter.getValue();
-			info.fetchTime = (end - start);
-			info.downBytes = runningJob.getCounters().findCounter("FetcherStatus", "bytes_downloaded").getValue();
-			info.pageSuccess = runningJob.getCounters()
-					.findCounter("FetcherStatus", ProtocolStatus.STATUS_SUCCESS.getName()).getValue();
+		try {
+			if (runningJob.isSuccessful()) {
+				FetchInfo info = FetchInfos.getFetchInfo();
+				info.start = start;
+				info.end = end;
+				info.name = job.getJobName();
+				info.pageTotal = runningJob.getCounters()
+						.findCounter("FetcherStatus","AboveExceptionThresholdInQueue").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "access_denied").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "exception").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "gone").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "moved").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "notfound").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "success").getValue();
+				info.pageTotal += runningJob.getCounters()
+						.findCounter("FetcherStatus", "temp_moved").getValue();
+				info.fetchTime = (end - start);
+				info.downBytes = runningJob.getCounters().findCounter("FetcherStatus", "bytes_downloaded").getValue();
+				info.pageSuccess = runningJob.getCounters()
+						.findCounter("FetcherStatus", ProtocolStatus.STATUS_SUCCESS.getName()).getValue();
 
-			LOG.info(info.toString());
-			LOG.info(FetchInfos.printString());
+				LOG.info(info.toString());
+				LOG.info(FetchInfos.printString());
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		LOG.info("Fetcher: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
 	}
 
 	public void run(RecordReader<Text, CrawlDatum> input, OutputCollector<Text, NutchWritable> output, Reporter reporter)
 			throws IOException {
+		java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+
 		this.output = output;
 		this.reporter = reporter;
 		this.fetchQueues = new FetchItemQueues(getConf());
@@ -419,13 +447,15 @@ public class WindFetcher extends Fetcher {
 			new WindFetcherThread(getConf()).start();
 		}
 
+		// 阶段输出的线程 hxx
+		totalThread = threadCount;
+		int bandWatch = 0;// 带宽不达标计数
 		Thread t = new Thread() {
 			public void run() {
 				batchTimeWrite(System.currentTimeMillis());
 			}
 		}; // t.setDaemon(true);
 		t.start();// hxx
-		int bandWatch = 0;
 
 		// select a timeout that avoids a task timeout
 		long timeout = getConf().getInt("mapred.task.timeout", 10 * 60 * 1000) / timeoutDivisor;
@@ -496,27 +526,28 @@ public class WindFetcher extends Fetcher {
 			}
 			// remove长尾？
 			if (!feeder.isAlive() && !notifyEnded) {
-				if (bytesLastSec < 1024 * 1024 && pagesLastSec < 30 && fetchQueues.getQueueCount() >= 60) {
+				if (bytesLastSec < 1024 * 1024 && pagesLastSec < 40 && fetchQueues.getQueueCount() >= 80) {
 					if (++bandWatch > 60)
 						longTail();
 				} else
 					bandWatch = 0;
 
 				if (maxUrls >= 50000) {
-					if (fetchQueues.getQueueCount() < 90) {
+					if (fetchQueues.getQueueCount() < 80 && pagesLastSec < 40) {
 						longTail();
 					}
-				} else if (maxUrls >= 20000) {
-					if (fetchQueues.getQueueCount() < 60) {
+				} else if (maxUrls >= 10000) {
+					if (fetchQueues.getQueueCount() <= 60) {
 						longTail();
 					}
 				} else if (maxUrls >= 2000) {// 中
-					if (fetchQueues.getQueueCount() < 30) {
+					if (fetchQueues.getQueueCount() <= 40) {
 						longTail();
 					}
 				} else if (fetchQueues.getQueueCount() <= 10 && fetchQueues.getTotalSize() >= 100) {// 初期
 					longTail();
 				}
+
 			} else if (feeder.isAlive() && !notifyEnded) {
 				if (bytesLastSec < 1200 * 1024 && pagesLastSec < 40 && fetchQueues.getQueueCount() >= 100) {
 					if (++bandWatch > 60)
@@ -540,6 +571,7 @@ public class WindFetcher extends Fetcher {
 				break;
 			}
 		} while (activeThreads.get() > 0);
+
 		// hxx
 		if (!notifyEnded)
 			FetchNotify.notifyFetchMapEnd(getConf());
@@ -548,10 +580,17 @@ public class WindFetcher extends Fetcher {
 		} catch (Exception e) {
 			LOG.error(e.toString());
 		}
-		writeLast();
+		writeLast();// error again?
+		UrlFilters.closeFetchFailTable();
 	}
 
+	/*
+	 * 长尾数据清理，通知fetch结束
+	 */
 	protected void longTail() {
+		if (notifyEnded)
+			return;
+
 		notifyEnded = true;
 		int hitLongTail = fetchQueues.emptyQueues();
 		FetchNotify.notifyFetchMapEnd(getConf());
@@ -559,6 +598,9 @@ public class WindFetcher extends Fetcher {
 		reporter.incrCounter("MyFetcher", subMapId, maxUrls);
 	}
 
+	/*
+	 * 抓取数据收集到内存
+	 */
 	protected void batchCollect(Text key, NutchWritable writable) throws IOException {
 		FetcherData data = new FetcherData(key, writable);
 		Writable obj = writable.get();
@@ -569,28 +611,33 @@ public class WindFetcher extends Fetcher {
 		}
 	}
 
+	/*
+	 * 每隔3分钟就输出抓取数据
+	 */
 	protected void batchTimeWrite(long start) {
 		try {
 			Thread.sleep(10 * 1000);
 		} catch (InterruptedException e2) {
 		}
-		Random random = new Random();
-		while (activeThreads.get() >= 50) {
-			int tmpTime = 3 + random.nextInt(1);
+		int outInterval = getConf().getInt("fetcher.out.interval", 150000);
+
+		while (activeThreads.get() >= totalThread / 4) {
 			long now = System.currentTimeMillis();
-			if (now - start >= tmpTime * 60 * 1000) {
+			if (now - start >= outInterval) {
+				final String timePath = makePath();
+
 				Future task = executorService.submit(new Callable() {
 					public Object call() throws Exception {
-						return writeTimePath(makePath());
+						return writeTimePath(timePath);
 					}
 				});
 				try {
-					int size = (Integer) task.get(tmpTime, TimeUnit.MINUTES);
-					LOG.info(Thread.currentThread() + "阶段输出了记录 size=" + size);
-				} catch (Exception e) {
-					LOG.error(Thread.currentThread() + "阶段批量写入失败：" + e);
+					int size = (Integer) task.get(outInterval, TimeUnit.MILLISECONDS);
+					LOG.info(Thread.currentThread() + " " + timePath + "阶段输出了记录 size=" + size);
+				} catch (Throwable e) {
+					LOG.error(Thread.currentThread() + "阶段批量写入失败：path=" + timePath);
 					task.cancel(true);
-					// delOutput(timePath);有客户端检查
+					// delOutput(timePath);
 				} finally {
 				}
 				start = now;
@@ -602,51 +649,36 @@ public class WindFetcher extends Fetcher {
 		}
 	}
 
+	/*
+	 * 用时间创建目录
+	 */
 	private String makePath() {
 		Calendar now = Calendar.getInstance();
 		int minute = now.get(Calendar.MINUTE);
-		int ratio = minute / 3;
-		now.set(Calendar.MINUTE, ratio * 3 + 1);
+		now.set(Calendar.MINUTE, minute + 1);
 		now.set(Calendar.SECOND, 0);
 		now.set(Calendar.MILLISECOND, 0);
 		return sdf.format(now.getTime());
 	}
 
-	@Deprecated
-	protected void batchWrite(Text key, NutchWritable writable) throws IOException {
-		FetcherData data = new FetcherData(key, writable);
-		Writable obj = writable.get();
-		if (obj instanceof Content) {
-			fetchContent.add(data);
-		} else {
-			fetchDatum.add(data);
-		}
-		if (fetchContent.size() >= writeHold && writeToken.compareAndSet(false, true)) {
-			executorService.submit(new Runnable() {
-				@Override
-				public void run() {
-					writePath("" + (++pathIdx));
-				}
-			});
-		}
-	}
-
-	@Deprecated
-	private void writePath(String batchPath) {
-		TreeSet contentSet = new TreeSet();
-		TreeSet datumSet = new TreeSet();
-		int i = 0;
-		while (i++ < writeHold) {
-			contentSet.add(fetchContent.poll());
-			datumSet.add(fetchDatum.poll());
-		}
-
-		writeHdfs(contentSet, datumSet, batchPath);
-		writeToken.compareAndSet(true, false);
-	}
-
+	/*
+	 * 输出截止到当前时间的数据
+	 */
 	private int writeTimePath(String path) {
-		int size = fetchContent.size();
+		int size = fetchDatum.size();
+		if (size == 0) {
+			LOG.warn("writeTimePath:fetchDatum path=" + path + " 没有数据需要输出，有问题？");
+			return 0;
+		}
+		size = fetchContent.size();
+		if (size == 0) {
+			LOG.warn("writeTimePath:fetchContent path=" + path + " 没有数据需要输出，有问题？");
+			return 0;
+		}
+
+		if (size > writeHold)
+			size = Long.valueOf(writeHold).intValue();
+
 		TreeSet contentSet = new TreeSet();
 		TreeSet datumSet = new TreeSet();
 		int i = 0;
@@ -659,11 +691,25 @@ public class WindFetcher extends Fetcher {
 		return size;
 	}
 
+	/*
+	 * 最后剩余数据输出
+	 */
 	protected void writeLast() {
 		TreeSet contentSet = new TreeSet();
 		TreeSet datumSet = new TreeSet();
 		contentSet.addAll(fetchContent);
 		datumSet.addAll(fetchDatum);
+
+		int size = contentSet.size();
+		if (size == 0) {
+			LOG.warn("writeLast contentSet 没有数据需要输出，有问题？");
+			return;
+		}
+		size = datumSet.size();
+		if (size == 0) {
+			LOG.warn("writeLast datumSet 没有数据需要输出，有问题？");
+			return;
+		}
 
 		writeHdfs(contentSet, datumSet, "last");
 	}
@@ -697,13 +743,49 @@ public class WindFetcher extends Fetcher {
 			contentWrite.close();
 			path = new Path(contentPath);
 			fs.rename(path, new Path(path.toString() + WindParallelUtilHBase.oldSuffixName));
+
+			LOG.info("写dfs成功, path=" + contentPath);
 		} catch (Throwable e) {
-			delOutput(batchPath);
-			LOG.error("写dfs出错: " + e + " path=" + contentPath);// hadoop已经输出，不用再print
+			// delOutput(batchPath);
+			LOG.error("写dfs出错: path=" + contentPath, e);// hadoop已经输出，不用再print
 		}
-		LOG.info("写dfs结束 path=" + contentPath);
 	}
 
+	@Deprecated
+	protected void batchWrite(Text key, NutchWritable writable) throws IOException {
+		FetcherData data = new FetcherData(key, writable);
+		Writable obj = writable.get();
+		if (obj instanceof Content) {
+			fetchContent.add(data);
+		} else {
+			fetchDatum.add(data);
+		}
+		if (fetchContent.size() >= writeHold && writeToken.compareAndSet(false, true)) {
+			executorService.submit(new Runnable() {
+				@Override
+				public void run() {
+					writePath("" + (++pathIdx));
+				}
+			});
+		}
+	}
+
+	// 不再使用
+	@Deprecated
+	private void writePath(String batchPath) {
+		TreeSet contentSet = new TreeSet();
+		TreeSet datumSet = new TreeSet();
+		int i = 0;
+		while (i++ < writeHold) {
+			contentSet.add(fetchContent.poll());
+			datumSet.add(fetchDatum.poll());
+		}
+
+		writeHdfs(contentSet, datumSet, batchPath);
+		writeToken.compareAndSet(true, false);
+	}
+
+	@Deprecated
 	private void delOutput(String path) {
 		String contentPath = fetchOutDir + "/content/" + path + "/" + subMapId;
 		String datumPath = fetchOutDir + "/crawl_fetch/" + path + "/" + subMapId;

@@ -88,7 +88,9 @@ public class HbaseClient {
 			return;
 		}
 		for (int i = 0; i < args.length; i++) {
-			if ("--urlStatusStats".equals(args[i])) {
+			if ("--urlBatchDel".equals(args[i])) {
+				urlBatchDel(Integer.parseInt(args[++i]));
+			} else if ("--urlStatusStats".equals(args[i])) {
 				urlStatusStats(Integer.parseInt(args[++i]));
 			} else if ("--urlTopicCnt".equals(args[i])) {
 				urlTopicCnt();
@@ -129,10 +131,56 @@ public class HbaseClient {
 		System.out.println("useage: --method var");
 	}
 
+	public static void urlBatchDel(int status) throws Exception {
+		System.out.println("start deleteRows status=" + status);
+		// public static final byte STATUS_DB_GONE = 0x03;
+
+		HConnection connection = HConnectionManager.createConnection(conf);
+		for (int i = 1; i < 4; i++) {
+			HTableInterface table = connection.getTable(T_CRAWLDBPRE + i);
+			table.setAutoFlush(false, true);
+			table.setWriteBufferSize(500 * 100000);
+
+			Scan scan = new Scan();
+			scan.setCaching(100000);
+			List<Filter> filters = new ArrayList<Filter>();
+			Filter filter = new SingleColumnValueFilter(Bytes.toBytes("cf1"), Bytes.toBytes("Status"), CompareOp.EQUAL,
+					new byte[] { Bytes.toBytes(status)[3] });
+			filters.add(filter);
+			filter = new FirstKeyOnlyFilter();
+			filters.add(filter);
+
+			FilterList filterList = new FilterList(filters);
+			scan.setFilter(filterList);
+			ResultScanner rs = table.getScanner(scan);
+
+			long cnt = 0;
+			List<byte[]> keys = new ArrayList<byte[]>();
+			for (Result r : rs) {
+				keys.add(r.getRow());
+				if (++cnt % 100000 == 0) {
+					deleteRows(table, keys);
+					table.flushCommits();
+					keys.clear();
+
+					System.out.println("deleteRows current=" + cnt);
+				}
+			}
+			deleteRows(table, keys);
+			table.flushCommits();
+
+			System.out.println("deleteRows total=" + cnt);
+			rs.close();
+
+			table.close();
+			connection.close();
+		}
+	}
+
 	public static void urlStatusStats(int status) throws Exception {
 		// public static final byte STATUS_DB_GONE = 0x03;
+		HConnection connection = HConnectionManager.createConnection(conf);
 		for (int i = 1; i < 4; i++) {
-			HConnection connection = HConnectionManager.createConnection(conf);
 			HTableInterface table = connection.getTable(T_CRAWLDBPRE + i);
 
 			Scan scan = new Scan();
@@ -933,10 +981,10 @@ public class HbaseClient {
 	 * @param row
 	 *            rowkey
 	 * **/
-	public static void deleteRows(HTableInterface table, String rowkey[]) throws Exception {
+	public static void deleteRows(HTableInterface table, List<byte[]> rowkey) throws Exception {
 		List<Delete> list = new ArrayList<Delete>();
-		for (String k : rowkey) {
-			Delete del = new Delete(Bytes.toBytes(k));
+		for (byte[] key : rowkey) {
+			Delete del = new Delete(key);
 			list.add(del);
 		}
 		table.delete(list);// É¾³ý

@@ -1,4 +1,4 @@
-<?xml version="1.0"?>
+<?xml version="1.0" encoding="UTF-8"?>
 <?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
 
 <!-- Put site-specific property overrides in this file. -->
@@ -57,7 +57,6 @@
 	  <name>fetcher.max.exceptions.per.queue</name>
 	  <value>10</value>
 	</property>
-	
 	<property>
 		<name>generate.max.count</name>
 		<value>100</value>
@@ -74,30 +73,42 @@
 	-->
 	<property>
 		<name>plugin.includes</name>
-		<value>protocol-http|urlfilter-regex|parse-(html|tika)|htmlparsefilter-topical|index-(basic|anchor)|indexer-solr|scoring-topic|urlnormalizer-(regex|basic)
+		<value>protocol-http|urlfilter-prefix|urlfilter-regex|parse-(html|tika)|htmlparsefilter-topical|index-(basic|anchor)|indexer-solr|scoring-topic|urlnormalizer-(regex|basic)
 		</value>
 	</property>
 	<property>
 		<name>http.agent.name</name>
-		<value>nutch</value>
+		<value>Mozilla/5.0 (Windows NT 6.1; WOW64; rv:23.0) Gecko/20100101 Firefox/23.0</value>
 	</property>
-
+	<property>
+	  <name>http.agent.version</name>
+	  <value></value>
+	</property>
+	
 	<!-- db -->
 	<property>
 		<name>db.signature.class</name>
 		<value>org.apache.nutch.wind.TextProfileSignatureChinese</value>
 	</property>
-	<property>
-		<name>db.fetch.interval.default</name>
-		<value>604800</value>
-	</property>
+<!-- 	<property> -->
+<!-- 		<name>db.fetch.interval.default</name> -->
+<!-- 		<value>604800</value> -->
+<!-- 	</property> -->
 	<property>
 		<name>crawl.gen.delay</name>
 		<value>43200000</value>
+		<description>12 hours (ms). how long we should keep the lock on records 
+   in CrawlDb that were just selected for fetching.</description>
 	</property>
 	<property>
 		<name>db.max.outlinks.per.page</name>
 		<value>-1</value>
+	</property>
+	<property>
+	  <name>db.fetch.retry.max</name>
+	  <value>1</value>
+	  <description>The maximum number of times a url that has encountered
+	  recoverable errors is generated for fetch.</description>
 	</property>
 
 	<!-- generate -->
@@ -169,6 +180,11 @@
 		<value>UTF-8</value>
 	</property>
 	
+	<property>
+		<name>encodingdetector.charset.min.confidence</name>
+		<value>1</value>
+	</property>
+	
 	<!--增加网页抓取调度类配置-->
 	<property>
 	  <name>db.fetch.schedule.class</name>
@@ -184,7 +200,7 @@
 	<!-- generator 阀值 ，小于该值则不抓取。 -->
 	<property>
 	  <name>generator.less</name>
-	  <value>10000</value> 
+	  <value>5000</value> 
 	</property>
 	<property>
 	  <name>fetcher.out.interval</name>
