@@ -1,0 +1,104 @@
+crawl.gen.delay
+
+maxClientCnxns
+maxSessionTimeout
+
+dfs.socket.timeout | dfs.client.socket-timeout
+dfs.namenode.handler.count	
+dfs.datanode.handler.count	
+dfs.datanode.max.xcievers, dfs.datanode.max.transfer.threads	
+ha.failover-controller.cli-check.rpc-timeout.ms
+ipc.client.connect.timeout
+
+mapred.job.tracker.handler.count	
+mapred.reduce.parallel.copies
+mapred.task.timeout  
+io.sort.mb	
+tasktracker.http.threads	
+mapred.submit.replication
+mapred.tasktracker.map.tasks.maximum	
+mapred.userlog.retain.hours
+
+hbase.lease.recovery.dfs.timeout
+hbase.master.handler.count	
+hbase.regionserver.lease.period	
+hbase.regionserver.handler.count	
+Durability.ASYNC_WAL  = DEFERRED_LOG_FLUSH
+Algorithm.SNAPPY
+zookeeper.session.timeout
+hbase.rpc.timeout	
+hbase.hregion.max.filesize
+hbase.regionserver.codecs	=snappy
+
+
+JVM error code 143 means Internal field must be valid. This is discussed on the OTN discussion forums. However, 
+the conclusion seems to be something killed your process.I suspect this could indeed be caused by a user logging off.
+
+你只能修改系统的charset, 或者jvm的启动参数里加上 -Dfile.encoding="UTF-8" 来指定，你运行时 setProperty("file.encoding","ISO-8859-1"); 这样是没用的
+WARN org.apache.hadoop.ha.HealthMonitor: Transport-level exception trying to monitor health of NameNode at njhadoopmaster1.wind.com.cn/192.168.201.11:8022: Failed on local exception: java.io.IOException: Connection reset by peer; Host Details : local host is: "njhadoopmaster1.wind.com.cn/192.168.201.11"; destination host is: "njhadoopmaster1.wind.com.cn":8022; 
+org.apache.hadoop.hdfs.qjournal.protocol.JournalNotFormattedException: Journal Storage Directory /data/dfs/jn/journalhdfs1 not formatted
+chown -R hdfs:hdfs journalhdfs1/
+
+namenode自动切换会导致文件访问问题，job失败；
+
+http://tldp.org/LDP/abs/html/exitcodes.html
+-d64 -Xms2g -Xmx5g -Xmn1g -XX:MaxPermSize=512M -Dfile.encoding=UTF-8 -Duser.language=zh
+ -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled -XX:-UseGCOverheadLimit
+/usr/java/jdk1.6.0_31/bin/java -XX:OnOutOfMemoryError=kill -9 %p 
+-Xmx55g -Xmn18g -XX:+UseParNewGC -XX:+UseConcMarkSweepGC -XX:-CMSConcurrentMTEnabled -XX:CMSInitiatingOccupancyFraction=70 -XX:+CMSParallelRemarkEnabled
+常见问题5：为什么有服务器进程挂了？
+ regionserver发生abort的场景很多，除了系统bug引起的以外，线上遇到最多的就是fullgc引起的zk节点超时和文件系统异常。
+1、查看regionserver日志查询FATAL异常，确定异常类型
+2、查看gc日志确定是否发生fullgc或者ygc时间过长
+3、如果没有征兆，日志突然中断，首先需要考虑是否发生了OOM（0.94版本会直接kill -9）。
+4、可以通过系统内存监控判断是否出现被占满的情况
+5、查看datanode是否出现异常日志，regionserver可能由于roll log或者flush时的文件系统异常导致abort
+6、排除人为调用stop的情况
+/var/log/messages           lastlog  last
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.200553] java invoked oom-killer: gfp_mask=0xd0, order=1, oom_adj=0, oom_score_adj=0
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.433697] Out of memory: Kill process 29232 (java) score 163 or sacrifice child
+Sep 12 13:14:06 njhadoopslave5 kernel: [1969266.433727] Killed process 29232 (java) total-vm:13525144kB, anon-rss:10782300kB, file-rss:3024kB
+
+ant
+Warning:  modified in the future.
+测试的时候将系统时间往前调了下，完后忘记改回来了，就直接编辑现在的代码，使得修改的文件的修改时间比真实的时间晚，当现在日期正常的时候就会报哪个警告
+
+hadoop sequencefile 往同一目录里面写data、index，会在下面建个子目录写
+/content/201410111834/m_000001_0_0/m_000001_0
+
+遇到的一个问题：如果没有mos.close(), 程序运行中会出现异常：
+　　12/05/21 20:12:47 WARN hdfs.DFSClient: DataStreamer Exception:
+　　org.apache.hadoop.ipc.RemoteException:org.apache.hadoop.hdfs.server.namenode.LeaseExpiredException: No lease on
+　　/test/mosreduce/_temporary/_attempt_local_0001_r_000000_0/h-r-00000 File does not exist. [Lease. Holder: DFSClient_-352105532, pendingcreates: 5]
+
+java.io.IOException: Connection reset by peer        推测datanode节点存在内存瓶颈。
+原因：	常规数据交换量过大，导致通信故障datanode无法连接namenode
+	任务数据交换量过大，导致tasktracker与jobtracker通信故障
+解决：	1.增大带宽
+	2.配置机架感知脚本topology.script.file.name
+	3.关闭均衡器
+
+大并发写	
+org.apache.hadoop.io.retry.RetryInvocationHandler: A failover has occurred since the start of this method invocation attempt.
+Error Recovery for block blk_326610323152553165_1164644 in pipeline 10.95.198.22:60010, 10.95.198.21:60010, 10.95.198.11:60010: bad datanode 10.95.198.22:60010 
+//添加如下两句
+  config.set("dfs.socket.timeout","3600000");
+  config.set("dfs.datanode.socket.write.timeout","3600000");
+  <property>
+    <name>dfs.socket.timeout</name>
+    <value>900000</value>
+</property>
+
+同时，由于无法创建线程，RPC通信也会阻塞，
+org.apache.hadoop.io.retry.RetryInvocationHandler: Exception while invoking renewLease of class ClientNamenodeProtocolTranslatorPB. Trying to fail over immediately.
+ulimit -a   max user processes              (-u) 514824
+
+java.io.EOFException: Premature EOF: no length prefix available
+由于DataNode终止了block的传输，所以client会出现这种错误，导致client无法正常数据读写，查询NameNode和相应DataNode的错误日志即可发现错误原因。
+
+（1） dfs.namenode.handler.count或mapred.job.tracker.handler.count
+（2） dfs.datanode.handler.count
+
+
+同时开启N个线程抓取一个网站，相信很快就会被对方网站封掉；因此抓取的频率也很重要；抓取网站同时不对对方网站造成压力；在robot.txt协议里面定义Crawl-delay来确定抓取的频率也是一种网站的通用的做法，对于一般的抓取而言，10到20秒抓取一次是一个比较保险的频率，也有提出10*t的抓取间隔（t是download时间）比较合理
+

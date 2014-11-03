@@ -1,0 +1,313 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-cn">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta http-equiv="Content-Language" content="UTF-8" />
+<meta content="all" name="robots" />
+<meta name="author" content="linuxの飘扬" />
+<meta name="description" content="Power by www.linuxfly.org" />
+<meta name="keywords" content="dns,bind,linuxfly 飘扬 redflag emos linux" />
+<base href="http://www.linuxfly.org/" />
+<link rel="alternate" title="linuxの飘扬" href="feed.php" type="application/rss+xml" />
+<link rel="stylesheet" rev="stylesheet" href="template/meSimple/styles.css" type="text/css" media="all" />
+
+<title>[原]清除DNS 缓存记录 - linuxの飘扬 - Power by www.linuxfly.org</title>
+<script type="text/javascript" src="images/js/common.js?jsver=2.1.1.3626.3"></script>
+<link rel="EditURI" type="application/rsd+xml" title="RSD" href="http://www.linuxfly.org/inc/rsd.php" />
+<script type="text/javascript" src="lang/zh-cn/jslang.js?jsver=2.1.1.3626.3"></script>
+<script type="text/javascript" src="images/js/ajax.js?jsver=2.1.1.3626.3"></script>
+<script type="text/javascript" src="images/js/swfobject.js?jsver=2.1.1.3626.3"></script>
+<script type="text/javascript">
+//<![CDATA[
+var moreimagepath="template/meSimple/images";
+var shutajax=0;
+var absbaseurl='http://www.linuxfly.org/';
+//]]>
+</script>
+<link title="搜索 linuxの飘扬" rel="search"  type="application/opensearchdescription+xml"  href="http://www.linuxfly.org/inc/opensearch.php" />
+
+<link type="text/css" rel="stylesheet" href="images/css/SyntaxHighlighter.css" />
+
+</head>
+<body id="pagelocation-index">
+<div id="wrapper">
+	<div id="innerWrapper">
+		<div id="header">
+			<div id="innerHeader">
+				<div id="menu">
+					<ul>
+					<li><span id="nav_index" class="activepage"><a href="index.php" ><span id="navitem_index" class="activepageitem">首页</span></a></span></li>
+<li><span id="nav_feed"><a href="feed.php"  target="_blank"><span id="navitem_feed">RSS</span></a></span></li>
+<li><span id="nav_login"><a href="login.php" ><span id="navitem_login">登入</span></a></span></li>
+<li><span id="nav_login_3Fjob_3Dregister"><a href="login.php?job=register" ><span id="navitem_login_3Fjob_3Dregister">注册</span></a></span></li>
+<li><span id="nav_tag"><a href="tag.php" ><span id="navitem_tag">标签</span></a></span></li>
+<li><span id="nav_guestbook"><a href="guestbook.php" ><span id="navitem_guestbook">留言</span></a></span></li>
+<li><span id="nav_links"><a href="links.php" ><span id="navitem_links">链接</span></a></span></li>
+<li><span id="nav_javascript_3AshowHideSidebar_28_29_3B"><a href="javascript:showHideSidebar();" ><span id="navitem_javascript_3AshowHideSidebar_28_29_3B">边栏</span></a></span></li>
+<li><span id="nav_star"><a href="star.php" ><span id="navitem_star">星标日志</span></a></span></li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div id="mainWrapper">
+			<div id="content" class="content">
+				<div id="innerContent">
+					<div class="announce" style="display: none">
+						<div class="announce-content">
+						
+						</div>
+					</div>
+					<div class="article-top" style="display: none">
+						<div class="pages">
+							
+						</div>
+					</div>
+					<div class="article-top">
+	<div class="prev-article"><a href="post/542/" title="上一篇 [原]Apache中虚拟主机设置泛域名解析"><img src="template/meSimple/images/toolbar_previous.gif" alt='' border='0'/>[原]Apache中虚拟主机设置泛域名解析</a></div>
+	<div class="next-article"><a href="post/544/" title="下一篇 [原]打开Win7的telnet支持"><img src="template/meSimple/images/toolbar_next.gif" alt='' border='0'/>[原]打开Win7的telnet支持</a></div>
+</div>
+<div class="textbox">
+	<div class="textbox-calendar">
+	<span class="textbox-calendar-month">Aug</span>
+	<span class="textbox-calendar-day">20</span>
+	</div>
+	<div class="textbox-title">
+		<h4>
+		[原]清除DNS 缓存记录 <span id="starid543"><img src="template/meSimple/images/others/unstarred.gif" alt="" title="未加星标" border="0"/></span> <img src="images/weather/rainy.gif" alt="雨" title="雨"/> 
+		</h4>
+		<div class="textbox-label">
+		 <a href="user/1/" target="_blank">linuxing</a> , 17:40 , <a href="category/2/" title="查看分类： 基础知识">基础知识</a> &raquo; <a href="category/15/" title="查看分类： 故障处理">故障处理</a> , <a href="post/543/#reply" title="发表您的评论">评论(0)</a> , <a href='javascript: void(0);' title="查看引用地址" onclick='showhidediv("tb543");'>引用(0)</a> , <a href="post/543/">阅读(14599)</a> ,  Via 本站原创 <span class="text-label-indented"><img src="template/meSimple/images/toolbar_fontsize.gif" alt='' title="字体大小" border='0'/> <a href="javascript: doZoom(16);">大</a> | <a href="javascript: doZoom(14);">中</a> | <a href="javascript: doZoom(12);">小</a> <a href="feed.php?go=entry_543"><img src="template/meSimple/images/toolbar_rss.gif" alt='' title="订阅本文" border='0'/></a></span>
+		</div>
+	</div>
+	<div id="tb543" style="display: none;" class="textbox-tburl"><strong>引用功能被关闭了。</strong></div>
+	
+	<div class="textbox-content" id="zoomtext">
+	 	&nbsp;&nbsp;&nbsp;&nbsp;为了提高DNS 解析的记录，很多操作系统都会提供缓存DNS 记录的功能，但是，这可能会为测试DNS 服务或域名设定带来麻烦。为了测试出准确的结果，我们需要强制刷新本地 DNS 缓存记录。这里提供Windows 与 Linux 客户端上的操作说明。<a name="entrymore"></a><br/><br/><strong><span style="color: #4169E1;">一、Windows 客户端</span></strong><br/>Windows 2000以上系统，默认自动启动了DNS Client服务，该服务提供了客户端的名字解析与缓存服务，用户的DNS查询结果会在本地得到缓存。以下是该服务的描述：<br/><div class="quote"><div class="quote-title">引用</div><div class="quote-content">DNS 客户端服务(dnscache)缓存域名系统(DNS)名称并注册该计算机的完整计算机名称。如果该服务被停止，将继续解析 DNS 名称。然而，将不缓存 DNS 名称的查询结果，且不注册计算机名称。如果该服务被禁用，则任何明确依赖于它的服务都将无法启动。</div></div><br/>可以通过下面的命令获得缓存中的DNS 结果：<br/><br/><div class="code">ipconfig /displaydns</div><br/>而下面的命令可以强制清除这些DNS 缓存：<br/><br/><div class="code">ipconfig /flushdns</div><br/>如果您觉得DNS Client服务带来麻烦，可以用在控制面板——服务 中停止，或使用下面的命令停止该服务：<br/><br/><div class="code">net stop dnscache</div><br/>重新启动该服务：<br/><br/><div class="code">net start dnscache</div><br/><strong><span style="color: #4169E1;">二、Linux 客户端</span></strong><br/>以红旗Asianux 3.0 为例，同样提供一个叫nscd 的本地DNS 缓存的服务。但与Windows 平台不同的是，该服务默认是关闭的：<br/><div class="quote"><div class="quote-title">引用</div><div class="quote-content"># chkconfig --list&#124;grep nscd<br/>nscd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0:关闭&nbsp;&nbsp;1:关闭&nbsp;&nbsp;2:关闭&nbsp;&nbsp;3:关闭&nbsp;&nbsp;4:关闭&nbsp;&nbsp;5:关闭&nbsp;&nbsp;6:关闭</div></div><br/>该服务除了提供DNS 缓存外，可提供NIS 加速的作用。下面是nscd 的描述：<br/><div class="quote"><div class="quote-title">引用</div><div class="quote-content">Nscd caches name service lookups and can dramatically improve performance with NIS+, and may help with DNS as well.</div></div><br/>如果我们要激活本地DNS 缓存，启动该服务即可：<br/><br/><div class="code"># service nscd start</div><br/>同样的，关闭该服务，可以避免DNS 缓存带来的问题：<br/><div class="code"># service nscd stop</div><br/>需要注意的是，该服务没有提供强制删除其缓存结果的命令。但是，我们可以通过删除其后台数据库记录信息，清空这些缓存：<br/><br/><div class="code"># rm /var/db/nscd/hosts<br/># service nscd restart</div><br/><strong><span style="color: #4169E1;">三、Linux Bind 服务</span></strong><br/>有时候，我们的客户端是处于某台DNS 缓存服务器后面的。常见的情况是，作为NAT 网关的Linux 服务器，通过bind 服务，提供DNS 缓存和转发功能。这可通过配置/etc/named.conf，加入forward来实现：<br/><div class="quote"><div class="quote-title">引用</div><div class="quote-content">options &#123;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;directory "/var/named";<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dump-file "/var/named/data/cache_dump.db";<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;statistics-file "/var/named/data/named_stats.txt";<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forward only;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;forwarders &#123;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;202.96.128.86;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;202.96.134.133;<br/>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&#125;;<br/><br/>&#125;;</div></div><br/>这时，客户端对外的DNS 解析结果，除保留在客户端本地的DNS 缓存中，同样会保留在这台网关服务器上。还有一种情况就是，当我们修改named 提供的DNS服务时，也需要刷新缓存。<br/>bind 提供的rndc 命令可以清空缓存的功能：<br/><br/><div class="code"># rndc flush</div><!-- Added by RelatedTopic, plugin for Bo-Blog 2.0.0 --><div style='clear: both; text-align: left; margin-top: 12px; padding: 5px; margin-bottom: 15px;'><strong>相关日志</strong><br/><a href="post/123/">[原]注册1元的cn域名：www.linuxfly.cn</a><br/><a href="post/122/">[原]使用免费的DNS解析</a><br/></div><!-- RelatedTopic over --> 
+	</div>
+	<div class="textbox-bottom">
+	</div>
+	<div class="tags" style="display: block"> Tags:  <a href="tags/dns/" title="Tags:  dns" rel="tag">dns</a> , <a href="tags/bind/" title="Tags:  bind" rel="tag">bind</a>
+	</div>
+</div>
+<div id="commentWrapper" class="comment-wrapper">
+	<a name="topreply"></a>
+	<div id="addnew"></div>	<div class="comment-pages">
+	
+	</div>
+</div>
+	<a name="reply"></a>
+	<div id="commentForm">
+		<form name="visitorinput" id="visitorinput" method="post" action="javascript: ajax_submit('addreply');">
+		<table width="100%" border="0" align="center" cellpadding="4" cellspacing="1" class="formbox-comment">
+			<tr>
+				<td colspan="2" class="formbox-comment-title">发表评论</td>
+			</tr>
+			<tr>
+				<td class="formbox-comment-rowheader" width="140" valign="top">
+					<div class="panel-smilies">
+						<div class="panel-smilies-title">表情</div>
+							<div class="panel-smilies-content">
+								<a href="javascript: insertemot('anger');"><img src="images/emot/thumbnail/anger.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('bad');"><img src="images/emot/thumbnail/bad.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('cool');"><img src="images/emot/thumbnail/cool.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('cry');"><img src="images/emot/thumbnail/cry.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('dog');"><img src="images/emot/thumbnail/dog.gif" alt='emot' border='0'/></a><br/><a href="javascript: insertemot('envy');"><img src="images/emot/thumbnail/envy.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('fear');"><img src="images/emot/thumbnail/fear.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('grin');"><img src="images/emot/thumbnail/grin.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('kill');"><img src="images/emot/thumbnail/kill.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('love');"><img src="images/emot/thumbnail/love.gif" alt='emot' border='0'/></a><br/><a href="javascript: insertemot('pig');"><img src="images/emot/thumbnail/pig.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('puke');"><img src="images/emot/thumbnail/puke.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('question');"><img src="images/emot/thumbnail/question.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('shock');"><img src="images/emot/thumbnail/shock.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('shuai');"><img src="images/emot/thumbnail/shuai.gif" alt='emot' border='0'/></a><br/><a href="javascript: insertemot('shy');"><img src="images/emot/thumbnail/shy.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('sleepy');"><img src="images/emot/thumbnail/sleepy.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('smile');"><img src="images/emot/thumbnail/smile.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('smoke');"><img src="images/emot/thumbnail/smoke.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('stupid');"><img src="images/emot/thumbnail/stupid.gif" alt='emot' border='0'/></a><br/><a href="javascript: insertemot('sweat');"><img src="images/emot/thumbnail/sweat.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('thumbdown');"><img src="images/emot/thumbnail/thumbdown.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('unhappy');"><img src="images/emot/thumbnail/unhappy.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('uplook');"><img src="images/emot/thumbnail/uplook.gif" alt='emot' border='0'/></a><a href="javascript: insertemot('zan');"><img src="images/emot/thumbnail/zan.gif" alt='emot' border='0'/></a><br/>
+							</div>
+						</div>
+						<div style="text-align: left;">
+							<input name="stat_html" id="stat_html" type="checkbox" value="1" disabled='disabled' /> 打开HTML<br />
+							<input name="stat_ubb" id="stat_ubb" type="checkbox" value="1" checked='checked' /> 打开UBB<br />
+							<input name="stat_emot" id="stat_emot" type="checkbox" value="1" checked='checked' /> 打开表情<br />
+							<input name="stat_property" id="stat_property" type="checkbox" value="1" onclick="promptreppsw();"/> 隐藏
+							<br />
+							<input name="stat_rememberme" id="stat_rememberme" type="checkbox" value="1"  onclick="quickremember();"/>  记住我 
+						</div>
+				</td>
+				<td class="formbox-comment-content" valign="top">
+					<div style="padding-bottom:5px">
+					
+					昵称 <input name="v_replier" id="v_replier" type="text" size="12" class="text" value="" />&nbsp;
+					 密码 <input name="v_password" id="v_password" type="password" size="12" class="text"  value="" />&nbsp; 游客无需密码 
+					<br/>
+					网址 <input name="v_repurl" id="v_repurl" type="text" size="12" class="text" value="" />&nbsp;
+					电邮 <input name="v_repemail" id="v_repemail" type="text" size="12" class="text"  value="" />&nbsp; <a href="login.php?job=register" title="注册">[注册]</a>
+					</div>
+					<script type="text/javascript" src="editor/ubb/ubbeditor_tiny.js"></script><div style="margin: 4px 0px 4px 0px;"><img src="editor/ubb/images/bar.gif" alt=''/> &nbsp;<a href="javascript: bold();"><img border='0' title="粗体" src="editor/ubb/images/bold.gif" alt=''/></a> &nbsp;<a href="javascript: italicize();"><img border='0' title="斜体" src="editor/ubb/images/italic.gif" alt=''/></a> &nbsp;<a href="javascript: underline();"><img border='0' title="下划线" src="editor/ubb/images/underline.gif"  alt=''/></a> &nbsp;<img src="editor/ubb/images/bar.gif" alt=''/> &nbsp;<a href="javascript: image();"><img border='0' title="插入图片" src="editor/ubb/images/insertimage.gif" alt=''/></a> &nbsp;<a href="javascript: hyperlink();"><img border='0' title="插入超链接" src="editor/ubb/images/url.gif" alt=''/></a> &nbsp;<a href="javascript: email();"><img border='0' title="插入邮件地址" src="editor/ubb/images/email.gif"  alt=''/></a> &nbsp;<a href="javascript: quoteme();"><img border='0' title="插入引用文字" src="editor/ubb/images/quote.gif" alt=''/></a></div>
+					<script type="text/javascript">securitycodejs="验证码 <span id='securityimagearea'><img src='inc/securitycode.php?rand=3307' alt='' title='请输入验证码'/></span> <input name='v_security' id='v_security' type='text' size='4' maxlength='4' class='text' /> 不区分大小写   [<a href=\"javascript: refreshsecuritycode('securityimagearea', 'v_security');\">看不清？</a>]";</script>  
+					<textarea name="v_content" id="v_content" cols="44" rows="10" onkeydown="ctrlenterkey(event);" onfocus="if (securitycodejs!=null) {document.getElementById('showsecuritycode').innerHTML=securitycodejs; securitycodejs=null;}"></textarea> <br/>	<span id="showsecuritycode"></span>
+					<div style="padding-top:10px">
+					<input type="hidden" name="v_id" id="v_id" value="543" /><input type="hidden" name="v_reppsw" id="v_reppsw" value="" />
+						<input type="button" name="btnSubmit" id="btnSubmit" value="提交" class="button" onclick="ajax_submit('addreply'); return false;"/>&nbsp;
+						<input name="reset" id="reset" type="reset" value="重置" class="button" />
+					</div>
+				</td>
+			</tr>
+		</table>
+		</form>
+	</div>
+					<div class="article-bottom" style="display: none">
+						<div class="pages">
+							
+						</div>
+					</div>
+				</div>
+			</div>
+		<div id="sidebar" class="sidebar">
+			<div id="innerSidebar">
+				<div class="panel">
+<h5 onclick='showhidediv("sidebar_calendar");'>日历</h5>
+<div class="panel-content" id="sidebar_calendar" style="display: block">
+<table id="calendar" cellspacing="1" width="100%">
+<tbody><tr><td colspan="7" class="calendar-top">
+<a href="archiver/10/2013/" rel="noindex,nofollow">&lt;</a>
+<a href="archive.php" rel="noindex,nofollow"><span class="calendar-year">2014</span></a>
+<a href="archiver/10/2015/" rel="noindex,nofollow">&gt;</a>
+	&nbsp;&nbsp;
+<a href="archiver/9/2014/" rel="noindex,nofollow">&lt;</a>
+<a href="archiver/10/2014/" rel="noindex,nofollow"><span class="calendar-month">10</span></a>
+<a href="archiver/11/2014/" rel="noindex,nofollow">&gt;</a><br/>甲午年（马）
+</td></tr>
+<tr class="calendar-weekdays">
+	<td class="calendar-weekday-cell">日</td>
+	<td class="calendar-weekday-cell">一</td>
+	<td class="calendar-weekday-cell">二</td>
+	<td class="calendar-weekday-cell">三</td>
+	<td class="calendar-weekday-cell">四</td>
+	<td class="calendar-weekday-cell">五</td>
+	<td class="calendar-weekday-cell">六</td>
+</tr>
+<tr class="calendar-weekdays"><td class="calendar-sunday"><span title=''></span></td><td class="calendar-day"><span title=''></span></td><td class="calendar-day"><span title=''></span></td><td id="cal1" class="calendar-day"><span title='初八'>1</span></td><td id="cal2" class="calendar-day"><span title='初九'>2</span></td><td id="cal3" class="calendar-day"><span title='初十'>3</span></td><td id="cal4" class="calendar-saturday"><span title='十一'>4</span></td></tr><tr class="calendar-weekdays"><td id="cal5" class="calendar-sunday"><span title='十二'>5</span></td><td id="cal6" class="calendar-day"><span title='十三'>6</span></td><td id="cal7" class="calendar-day"><span title='十四'>7</span></td><td id="cal8" class="calendar-day"><span title='十五'>8</span></td><td id="cal9" class="calendar-day"><span title='十六'>9</span></td><td id="cal10" class="calendar-day"><span title='十七'>10</span></td><td id="cal11" class="calendar-saturday"><span title='十八'>11</span></td></tr><tr class="calendar-weekdays"><td id="cal12" class="calendar-sunday"><span title='十九'>12</span></td><td id="cal13" class="calendar-day"><span title='二十'>13</span></td><td id="cal14" class="calendar-day"><span title='廿一'>14</span></td><td id="cal15" class="calendar-day"><span title='廿二'>15</span></td><td id="cal16" class="calendar-day"><span title='廿三'>16</span></td><td id="cal17" class="calendar-day"><span title='廿四'>17</span></td><td id="cal18" class="calendar-saturday"><span title='廿五'>18</span></td></tr><tr class="calendar-weekdays"><td id="cal19" class="calendar-sunday"><span title='廿六'>19</span></td><td id="cal20" class="calendar-day"><span title='廿七'>20</span></td><td id="cal21" class="calendar-day"><span title='廿八'>21</span></td><td id="cal22" class="calendar-day"><span title='廿九'>22</span></td><td id="cal23" class="calendar-day"><span title='三十'>23</span></td><td id="cal24" class="calendar-day"><span title='闰九'>24</span></td><td id="cal25" class="calendar-saturday"><span title='初二'>25</span></td></tr><tr class="calendar-weekdays"><td id="cal26" class="calendar-sunday"><span title='初三'>26</span></td><td id="cal27" class="calendar-today"><span title='初四'>27</span></td><td id="cal28" class="calendar-day"><span title='初五'>28</span></td><td id="cal29" class="calendar-day"><span title='初六'>29</span></td><td id="cal30" class="calendar-day"><span title='初七'>30</span></td><td id="cal31" class="calendar-day"><span title='初八'>31</span></td><td class="calendar-saturday"><span title=''></span></td></tr>
+</tbody></table>
+</div>
+</div><div id='panelCategory' class="panel">
+<h5 style="cursor: pointer" onclick='showhidediv("sideblock_category");'>分类</h5>
+<div class="panel-content" id="sideblock_category" style="display: block">
+<ul><li><a href="category/2/" title="讲述基本的命令知识">基础知识</a> [0] <a href="feed.php?go=category_2"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/17/" title="大部分Linux发行版自带系统和应用命令的使用介绍">系统命令</a> [44] <a href="feed.php?go=category_17"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/19/" title="分析Linux性能状态、评估、调优">性能评估</a> [11] <a href="feed.php?go=category_19"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/15/" title="常见故障、Bug的处理">故障处理</a> [48] <a href="feed.php?go=category_15"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/27/" title="常见的硬件处理问题，例如连接磁盘柜、使用串口等。">硬件处理</a> [35] <a href="feed.php?go=category_27"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/18/" title="RPM及Linux发行版的制作介绍">RPM</a> [20] <a href="feed.php?go=category_18"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li><a href="category/1/" title="讲述与网络服务有关的知识点">网络服务</a> [0] <a href="feed.php?go=category_1"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/OpenStack/" title="OpenStack 相关研究">OpenStack</a> [4] <a href="feed.php?go=category_40"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/23/" title="高可用集群服务器的配置和使用">HA</a> [23] <a href="feed.php?go=category_23"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/16/" title="OpenVZ、Vmware、Xen等虚拟机的配置，以及创建模板">虚拟机</a> [35] <a href="feed.php?go=category_16"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/8/" title="介绍postfix、cryus等和邮件系统相关的配置和部署。">邮件系统</a> [16] <a href="feed.php?go=category_8"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/7/" title="包括putty、Openssh、vnc、Xwin32等远程管理软件的使用和介绍">远程管理</a> [14] <a href="feed.php?go=category_7"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/20/" title="VPN、iptables、rootkit等">安全相关</a> [40] <a href="feed.php?go=category_20"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/9/" title="讲述日志服务器、性能监控等知识">性能监控</a> [8] <a href="feed.php?go=category_9"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/26/" title="Web、proxy、FTP、NTP、iptables等">常见服务</a> [52] <a href="feed.php?go=category_26"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/24/" title="Websphere、Weblogic等商业软件的安装和使用">商业软件</a> [6] <a href="feed.php?go=category_24"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li><a href="category/3/" title="数据库安装、维护、应用">数据库</a> [0] <a href="feed.php?go=category_3"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/11/" title="关于Oracle单机版、集群的部署和调优">Oracle</a> [19] <a href="feed.php?go=category_11"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/10/" title="Mysql的安装、使用以及常见问题。">Mysql</a> [7] <a href="feed.php?go=category_10"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li><a href="category/4/" title="讲解Bash脚本、python、ASP等语言的原理和部分优秀脚本的例子">编程</a> [0] <a href="feed.php?go=category_4"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/38/" title="Android 平台开发相关">Android</a> [1] <a href="feed.php?go=category_38"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/14/" title="Linux上运行ASP">ASP</a> [4] <a href="feed.php?go=category_14"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/12/" title="Bash脚本">Bash</a> [13] <a href="feed.php?go=category_12"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/39/" title="C / C++ 语言相关">C/C++</a> [2] <a href="feed.php?go=category_39"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/36/" title="CSS相关内容">CSS</a> [2] <a href="feed.php?go=category_36"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/37/" title="Java 语言相关">Java</a> [8] <a href="feed.php?go=category_37"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/31/" title="归类JavaScript、DOM、Ajax等相关的资料">JavaScript</a> [34] <a href="feed.php?go=category_31"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/28/" title="Perl 脚本">Perl</a> [32] <a href="feed.php?go=category_28"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/35/" title="Php脚本相关内容">Php</a> [21] <a href="feed.php?go=category_35"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/13/" title="Python语言">Python</a> [6] <a href="feed.php?go=category_13"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/33/" title="HTML和XHTML的相关规范">(X)HTML</a> [13] <a href="feed.php?go=category_33"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/30/" title="一些脚本示例">示例</a> [13] <a href="feed.php?go=category_30"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li><a href="category/22/" title="others">其他</a> [0] <a href="feed.php?go=category_22"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/21/" title="不知道怎么分类的咚咚放这里吧">杂七杂八</a> [73] <a href="feed.php?go=category_21"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/5/" title="就是说说日常的咚咚">闲聊</a> [98] <a href="feed.php?go=category_5"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li class="indent"><a href="category/32/" title="电子书籍">Ebook</a> [4] <a href="feed.php?go=category_32"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li><li><a href="category/6/" title="描述Gentoo Linux的使用">Gentoo</a> [2] <a href="feed.php?go=category_6"><img src="template/meSimple/images/rss.png" border="0" alt="RSS" title="追踪这个分类的RSS" /></a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_GoogleAds");'>广告</h5>
+<div class="panel-content" id="sidebar_GoogleAds" style="display: block">
+<script type="text/javascript"><!--
+google_ad_client = "pub-6493950154813847";
+google_ad_width = 120;
+google_ad_height = 600;
+google_ad_format = "120x600_as";
+google_ad_type = "text_image";
+//2007-07-08: linuxfly.org
+google_ad_channel = "7550491816";
+google_color_border = "FFFFFF";
+google_color_bg = "FFFFFF";
+google_color_link = "78B749";
+google_color_text = "000000";
+google_color_url = "3D81EE";
+google_ui_features = "rc:6";
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_ads.js">
+</script>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_search");'>搜索</h5>
+<div class="panel-content" id="sidebar_search" style="display: block">
+	<form method="post" action="visit.php">
+	<input name="job" type="hidden" value="search"/>
+	<input name="keyword" class="search-field" type="text"/>
+	<select name="searchmethod"><option value="1">日志标题</option><option value="2">日志全文</option><option value="3">评论引用</option><option value="4">所有留言</option></select>
+	<input value="搜索" class="button" type="submit"/>
+	</form>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_statistics");'>统计</h5>
+<div class="panel-content" id="sidebar_statistics" style="display: block">
+访问次数 5184294<br/>今日访问 1576<br/>日志数量 704<br/><a href="view.php?go=comment">评论数量 478</a><br/><a href="view.php?go=tb">引用数量 1</a><br/><a href="guestbook.php">留言数量 82</a><br/><a href="view.php?go=userlist">注册用户 727</a><br/>在线人数 71<br/>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_GoogleSearch");'>全局搜索</h5>
+<div class="panel-content" id="sidebar_GoogleSearch" style="display: block">
+<script type="text/javascript"><!--
+  google_ad_client = "pub-6493950154813847";
+  google_ad_format = "configurable_sdo";
+  google_link_target = 2;
+  google_color_bg = "ffffff";
+  google_color_link = "000000";
+  google_color_text = "000000";
+  google_encoding = "UTF-8";
+  google_box_len = 23;
+  google_logo_pos = "above";
+  google_button_pos = "below";
+  google_ss_domains = "www.linuxfly.org";
+  google_ad_height = 120;
+  google_ad_width = 200;
+//-->
+</script>
+<script type="text/javascript"
+  src="http://pagead2.googlesyndication.com/pagead/show_sdo.js">
+</script>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_entries");'>最新日志</h5>
+<div class="panel-content" id="sidebar_entries" style="display: block">
+<ul><li class='rowcouple'><a href="post/720/" title="国产操作系统厂商中科红旗开始拍卖旗下资产">国产操作系统厂商中科红旗...</a></li><li class='rowodd'><a href="post/719/" title="测试OpenStack Icehouse Horizon（2） —— 创建网络">测试OpenStack ...</a></li><li class='rowcouple'><a href="post/718/" title="测试OpenStack Icehouse Horizon（1） —— 创建项目和用户">测试OpenStack ...</a></li><li class='rowodd'><a href="post/717/" title="使用RDO 安装OpenStack Icehouse">使用RDO 安装Open...</a></li><li class='rowcouple'><a href="post/716/" title="Excel 打印标题的设置区域为灰色">Excel 打印标题的设...</a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_allhotview");'>综合点击排行</h5>
+<div class="panel-content" id="sidebar_allhotview" style="display: block">
+<ul><li>[168149]<a href="post/290/">宋韶光2009年...</a></li><li>[116459]<a href="post/172/">[原]使用php...</a></li><li>[94731]<a href="post/588/">推荐一款基于云存...</a></li><li>[92150]<a href="post/205/">[原]EMOS ...</a></li><li>[89811]<a href="post/589/">[原]安装Ecl...</a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_RandArticle");'>随机日志</h5>
+<div class="panel-content" id="sidebar_RandArticle" style="display: block">
+<ul><li class="rowcouple"><a href="read.php?511" title="同时适用于IE 和 FireFox 的cursor">同时适用于IE 和 Fi...</a></li><li class="rowodd"><a href="read.php?675" title="[原]Apache 因SSL Library Certificate has expired 无法启动">[原]Apache 因S...</a></li><li class="rowcouple"><a href="read.php?159" title="[原]在linux上运行ASP ">[原]在linux上运行...</a></li><li class="rowodd"><a href="read.php?458" title="反万字">反万字</a></li><li class="rowcouple"><a href="read.php?287" title="[原]使用NAT为OpenVZ节省IP地址">[原]使用NAT为Ope...</a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_replies");'>最新评论</h5>
+<div class="panel-content" id="sidebar_replies" style="display: block">
+<ul><li class='rowcouple'><a href="post/641/#blogcomment6263" title="[www_elesos_com] - [原]Linux 下部署PPTP VPN -- 客户端">文章不错</a></li><li class='rowodd'><a href="post/659/#blogcomment6262" title="[增老师] - [原]红帽 Red Hat Linux相关产品iso镜像下载【迅雷快传】【更新7.0】">楼主不但是好人，一看就是...</a></li><li class='rowcouple'><a href="post/659/#blogcomment6261" title="[lgh] - [原]红帽 Red Hat Linux相关产品iso镜像下载【迅雷快传】【更新7.0】">感谢</a></li><li class='rowodd'><a href="post/659/#blogcomment6260" title="[刺客] - [原]红帽 Red Hat Linux相关产品iso镜像下载【迅雷快传】【更新7.0】">好人啊！在官网上点了半天...</a></li><li class='rowcouple'><a href="post/599/#blogcomment6259" title="[ejzhang] - [原]激活Windows下Apache的php_snmp 模块支持">MIBs文件可以到net...</a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_archive");'>归档</h5>
+<div class="panel-content" id="sidebar_archive" style="display: block">
+<ul><li><a href="archiver/10/2014/" rel="noindex,nofollow">2014/10</a></li>
+<li><a href="archiver/9/2014/" rel="noindex,nofollow">2014/09</a></li>
+<li><a href="archiver/8/2014/" rel="noindex,nofollow">2014/08</a></li>
+<li><a href="archiver/7/2014/" rel="noindex,nofollow">2014/07</a></li>
+<li><a href="archiver/6/2014/" rel="noindex,nofollow">2014/06</a></li></ul>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_misc");'>其他</h5>
+<div class="panel-content" id="sidebar_misc" style="display: block">
+<a href='login.php'>登入</a><br/><a href='login.php?job=register'>注册</a><br/><a href='login.php?job=applylink'>申请链接</a><br/>RSS： <a href='feed.php'>日志</a> | <a href='feed.php?go=comment'>评论</a><br/>编码：UTF-8<br/><a href="http://validator.w3.org/check?uri=referer" target="_blank">XHTML 1.0</a>
+</div>
+</div><div class="panel">
+<h5 onclick='showhidediv("sidebar_link");'>链接</h5>
+<div class="panel-content" id="sidebar_link" style="display: block">
+<ul><li><strong>默认链接组</strong></li><li class="indent"><a href="http://www.linuxfly.cn" target="_blank" title="园软门户 - Linux技巧、视频、图片门户">园软门户</a></li><li class="indent"><a href="http://www.cnbeta.com/" target="_blank" title="cnBeta.com - 中文业界资讯站">cnBeta.com</a></li><li class="indent"><a href="http://manage.linuxfly.org/awstats/awstats.pl?config=www.linuxfly.org" target="_blank" title="登陆日志 - ">登陆日志</a></li><li class="indent"><a href="https://www.google.com/bookmarks/?hl=zh-CN" target="_blank" title="Google Bookmarks - ">Google Bookmarks</a></li><li class="indent"><a href="http://www.price.com.hk/" target="_blank" title="香港格價網 - 香港数码产品价格对比网站，到香港购买水货可以先上去看看。">香港格價網</a></li><li><strong>参考资料</strong></li><li class="indent"><a href="https://developer.mozilla.org/En" target="_blank" title=" Mozilla Developer Network - "> Mozilla Developer Network</a></li><li class="indent"><a href="http://manual.phpv.net/zh/index.php" target="_blank" title="PHP Manual - ">PHP Manual</a></li><li class="indent"><a href="http://book.cakephp.org/cn" target="_blank" title="CakePHP手册 - ">CakePHP手册</a></li><li class="indent"><a href="http://api.jquery.com/" target="_blank" title="jQuery API - ">jQuery API</a></li><li class="indent"><a href="http://hyperpolyglot.org/scripting" target="_blank" title="Interpreted Languages - Perl, PHP, Python, Ruby 对比">Interpreted Languages</a></li><li><strong>技术网站</strong></li><li class="indent"><a href="http://www.freegroup.org/" target="_blank" title="免费资源网络社群 - 台灣最大的免費資源蒐集網站，提供完整的免費資源介紹。">免费资源网络社群</a></li><li class="indent"><a href="http://www.howtoforge.com/" target="_blank" title="HowtoForge - HowtoForge provides user-friendly Linux tutorials about almost every topic.">HowtoForge</a></li><li class="indent"><a href="http://www.linuxtone.org/" target="_blank" title="IT运维专家论坛 - 欢迎到IT运维专家网提问交流,我们将第一时刻为你解答！同时也希望站内朋友多多分享自己的心得，加强社区互动建设！建立最好的讨论平台！技术源于积累，源于分享！感谢你能分享！">IT运维专家论坛</a></li><li class="indent"><a href="http://blog.s135.com/" target="_blank" title="回忆未来[张宴] - 新浪播客-系统工程师">回忆未来[张宴]</a></li><li class="indent"><a href="http://www.dbanotes.net/" target="_blank" title="DBA notes - SELECT blog FROM Fenng.Thought WHERE subjects IN (&#039;ORACLE&#039;, &#039;Web Arch&#039;, &#039;UNIX&#039;, &#039;Web 2.0&#039;, &#039;OPENSOURCE&#039;) ;&nbsp;&nbsp;">DBA notes</a></li><li class="indent"><a href="http://www.freebsdchina.org/" target="_blank" title="FreeBSD China - FreeBSD China 中文论坛">FreeBSD China</a></li><li class="indent"><a href="http://tech.idv2.com/" target="_blank" title="idv2.com - 这里是charlee的个人技术Blog，关注Web开发，关注网页设计。在这里你可以找到有关Linux、 Apache、PHP、HTML、CSS、Photoshop的使用经验和开发技巧，更有国内鲜有人使用的Perl语言的相关内容。">idv2.com</a></li><li class="indent"><a href="http://blog.redzone.com.cn/index.php" target="_blank" title="疯狂老头 BLOG - ">疯狂老头 BLOG</a></li><li class="indent"><a href="http://www.linuxmail.info/" target="_blank" title="LinuxMail.Info - Linux Mail Server Setup and Howto Guide">LinuxMail.Info</a></li><li class="indent"><a href="http://www.cyberciti.biz/" target="_blank" title="Nixcraft - Linux and Open Source Software Blog by Vivek">Nixcraft</a></li><li class="indent"><a href="http://www.alidba.net/" target="_blank" title="Alibaba DBA Team - 这里记录着阿里巴巴数据库团队成员的点点滴滴">Alibaba DBA Team</a></li><li class="indent"><a href="http://blog.bingo929.com/index.php" target="_blank" title="彬Go - 关注前端开发/网页设计/网站可用性/用户体验">彬Go</a></li><li class="indent"><a href="http://www.fwolf.com/" target="_blank" title="Fwolf’s Blog - 随心·随意·随缘·努力">Fwolf’s Blog</a></li><li><strong>友情链接</strong></li><li class="indent"><a href="http://rachel.xplore.cn/" target="_blank" title="红旗漫卷 - ">红旗漫卷</a></li><li class="indent"><a href="http://www.guimod.com/blog/" target="_blank" title="Exceeder - ">Exceeder</a></li><li class="indent"><a href="http://www.ipedia.org.cn/" target="_blank" title="爱百科 - 爱百科,可信赖的中文百科全书">爱百科</a></li><li class="indent"><a href="http://badb0y.cublog.cn" target="_blank" title="badb0y&#039;s blog - Linux 技术交流">badb0y&#039;s blog</a></li><li class="indent"><a href="http://jackywdx.cn" target="_blank" title="鸭嘴的博客 - 关注LAMP技术">鸭嘴的博客</a></li><li class="indent"><a href="http://www.icnote.com/" target="_blank" title="博爱老头的草屋 - 博爱老头的草屋">博爱老头的草屋</a></li><li class="indent"><a href="http://selboo.com.cn" target="_blank" title="Selboo&#039;s Blog - ">Selboo&#039;s Blog</a></li><li class="indent"><a href="http://www.fengyeji.com" target="_blank" title="枫叶集 - ">枫叶集</a></li><li class="indent"><a href="http://www.php-oa.com" target="_blank" title="扶凯 - 一个普通的linux,ubuntu,perl爱好者">扶凯</a></li><li class="indent"><a href="http://www.helpphp.cn/" target="_blank" title="康盛博客 - ">康盛博客</a></li><li class="indent"><a href="http://www.ppurl.com/" target="_blank" title="皮皮书屋 - ">皮皮书屋</a></li><li class="indent"><a href="http://meridian.dyndns.org/" target="_blank" title="meridian - ">meridian</a></li><li class="indent"><a href="http://blog.wxd5981.com" target="_blank" title="wxd5981 - ">wxd5981</a></li></ul>
+</div>
+</div>
+			</div>
+		</div>
+	</div>
+		<div id="footer">
+			<div id="innerFooter">
+
+				<!-- 使用本模板请遵守共同创作公约，尊重作者版权，在本作品下衍生和分享需要保留或注明出处和作者链接。-->
+				Copyright © 2005-2008 迷·拾壹月 All rights reserved. | Template By <a href="http://www.menov.net" target="_blank">Eiker</a> |  Powered by <a href="http://www.bo-blog.com" target="_blank">Bo-Blog 2.1.1 Release</a><span id="footer-security"><a href="http://www.cnbct.org" target="_blank" title="Code detection by Bug.Center.Team"><img src="images/others/detect.gif" alt="Code detection by Bug.Center.Team" border="0" /></a></span><span id="nav_http_3A_2F_2Fwww.miibeian.gov.cn"><a href="http://www.miibeian.gov.cn"  target="_blank"><span id="navitem_http_3A_2F_2Fwww.miibeian.gov.cn"><br/>粤ICP备09022853号</span></a></span><script type="text/javascript" src="images/hl/shCore.js"></script>
+<script type="text/javascript" src="images/hl/shBrushPhp.js"></script>
+<script type="text/javascript" src="images/hl/shBrushJScript.js"></script>
+<script type="text/javascript" src="images/hl/shBrushJava.js"></script>
+<script type="text/javascript" src="images/hl/shBrushSql.js"></script>
+<script type="text/javascript" src="images/hl/shBrushXml.js"></script>
+<script type="text/javascript" src="images/hl/shBrushCss.js"></script>
+<script type="text/javascript" src="images/hl/shBrushCpp.js"></script>
+<script type="text/javascript" src="images/hl/shBrushPython.js"></script>
+<script type="text/javascript" src="images/hl/shBrushBash.js"></script>
+<script class="javascript">dp.SyntaxHighlighter.HighlightAll('code');</script>
+				
+			<div id="processtime"><span class='runtimedisplay'>Run in 50 ms, 11 Queries, Gzip enabled.</span>
+			</div>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+loadSidebar();
+</script>
+</body>
+</html>

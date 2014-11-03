@@ -49,7 +49,8 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.util.EntityUtils;
 import org.apache.nutch.crawl.CrawlDatum;
-import org.test.hbase.ShortUrlGenerator.IDShorter;
+import org.test.utils.ShortUrlGenerator;
+import org.test.utils.ShortUrlGenerator.IDShorter;
 
 public class HbaseClient98 {
 	public static Configuration conf = HBaseConfiguration.create();

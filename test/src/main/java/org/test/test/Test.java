@@ -11,13 +11,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
-import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.nutch.crawl.CrawlDatum;
+import org.apache.commons.lang.StringUtils;
 
 public class Test {
 	private static Lock dbLock = new ReentrantLock();
 
 	public static void main(String[] args) throws Exception {
+		System.out.println(StringUtils.isAlphanumeric("*&^%"));
+		System.out.println(StringUtils.isAlphanumeric("非常的硬"));
+		System.out.println(StringUtils.isAsciiPrintable("非常的硬"));
+
 		// String a = "";
 		// a += "dd";
 		// System.out.println(a);
@@ -30,7 +33,7 @@ public class Test {
 		// String a = "attempt_201408261602_0068_m_000001_0".substring(26);
 		// System.out.println(a.substring(0, a.length() - 2));
 
-		System.out.println(Bytes.toBytes(3)[3] == CrawlDatum.STATUS_DB_GONE);
+		// System.out.println(Bytes.toBytes(3)[3] == CrawlDatum.STATUS_DB_GONE);
 		// Calendar calendar = Calendar.getInstance();
 		// calendar.set(2014, 9, 1, 0, 0, 0);
 		// long start = calendar.getTimeInMillis();

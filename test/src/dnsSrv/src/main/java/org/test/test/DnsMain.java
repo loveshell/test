@@ -2,12 +2,17 @@ package org.test.test;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.URI;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -19,6 +24,7 @@ import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.PosixParser;
+import org.apache.commons.lang.CharUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -33,24 +39,13 @@ import org.apache.hadoop.hbase.filter.ColumnPrefixFilter;
 import org.apache.hadoop.hbase.filter.Filter;
 import org.apache.hadoop.hbase.filter.FilterList;
 import org.apache.hadoop.hbase.util.Bytes;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.utils.URIUtils;
-import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.params.CoreConnectionPNames;
-import org.apache.http.util.EntityUtils;
 import org.eclipse.jetty.server.Connector;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
 import org.eclipse.jetty.servlet.ServletContextHandler;
 import org.eclipse.jetty.servlet.ServletHolder;
-import org.eclipse.jetty.util.thread.QueuedThreadPool;
+
+import com.google.common.util.concurrent.ThreadFactoryBuilder;
 
 /**
  * Main application class for Hush - The HBase URL Shortener.
@@ -134,64 +129,192 @@ public class DnsMain {
 	}
 
 	public static class DnsServ extends HttpServlet {
-		/**
-		 * 
-		 */
+
 		private static final long serialVersionUID = -2605999282979633805L;
-		private Map dns = new HashMap();
+
+		private Map dns;
+		private Map unknownHosts;
+		private Map querying;
+
+		private LinkedBlockingQueue queryQueue = new LinkedBlockingQueue(100000);
+		private static int queryConcurrent = 3;
+		private final static String ipPend = ".";
+		private final static String ipUnknown = "u";
+		// 限制线程并发数
+		private ExecutorService executorService = Executors.newFixedThreadPool(queryConcurrent,
+				new ThreadFactoryBuilder().setNameFormat("dns query-%d").setDaemon(true).build());
 
 		@Override
 		public void init() throws ServletException {
 			java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+			// java.security.Security.setProperty("networkaddress.cache.negative.ttl",
+			// "60");// second
 
 			loadIPs();
+
+			startQueryThread();
 
 			super.init();
 		}
 
 		@Override
 		public void destroy() {
+			executorService.shutdown();
 			super.destroy();
+		}
+
+		private static boolean isLegalHost(String host) {
+			if (StringUtils.isEmpty(host))
+				return false;
+			if (host.length() > 60)
+				return false;
+			if (host.startsWith(".") || host.startsWith("-"))
+				return false;
+
+			host = host.replaceAll("-", "");
+			host = host.replaceAll("\\.", "");
+			if (!isAsciiAlphanumeric(host))
+				return false;
+
+			return true;
+		}
+
+		private static boolean isAsciiAlphanumeric(String str) {
+			if (StringUtils.isEmpty(str)) {
+				return false;
+			}
+			int sz = str.length();
+			for (int i = 0; i < sz; i++) {
+				if (CharUtils.isAsciiAlphanumeric(str.charAt(i)) == false) {
+					return false;
+				}
+			}
+			return true;
 		}
 
 		@Override
 		protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 			String host = req.getParameter("host");
-			if (StringUtils.isEmpty(host)) {
-				// resp.getWriter().print();
-				// resp.flushBuffer();
+			if (!isLegalHost(host)) {
+				LOG.error("from=" + req.getRemoteAddr() + "errHost=" + host);
 				return;
 			}
 
 			String action = req.getParameter("action");
 			if ("reload".equals(action)) {
-				resp.getWriter().print("old size=" + dns.size() + " reloading...");
+				resp.getWriter().println("old size=" + dns.size() + " reloading...");
 				resp.flushBuffer();
 
 				loadIPs();
 
-				resp.getWriter().print("new size=" + dns.size());
+				resp.getWriter().println("new size=" + dns.size());
 				resp.flushBuffer();
+				return;
+			} else if ("count".equals(action)) {
+				resp.getWriter().println("dns=" + dns.size());
+				resp.getWriter().println("unknownHosts=" + unknownHosts.size());
+				resp.getWriter().println("querying=" + querying.size());
+				resp.flushBuffer();
+				return;
+			} else if ("cleanUnknown".equals(action)) {// 清理 unknownhost缓存
+				resp.getWriter().println("unknownHosts=" + unknownHosts.size());
+				resp.flushBuffer();
+				unknownHosts = new HashMap(1000000);
 				return;
 			}
 
 			try {
-				String ip = null;
-				if (dns.containsKey(host))
-					ip = (String) dns.get(host);
-				else {
-					ip = InetAddress.getByName(host).getHostAddress();
-					dns.put(host, ip);
-				}
+				if (dns.containsKey(host)) {
+					resp.getWriter().print(dns.get(host));
+					resp.flushBuffer();
+					return;
+				} else if (unknownHosts.containsKey(host)) {
+					resp.getWriter().print(ipUnknown);
+					resp.flushBuffer();
+					return;
+				} else {// 直接返回，查找
+					queryQueue.add(host);// doing
 
-				resp.getWriter().print(ip);
-				resp.flushBuffer();
+					resp.getWriter().print(ipPend);// 不确定
+					resp.flushBuffer();
+					return;
+				}
 			} catch (Exception e) {
-				LOG.error(host + " " + e);
+				LOG.error("from=" + e.toString());
+
+				resp.getWriter().print(ipPend);
+				resp.flushBuffer();
+				return;
+			}
+		}
+
+		/**
+		 * 查询入口，控制同host只能查一次
+		 */
+		private void startQueryThread() {
+			Thread t = new Thread() {
+				public void run() {
+					Thread.currentThread().setName("dnsQuery");
+					LOG.info(Thread.currentThread() + ": 线程启动");
+					while (true) {
+						try {
+							if (queryQueue.isEmpty()) {
+								Thread.sleep(1000);
+							} else {
+								Set set = new HashSet();
+								// 保证这批次host唯一
+								queryQueue.drainTo(set);
+
+								for (Object object : set) {
+									String host = (String) object;
+									// 注意先后，不会有多线程问题
+									// 上批次的用querying控制
+									if (!(querying.containsKey(host) || dns.containsKey(host) || unknownHosts
+											.containsKey(host))) {
+										querying.put(host, null);
+										dnsQuery(host);
+									}
+								}
+
+								Thread.sleep(2000);
+							}
+						} catch (Exception e) {
+							LOG.error(e.toString());
+						}
+					}
+				}
+			};
+			t.setDaemon(true);
+			t.start();
+		}
+
+		private void dnsQuery(final String host) {
+			try {
+				executorService.submit(new Runnable() {
+					public void run() {
+						String ip;
+						try {
+							ip = InetAddress.getByName(host).getHostAddress();
+							dns.put(host, ip);
+							querying.remove(host);// 注意先后，不会有多线程问题
+						} catch (UnknownHostException e) {
+							unknownHosts.put(host, null);
+							querying.remove(host);
+
+							LOG.error(e.toString());
+						}
+					}
+				});
+			} catch (Exception e) {
+				LOG.error(e.toString());
 			}
 		}
 
 		private void loadIPs() {
+			dns = new HashMap(100000000);// 无需并发
+			unknownHosts = new HashMap(1000000);
+			querying = new HashMap(100000);
+
 			try {
 				int statsCommit = 500000;
 
@@ -227,105 +350,9 @@ public class DnsMain {
 				connection.close();
 			} catch (Exception e) {
 				e.printStackTrace();
-			}
-		}
-
-		public static void main(String[] args) throws Exception {
-
-		}
-
-	}
-
-	public static class JettyTest {
-		public static void main(String[] args) throws Exception {
-			HttpClient httpClient = new DefaultHttpClient();
-			httpClient.getParams().setParameter(CoreConnectionPNames.CONNECTION_TIMEOUT, 10000);
-			httpClient.getParams().setParameter(CoreConnectionPNames.SO_TIMEOUT, 15000);
-			HttpGet httpget = new HttpGet();// Get请求
-			List<NameValuePair> qparams = new ArrayList<NameValuePair>();// 设置参数
-			qparams.add(new BasicNameValuePair("cnt", "10"));
-
-			try {
-				URI uri = URIUtils.createURI("http", "localhost", 8080, "/", URLEncodedUtils.format(qparams, "UTF-8"),
-						null);
-				httpget.setURI(uri);
-				// 发送请求
-				HttpResponse httpresponse = httpClient.execute(httpget);
-				// 获取返回数据
-				HttpEntity entity = httpresponse.getEntity();
-				String value = EntityUtils.toString(entity);
-				System.out.println(value);
-				EntityUtils.consume(entity);
-			} catch (Exception e) {
-				e.printStackTrace();
 			} finally {
-				httpClient.getConnectionManager().shutdown();
+				//
 			}
-		}
-
-		public static void main1(String[] args) throws Exception {
-			Server server = new Server(8080);
-
-			ServletContextHandler context0 = new ServletContextHandler(ServletContextHandler.SESSIONS);
-			context0.setContextPath("/ctx0");
-			// context0.addServlet(new ServletHolder(new HelloServlet()), "/*");
-			// context0.addServlet(new ServletHolder(new
-			// HelloServlet("buongiorno")), "/it/*");
-			// context0.addServlet(new ServletHolder(new
-			// HelloServlet("bonjour le Monde")), "/fr/*");
-
-			// WebAppContext webapp = new WebAppContext();
-			// String jetty_home = System.getProperty("jetty.home",
-			// "F:\\book\\开源项目\\jetty-hightide-8.1.6.v20120903\\jetty-hightide-8.1.6.v20120903");
-			// webapp.setContextPath("/ctx1");
-			// webapp.setWar(jetty_home + "/webapps/test.war");
-			// SecurityHandler securityHandler = new
-			// ConstraintSecurityHandler();
-			// HashLoginService loginService = new HashLoginService();
-			// loginService.setName("Realm");
-			// securityHandler.setLoginService(loginService);
-			// webapp.setSecurityHandler(securityHandler);
-
-			// ContextHandlerCollection contexts = new
-			// ContextHandlerCollection();
-			// contexts.setHandlers(new Handler[] { context0, webapp });
-
-			// server.setHandler(contexts);
-
-			server.start();
-			server.join();
-
-		}
-
-		public static void main2(String[] args) throws Exception {
-			Server server = new Server();
-			SelectChannelConnector connector0 = new SelectChannelConnector();
-			connector0.setPort(8080);
-			connector0.setMaxIdleTime(30000);
-			connector0.setRequestHeaderSize(8192);
-
-			SelectChannelConnector connector1 = new SelectChannelConnector();
-			connector1.setHost("127.0.0.1");
-			connector1.setPort(8888);
-			connector1.setThreadPool(new QueuedThreadPool(20));
-			connector1.setName("/admin");
-
-			SslSelectChannelConnector ssl_connector = new SslSelectChannelConnector();
-			String jetty_home = System.getProperty("jetty.home",
-					"F:\\book\\开源项目\\jetty-hightide-8.1.6.v20120903\\jetty-hightide-8.1.6.v20120903");
-			System.setProperty("jetty.home", jetty_home);
-			ssl_connector.setPort(8443);
-			org.eclipse.jetty.util.ssl.SslContextFactory cf = ssl_connector.getSslContextFactory();
-			cf.setKeyStorePath(jetty_home + "/etc/keystore");
-			cf.setKeyStorePassword("OBF:1vny1zlo1x8e1vnw1vn61x8g1zlu1vn4");
-			cf.setKeyManagerPassword("OBF:1u2u1wml1z7s1z7a1wnl1u2g");
-
-			server.setConnectors(new Connector[] { connector0, connector1, ssl_connector });
-
-			// server.setHandler(new HelloHandler());
-
-			server.start();
-			server.join();
 		}
 	}
 }

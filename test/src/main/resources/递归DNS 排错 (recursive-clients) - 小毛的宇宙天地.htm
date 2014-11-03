@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>递归DNS 排错 (recursive-clients) - 小毛的宇宙天地</title>
+  <meta name="author" content="xiaomao" />
+  
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True" />
+  <meta name="MobileOptimized" content="320" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  
+  <link rel="canonical" href="/post/40/dns-trouble-shooting/" />
+  <link href="/feed/" rel="alternate" title="小毛的宇宙天地" type="application/atom+xml" />
+  <link href="/favicon.ico" rel="shortcut icon" />
+  <link href="/static/css/screen.css?2" media="screen, projection" rel="stylesheet" type="text/css" />
+  <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+  <script src="/static/js/main.js"></script>
+  
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-28119708-1']);
+      _gaq.push(['_trackPageview']);
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  
+</head>
+<body>
+  <header>
+	<hgroup>
+	  <h1><a href="/">小毛的宇宙天地</a></h1>
+	  
+		<h2>多维空间</h2>
+	  
+	</hgroup>
+  </header>
+  <nav role=navigation>
+	<ul role=subscription data-subscription="rss">
+	  <li><a href="/feed/" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+	</ul>
+	<form action="http://www.google.com/cse" method="get">
+	  <fieldset role="site-search">
+		<input type="hidden" name="cx" value="">
+		<input class="search" type="search" name="q" placeholder="Search" />
+	  </fieldset>
+	</form>
+	<ul role=main-navigation>
+	  <li><a href="/">Blog</a></li>
+	  <li><a href="/archives/">Archives</a></li>
+	  
+	  
+		
+		  <li><a href="/about-me/">About Me</a></li>
+		
+	</ul>
+  </nav>
+  <div id="main">
+    <div id="content">
+      
+<div>
+<article>
+  
+  <header>
+    <h1 class="entry-title">递归DNS 排错 (recursive-clients)</h1>
+    <p class="meta"><time datetime="2014-05-09 15:06:26 +0800" pubdate>2014/05/09 15:06:26</time></p>
+  </header>
+  
+  <p>
+	<strong>业务反馈个别DNS客户端偶尔的或频繁的解析无响应</strong> 
+</p>
+<ol>
+	<li>
+		<span style="line-height:1.5;">现象反馈</span> 
+	</li>
+</ol>
+<span style="line-height:1.5;"> 
+<ul>
+	<li>
+		<span style="line-height:1.5;">网络层面
+<pre class="prettyprint lang-py">ubuntu@ubuntu:~#ping baidu.com
+ping: unknown host baidu.com</pre>
+</span> 
+	</li>
+	<li>
+		<span style="line-height:1.5;">业务层面
+<pre class="prettyprint lang-py">IOError: [Errno socket error] [Errno -2] Name or service not known</pre>
+</span> 
+	</li>
+	<li>
+		<span style="line-height:1.5;">出现时间及频率随机性,改用公网DNS服务器不会出现问题<br />
+</span> 
+	</li>
+</ul>
+</span><span style="line-height:1.5;"> 
+<p>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 2. 排查思路
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">客户端</span> 
+	</li>
+	<ul>
+		<li>
+			配置OK
+		</li>
+		<li>
+			测试(dig)确实会偶尔出现问题
+		</li>
+		<li>
+			更换为公网DNS服务器,未出现问题
+		</li>
+	</ul>
+	<li>
+		<span style="line-height:1.5;">其它主</span><span style="line-height:1.5;">机是否有类似问题</span> 
+	</li>
+	<ul>
+		<li>
+			<span style="line-height:1.5;">随机抽查机器,同样存在此问题</span> 
+		</li>
+		<li>
+			<span style="line-height:1.5;">未收到其它业务部门的主动反馈:可能业务层面做了容错处理、可能业务大并发情况下错误的认为了这是正常现象... ...</span> 
+		</li>
+	</ul>
+	<li>
+		<span style="line-height:1.5;">基本肯定</span><span style="line-height:1.5;"></span> 
+	</li>
+	<ul>
+		<li>
+			<span style="line-height:1.5;">服务器端问题</span> 
+		</li>
+	</ul>
+	<li>
+		<span style="line-height:1.5;">增加日志级别</span><span style="line-height:1.5;"></span> 
+	</li>
+	<ul>
+		<li>
+			<span style="line-height:1.5;">记录warning级别日志
+<pre class="prettyprint lang-py">channel "warning_log" {
+      file "/data/log/named/warning.log" versions 3 size 100M;
+      severity warning;
+      print-time yes;
+      print-severity yes;
+      print-category yes;
+  };
+  category default { "warning_log"; };</pre>
+</span> 
+		</li>
+		<li>
+			<span style="line-height:1.5;">为什么记录warning级别而不是其它</span> 
+		</li>
+		<ul>
+			<li>
+				<span style="line-height:1.5;">warning级别代表"系统有问题,但是(勉强)可用"; err和critical级别代表有致命错误,例如配置文件语法有问题、启动涉及权限等问题</span> 
+			</li>
+		</ul>
+		<li>
+			通过warning日志发现问题:
+<pre class="prettyprint lang-py"> root@it-ops:/data/log/named# tail -f warning.log
+  02-Apr-2014 11:51:50.000 client: warning: client 10.x.x.81#38689: no more recursive clients (1000/0/1000): quota reached
+  02-Apr-2014 11:51:51.002 client: warning: client 10.x.x.213#59881: no more recursive clients (1000/0/1000): quota reached
+  02-Apr-2014 11:51:52.001 client: warning: client 10.x.x.224#40641: no more recursive clients (1000/0/1000): quota reached
+  ... ...</pre>
+		</li>
+	</ul>
+</ul>
+<p>
+	&nbsp;&nbsp;&nbsp;&nbsp;3. 解决方案：
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">根据提示查找和确认相关参数意义&nbsp;recursive-clients
+<pre class="prettyprint lang-py">recursive-clients    The maximum number of simultaneous recursive lookups the server will perform on behalf of clients. The default is 1000. 
+Because each recursing client uses a fair bit of memory, on the order of 20 kilobytes, the value of the recursive-clients option may have
+to be decreased on hosts with limited memory.</pre>
+</span> 
+	</li>
+	<li>
+		<span style="line-height:1.5;">调大允许递归查询的并发数
+<pre class="prettyprint lang-py">recursive-clients 10000; //default 1000</pre>
+</span> 
+	</li>
+</ul>
+</span> 
+<p>
+	<span style="line-height:1.5;">&nbsp;&nbsp;&nbsp;&nbsp;4. 预防同样问题发生</span> 
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">递归请求监控
+<pre class="prettyprint lang-py">root@it-ops:~# rndc status
+version: 9.8.1-P1
+CPUs found: 4
+worker threads: 4
+number of zones: 21
+debug level: 0
+xfers running: 0
+xfers deferred: 0
+soa queries in progress: 0
+query logging is ON
+recursive clients: 2409/9900/10000  //当前客户端请求数/soft limit/最大允许数; 达到soft limit未达到最大允许数时,会丢弃还未处理完的"旧"的请求
+tcp clients: 0/100
+server is up and running</pre>
+</span> 
+	</li>
+	<li>
+		<span style="line-height:1.5;">例如通过zabbix监控（示例；绘图效果更好），可以看到递归查询正好在默认临界值附近波动
+<pre class="prettyprint lang-py">root@it-ops:~# tail /usr/local/etc/zabbix_agentd.conf.d/userparameter_dns.conf
+UserParameter=dns.recursive.clients,/usr/sbin/rndc status | grep 'recursive clients' | awk '{ print $3 }' | cut -d '/' -f 1
+UserParameter=dns.recursive.limit,/usr/sbin/rndc status | grep 'recursive clients' | awk '{ print $3 }' | cut -d '/' -f 2
+UserParameter=dns.recursive.max,/usr/sbin/rndc status | grep 'recursive clients' | awk '{ print $3 }' | cut -d '/' -f 3</pre>
+</span> 
+	</li>
+</ul>
+<p>
+	&nbsp; &nbsp; 5. 根本原因
+</p>
+<ul>
+	<li>
+		<span style="line-height:1.5;">对Bind（首选搭建DNS服务器）配置参数了解不够</span> 
+	</li>
+	<li>
+		<span style="line-height:1.5;">日志记录记录不完整：该记录什么级别的日志、记录多久等一开始没有规划好</span> 
+	</li>
+</ul>
+<p>
+	<br />
+</p>
+<span style="line-height:1.5;"> </span>
+  
+    <footer>
+	  <p class="meta">
+        <span class="byline author vcard">Posted by <span class="fn">xiaomao</span></span>
+		<time datetime="2014-05-09 15:06:26 +0800" pubdate>2014/05/09 15:06:26</time>
+        
+      </p>
+      
+        <div class="sharing">
+			Share to 
+			<a href="http://twitter.com/share" class="twitter-share-button">Tweeter</a>
+			<a href="#" onclick="location.href='http://v.t.sina.com.cn/share/share.php?title='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(location.href);return false;">Weibo</a>
+			<a href="#" onclick="location.href='http://www.delicious.com/share?url='+encodeURIComponent(location.href)+'&title='+encodeURIComponent(document.title);return false;">Delicious</a>
+		</div>
+      
+    </footer>
+  
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <!-- Duoshuo Comment BEGIN -->
+      <div class="ds-thread" data-thread-key="40" data-title="递归DNS 排错 (recursive-clients)"></div>
+    <script type="text/javascript">
+    var duoshuoQuery = {short_name:"xiaomao"};
+      (function() {
+        var ds = document.createElement('script');
+        ds.type = 'text/javascript';ds.async = true;
+        ds.src = 'http://static.duoshuo.com/embed.js';
+        ds.charset = 'UTF-8';
+        (document.getElementsByTagName('head')[0] 
+        || document.getElementsByTagName('body')[0]).appendChild(ds);
+      })();
+      </script>
+    <!-- Duoshuo Comment END -->
+  </section>
+
+</div>
+
+      
+        <aside role=sidebar>
+  <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/post/43/esxi-vm-copy/">Esxi环境下的虚拟机拷贝</a>
+      </li>
+    
+      <li class="post">
+        <a href="/post/42/redis-master-slave-switch/">Redis master slave switch</a>
+      </li>
+    
+      <li class="post">
+        <a href="/post/41/redis-master-slave/">Redis master slave部署</a>
+      </li>
+    
+      <li class="post">
+        <a href="/post/40/dns-trouble-shooting/">递归DNS 排错 (recursive-clients)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/post/39/ulimit 生效范围/">ulimit 生效范围</a>
+      </li>
+    
+  </ul>
+</section>
+
+  <section>
+  <h1>Tags</h1>
+  <p id="top_tags">
+    
+      <a title="8 Posts" href="/tag/linux/">linux</a> <span class="tag_meta">(8)</span>
+    
+      <a title="7 Posts" href="/tag/运维/">运维</a> <span class="tag_meta">(7)</span>
+    
+      <a title="5 Posts" href="/tag/Python/">Python</a> <span class="tag_meta">(5)</span>
+    
+      <a title="3 Posts" href="/tag/node.js/">node.js</a> <span class="tag_meta">(3)</span>
+    
+      <a title="3 Posts" href="/tag/扯淡人生/">扯淡人生</a> <span class="tag_meta">(3)</span>
+    
+      <a title="2 Posts" href="/tag/Learn C/">Learn C</a> <span class="tag_meta">(2)</span>
+    
+      <a title="2 Posts" href="/tag/redis/">redis</a> <span class="tag_meta">(2)</span>
+    
+      <a title="1 Posts" href="/tag/计划/">计划</a> <span class="tag_meta">(1)</span>
+    
+      <a title="1 Posts" href="/tag/学习/">学习</a> <span class="tag_meta">(1)</span>
+    
+      <a title="1 Posts" href="/tag/gearman/">gearman</a> <span class="tag_meta">(1)</span>
+    
+      <a title="1 Posts" href="/tag/tools/">tools</a> <span class="tag_meta">(1)</span>
+    
+  </p>
+</section>
+
+</aside>
+      
+    </div>
+  </div>
+  <footer>
+	<p>
+	  Copyright &copy; 2011 - xiaomao -
+	  <span class="credit">Powered by <a href="https://github.com/ichuan/djblog">djblog</a></span> -
+	  <span class="credit">Theme by <a href="http://www.octopress.org/">Octopress</a></span>
+	</p>
+  </footer>
+</body>
+</html>

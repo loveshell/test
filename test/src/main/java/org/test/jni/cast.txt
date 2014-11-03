@@ -1,0 +1,9 @@
+#�������������Ҫ����ϴ�ı�ǩ��֧�ֿ��к�ע��(��#��ͷ)
+script
+style
+iframe
+form
+select
+img
+
+ 

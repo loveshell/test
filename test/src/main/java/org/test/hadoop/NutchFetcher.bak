@@ -30,7 +30,6 @@ import org.apache.hadoop.io.MapFile;
 import org.apache.hadoop.io.SequenceFile.CompressionType;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.io.Writable;
-import org.apache.hadoop.mapred.Counters.Counter;
 import org.apache.hadoop.mapred.FileInputFormat;
 import org.apache.hadoop.mapred.FileOutputFormat;
 import org.apache.hadoop.mapred.JobClient;
@@ -87,7 +86,7 @@ public class WindFetcher extends Fetcher {
 	protected int pathIdx = 0;
 	protected CompressionType compType;
 	protected boolean notifyEnded = false;
-	protected ExecutorService executorService = Executors.newCachedThreadPool(new ThreadFactoryBuilder()
+	protected ExecutorService executorService = Executors.newFixedThreadPool(2, new ThreadFactoryBuilder()
 			.setNameFormat("fetchout-%d").setDaemon(true).build());
 	protected SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmm");
 
@@ -371,51 +370,41 @@ public class WindFetcher extends Fetcher {
 		RunningJob runningJob;
 		try {
 			runningJob = JobClient.runJob(job);
-		} catch (Throwable e) {
-			e.printStackTrace();
-			return;
-		}
-
-		long end = System.currentTimeMillis();
-		try {
+			long end = System.currentTimeMillis();
 			if (runningJob.isSuccessful()) {
 				FetchInfo info = FetchInfos.getFetchInfo();
 				info.start = start;
 				info.end = end;
 				info.name = job.getJobName();
-				info.pageTotal = runningJob.getCounters()
-						.findCounter("FetcherStatus","AboveExceptionThresholdInQueue").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "access_denied").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "exception").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "gone").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "moved").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "notfound").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "success").getValue();
-				info.pageTotal += runningJob.getCounters()
-						.findCounter("FetcherStatus", "temp_moved").getValue();
 				info.fetchTime = (end - start);
+				info.topicDiscardBytes = runningJob.getCounters()
+						.findCounter("FetcherStatus", Nutch.FETCH_TOPICCAL_DISCARDBYTES).getValue();
 				info.downBytes = runningJob.getCounters().findCounter("FetcherStatus", "bytes_downloaded").getValue();
-				info.pageSuccess = runningJob.getCounters()
-						.findCounter("FetcherStatus", ProtocolStatus.STATUS_SUCCESS.getName()).getValue();
-
+				info.pageSuccess = runningJob.getCounters().findCounter("FetcherStatus", "success").getValue();
+				info.pageAccessDenied = runningJob.getCounters().findCounter("FetcherStatus", "access_denied")
+						.getValue();
+				info.pageException = runningJob.getCounters().findCounter("FetcherStatus", "exception").getValue();
+				info.pageGone = runningJob.getCounters().findCounter("FetcherStatus", "gone").getValue();
+				info.pageMoved = runningJob.getCounters().findCounter("FetcherStatus", "moved").getValue();
+				info.pageNotFound = runningJob.getCounters().findCounter("FetcherStatus", "notfound").getValue();
+				info.pageTempMoved = runningJob.getCounters().findCounter("FetcherStatus", "temp_moved").getValue();
 				LOG.info(info.toString());
 				LOG.info(FetchInfos.printString());
+				LOG.info("Fetcher: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
+			} else {
+				LOG.info(Nutch.FETCH_JOB_FAIL + "=1;");
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
+			LOG.info(Nutch.FETCH_JOB_FAIL + "=1;");
+		} catch (Throwable e) {
 			e.printStackTrace();
 		}
-		LOG.info("Fetcher: finished at " + sdf.format(end) + ", elapsed: " + TimingUtil.elapsedTime(start, end));
 	}
 
 	public void run(RecordReader<Text, CrawlDatum> input, OutputCollector<Text, NutchWritable> output, Reporter reporter)
 			throws IOException {
-		java.security.Security.setProperty("networkaddress.cache.ttl", "-1");
+		java.security.Security.setProperty("networkaddress.cache.ttl", "-1");// ever
+		java.security.Security.setProperty("networkaddress.cache.negative.ttl", "30");// 30s
 
 		this.output = output;
 		this.reporter = reporter;
