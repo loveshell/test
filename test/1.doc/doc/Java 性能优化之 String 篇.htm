@@ -1,0 +1,695 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+	
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-CN" xml:lang="zh-CN">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+<title>Java 性能优化之 String 篇</title>
+<link rel="schema.DC" href="http://purl.org/DC/elements/1.0/"/>
+<link rel="SHORTCUT ICON" href="//www.ibm.com/favicon.ico"/>
+<meta name="DC.Rights" content="© Copyright IBM Corporation 2012"/>
+<meta name="Keywords" content="String, 内存 , 优化 ,, tttjca"/>
+<meta name="DC.Date" scheme="iso8601" content="2012-05-14"/>
+<meta name="Source"  content="v17 delivery:developerWorks"/>
+<meta name="Security" content="Public"/>
+<meta name="Abstract" content="String 方法用于文本分析及大量字符串处理时会对内存性能造成不可低估的影响。我们在一个大文本数据分析的项目中（我们统计一个约 300MB 的 csv 文件中所有单词出现的次数）发现，用于存放结果的 Collection 占用了几百兆的内存，远远超出唯一单词总数 20000 个。 本文将通过分析 String 在 JVM 中的存储结构，以及常见 String 操作对内存的影响阐述问题产生的原因及解决。."/>
+<meta name="Description" content="String 方法用于文本分析及大量字符串处理时会对内存性能造成不可低估的影响。我们在一个大文本数据分析的项目中（我们统计一个约 300MB 的 csv 文件中所有单词出现的次数）发现，用于存放结果的 Collection 占用了几百兆的内存，远远超出唯一单词总数 20000 个。 本文将通过分析 String 在 JVM 中的存储结构，以及常见 String 操作对内存的影响阐述问题产生的原因及解决。."/>
+<meta name="IBM.Effective" scheme="W3CDTF" content="2012-05-14"/>
+<meta name="Owner" content="developerWorks/China/IBM"/>
+<meta name="DC.Language" scheme="rfc1766" content="zh-CN"/>
+<meta name="IBM.SpecialPurpose" content="SP001"/>
+<meta name="IBM.Country" content="CN"/>
+<meta name="Robots" content="index,follow"/>
+<meta name="DC.Type" scheme="IBM_ContentClassTaxonomy" content="CT316" />
+<meta name="DC.Subject" scheme="IBM_SubjectTaxonomy" content="TT300" />
+<meta name="dW.ContentArea" content="1" />
+<meta name="dW.Topic" content="125,198,263,11" />
+
+<meta scheme="IBM_WTMCategory" name="IBM.WTMCategory" content="SOFDCJVACN" />
+
+<link rel="canonical" href="http://www.ibm.com/developerworks/cn/java/j-lo-optmizestring/index.html"/>
+<!-- HEADER_SCRIPTS_AND_CSS_INCLUDE -->
+<link href="//1.www.s81c.com/common/v17/css/www.css" rel="stylesheet" title="www"  type="text/css"/>
+<link href="//1.www.s81c.com/common/v17/css/country/cnzh.css" rel="stylesheet" title="www" type="text/css">
+<!-- Masthead/footer -->
+<link href="//dw1.s81c.com/developerworks/css/dw-mf/v17/dw-mfN2014-05.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/v17/dw-article-6.css" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/v17/dw-common-features.css" rel="stylesheet" title="www" type="text/css"/>
+<link href="//dw1.s81c.com/developerworks/css/v17/dw-local-site-v17-N2014-05.css" media="screen,projection" rel="stylesheet" title="www" type="text/css"/>
+<script type="text/javascript" src="//1.www.s81c.com/common/js/dojo/www.js">//</script>
+<script type="text/javascript" src="//dw1.s81c.com/developerworks/js/v17/dw-www.js">//</script> 
+<script type="text/javascript">
+//  ibmweb.config.set({ sbs: { enabled: false }});
+</script>
+<!-- Exp -->
+<script type="text/javascript">dojo.addOnLoad(function(){var dw_source="dwchina";var dw_register="注册免费的 Bluemix 试用版";var dw_connect="连接 Bluemix 开发者";var dw_vp="在 IBM Bluemix 云平台上开发并部署您的下一个应用。";var dw_cta="现在就开始免费试用";var dw_tile_alt="在 IBM Bluemix 云平台上开发并部署您的下一个应用。现在就开始免费试用";var dw_campaign="bluemix";var dw_content=window.location.pathname.split("/")[window.location.pathname.split("/").length-2];if(dw_content=="library"){dw_content=window.location.pathname.split("/")[window.location.pathname.split("/").length-1];dw_content=window.location.pathname.split("/")[window.location.pathname.split("/").length-3]+"-"+dw_content.substring(0,dw_content.indexOf(".html"))}var dw_medium="article";var bluDevComURL="https://developer.ibm.com/bluemix/";var bluLink="https://www.bluemix.net/";var watsonLink="https://www.bluemix.net/#/solutions/solution=watson";var lnkID;var lnkIDd;var lnkIDt;var bLinkEnd;var bLinkTemp;var idTrkr=[];var idCnt;var artTop=dojo.query("div.ibm-col-1-1")[0];var artChildren=dojo.query(artTop).children();var edgy=false;if(dojo.hasClass(artChildren[0],"ibm-inset"))edgy=true;if((artChildren[0].nodeName=="H2")&&(dojo.hasClass(artChildren[1],"ibm-inset")))edgy=true;if(dojo.hasClass(artChildren[0],"codesection"))edgy=true;if((artChildren[0].nodeName=="H5")&&(dojo.hasClass(artChildren[1],"codesection")))edgy=true;if((artChildren[0].nodeName=="H5")&&(artChildren[1].width>=701))edgy=true;if(artChildren[1].width>=701)edgy=true;if(dojo.hasClass(artChildren[0],"ibm-data-table"))edgy=true;if((artChildren[0].nodeName=="H5")&&(dojo.hasClass(artChildren[1],"ibm-data-table")))edgy=true;if(!(edgy)){var sBarAB='<div class="dw-article-sidebar dw-bluemix" id="dwc-exp-c">'+'<img src="//dw1.s81c.com/developerworks/i/bluemix-graphic.png" height="64" width="64" alt=""/>'+'<p>'+dw_vp+'</p>'+'<p class="ibm-button-link-alternate dw-button-green">'+'<a id="tutc-sbar-bmix-home-btn-ABc" href="'+bluLink+'" class="dw-button-large">'+dw_cta+'</a></p></div>';dojo.place(sBarAB,artTop,"first");}dojo.forEach(dojo.query("#ibm-content-main a"),function(item,index){var bLink=dojo.attr(item,"href");if(bLink&&(bLink.indexOf("//bluemix.net")>-1))bLink=bLink.replace("//bluemix.net","//www.bluemix.net");if(bLink&&(bLink.indexOf("//ace.ng.bluemix.net")>-1))bLink=bLink.replace("//ace.ng.bluemix.net","//www.bluemix.net");if(bLink&&(bLink.indexOf("//console.ng.bluemix.net")>-1))bLink=bLink.replace("//console.ng.bluemix.net","//www.bluemix.net");if(bLink&&((bLink.indexOf("//www.bluemix.net")>-1)||(bLink.indexOf("//www.ng.bluemix.net")>-1)||(bLink.indexOf("//hub.jazz.net")>-1))){bLinkEnd="";bLink=bLink.split("?");if((bLink[1])&&(bLink[1].indexOf("/")!=-1))bLinkEnd=bLink[1].substring(bLink[1].indexOf("/"));bLink=bLink[0];if(bLink.indexOf("//hub.jazz.net")>-1){if((bLink.indexOf("//hub.jazz.net/git")>-1)||(bLink.indexOf("//hub.jazz.net/project")>-1)){bLink="https://login.jazz.net/psso/proxy/jazzregister?utm_source="+dw_source+"&utm_medium="+dw_medium+"&utm_content="+dw_content+"&utm_campaign="+dw_campaign+"&redirect_uri="+bLink}else{bLink=bLink+"?utm_source="+dw_source+"&utm_campaign="+dw_campaign+"&utm_content="+dw_content+"&utm_medium="+dw_medium}}else{if(bLink.indexOf("/#/")==-1){if(bLink.substring(bLink.length-7)=="/docs/#"){bLink=bLink.replace("/docs/#","/docs/"+"?cm_mmc="+dw_source+"-_-"+dw_campaign+"-_-"+dw_content+"-_-"+dw_medium+"#")}else{bLink=bLink+"?cm_mmc="+dw_source+"-_-"+dw_campaign+"-_-"+dw_content+"-_-"+dw_medium}}else{bLink=bLink.substring(0,bLink.indexOf("#"))+"?cm_mmc="+dw_source+"-_-"+dw_campaign+"-_-"+dw_content+"-_-"+dw_medium+bLink.substring(bLink.indexOf("#")-1)}}if(bLinkEnd)bLink=bLink+bLinkEnd;dojo.attr(item,"href",bLink);}})});</script><!-- LEADSPACE_STYLES -->
+
+</head>
+
+<body id="ibm-com">
+
+	<div id="ibm-top" class="ibm-landing-page">
+
+<!-- MASTHEAD_BEGIN -->
+<div id="ibm-masthead">
+
+    <!-- TOP ROW -->    
+	<div id="dw-masthead-top-row">
+		<ul id="ibm-mast-options-dw" role="toolbar" class="cn">
+		<li role="presentation" id="dw-mast-top-4">
+				<a href="http://www.ibm.com/developerworks/cn/"><img src="//dw1.s81c.com/developerworks/i/mf/dwn-dw-badge.png" width="43" height="22" alt="dW" aria-label="dW" /></a></li>
+			<li role="presentation" id="dw-mast-top-0">
+				<div><a class="dw-mf-noscript" href="#" title="登录（或注册）需启用 JavaScript" role="button" tabindex="0">登录 (或注册)</a></div>
+			</li>
+			<li role="presentation" id="dw-mast-top-1">
+				<div><a href="#SELECTLANG" role="button">中文</a></div>
+			</li>
+			<li role="presentation" id="dw-mast-top-3">
+				<a role="button" href="http://www.ibm.com">IBM</a>
+			</li>
+			<li role="presentation" id="dw-mast-top-2" class="dw-mf-hide">
+				<a href="#">[userid]</a>
+			</li>
+		</ul>
+	</div>
+
+    <!-- TOP ROW SLIDER -->
+	<div id="ibm-my-menu-dw" style="display:none">
+        <!-- Sign-in -->
+		<div id="signin_div" class="dw-mast-columns" role="group">
+			<div class="dw-mast-col-1-1">
+				<div id="dw-mast-sso">
+					<div id="signin_error_mf" class="no-display"></div>
+					<div id="dw-mast-sso-form">
+						<form id="sForm_mf" action="" method="post" name="sForm_name_mf" onsubmit="return false;">
+							<div id="dw-mast-sso-id" class="dw-mast-sso-id-cn">
+								<label for="ibmid_mf">IBM ID:</label>
+								<input id="ibmid_mf" value="" name="ibmid_name_mf" maxlength="100"
+								    onkeypress="dwsi.siInst.handleEP(event,this.form,'mf');" type="text" />
+							</div>
+							<div id="dw-mast-sso-pw" class="dw-mast-sso-pw-cn">
+								<label for="pw_mf">密码：</label>
+								<input id="pw_mf" value="" name="pw_name_mf" maxlength="100"
+								    onkeypress="dwsi.siInst.handleEP(event,this.form,'mf');" type="password" />
+							</div>
+							<div id="dw-mast-sso-target" class="dw-mast-sso-target-cn">
+								<p class="dw-mf-perm-box">
+									<input id="perm_mf" name="perm_name_mf" type="checkbox"><label for="perm_mf"> 保持登录。</label></input>
+								</p>
+							</div>					
+							<div id="dw-mast-sso-terms">
+								<p class="dw-mast-sso-terms-cn">单击提交则表示您同意developerWorks 的条款和条件。 <a
+								    href="//www.ibm.com/developerworks/community/terms?lang=zh">查看条款和条件</a>.</p>
+									</div>
+							<div>
+								<input class="dw-mf-submit-btn-cn" name="ibm_submit_name_mf" value="提交"
+								    onclick="dwsi.siInst.signin('mf');return false;" type="submit" />
+							</div>
+						</form>
+					</div>
+					<div id="dw-mast-sso-update">
+						<div id="dw-mast-sso-update-id">
+							<ul>
+								<li><a href="#" onclick="(function ()
+								    {window.location='//www.ibm.com/developerworks/dwwi/DWAuthRouter?m=reg&amp;lang=zh_CN&amp;d='+encodeURIComponent(location.href);})();">需要一个 IBM ID？</a></li>
+								<li><a href="//www.ibm.com/developerworks/dwwi/jsp/WSHelp.jsp?lang=zh_CN">忘记 IBM ID？</a></li>
+							</ul>
+						</div>
+						<div id="dw-mast-sso-update-pw">
+							<ul class="dw-mf-pwupdate">
+								<li><a href="#" onclick="(function ()
+								    {window.location='https://www.ibm.com/account/profile?page=forgot&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(dwsi.siInst.getAuthUrl())+'%3Fm%3Dloginpage%26lang%3Den_US%26d%3D'+encodeURIComponent(location.href);})();">忘记密码？</a></li>
+								<li><a href="#" onclick="(function ()
+								    {window.location='https://www.ibm.com/account/profile?page=chpw&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(location.href);})();">更改您的密码</a></li>
+							</ul>
+						</div>
+					</div>
+					<div id="dw-mast-sso-text">
+						<p>在您首次登录 developerWorks 时，会为您创建一份个人概要。<strong>您的个人概要中的信息（您的姓名、国家/地区，以及公司名称）是公开显示的，而且会随着您发布的任何内容一起显示，除非您选择隐藏您的公司名称。</strong>您可以随时更新您的 IBM 帐户。</p>
+						<p class="dw-mf-secure-cn">所有提交的信息确保安全。</p>
+					</div>
+				</div>
+				<div id="dw-mast-dname" class="dw-mf-hide">
+					<p>当您初次登录到 developerWorks 时，将会为您创建一份概要信息，您需要指定一个昵称。您的昵称将和您在 developerWorks 发布的内容显示在一起。</p><p><strong>昵称长度在 3 至 31 个字符之间</strong>。 您的昵称在 developerWorks 社区中必须是唯一的，并且出于隐私保护的原因，不能是您的电子邮件地址。</p>
+					<div id="signin_dname_error_mf" class="no-display"></div>
+					<div id="dw-mast-dname-form"  class="dw-mast-dname-form-cn">
+						<form id="dForm_mf" action="" method="post" name="dForm_name_mf" onsubmit="return false;">
+							<div id="dw-mast-dname-mf">
+								<label for="dname_mf">昵称：</label>
+								<input id="dname_mf" name="dname_name_mf" maxlength="31" size="25" value=""
+								    onkeypress="dwsi.siInst.handleEP(event,this.form,'mf');" type="text" />
+							</div>
+							<div id="dw-mast-dname-terms">
+								<p class="dw-mast-dname-terms-cn">单击<strong>提交</strong>则表示您同意developerWorks
+								    的条款和条件。 <a href="//www.ibm.com/developerworks/community/terms?lang=zh">查看条款和条件</a>.</p>
+									</div>
+							<div>
+								<input class="dw-mf-submit-btn-cn" name="dname_submit_name_mf" value="提交"
+								    onclick="dwsi.siInst.signin('mf');return false;" type="submit" />
+							</div>
+						</form>								
+					</div>
+					<div id="dw-mast-dname-secure">
+						<p class="dw-mf-secure-cn">所有提交的信息确保安全。</p>
+					</div>
+				</div>
+				<div id="dw-mast-auth" class="dw-mf-hide">
+					<div>
+						<h2>developerWorks 社区:</h2>
+                		<ul>
+							<li><a id="dw-mast-top-0-0" href="//www.ibm.com/developerworks/community/homepage?lang=zh">我的首页</a></li>						    
+							<li><a
+							    href="//www.ibm.com/developerworks/community/profiles/html/myProfileView.do?lang=zh">我的概要信息</a></li>
+							<li><a
+							    href="//www.ibm.com/developerworks/community/groups/service/html/mycommunities?lang=zh">我的社区</a></li>
+			                 <li><a href="/developerworks/community/news/?lang=zh">设置</a></li>
+										    
+						</ul>     
+					</div>
+					
+					<div class="dw-mast-more">
+						<ul class="ibm-link-list">
+							<li><a class="dw-more-link" href="#" onclick="dwsi.siInst.signOut(); return false;"><strong>退出</strong></a></li>
+						</ul>
+					</div>
+				</div>								
+			</div>		
+		</div>
+        <!-- Language selector --> 
+		<div id="lang_div" class="dw-mast-columns" role="group">
+			<div class="dw-mast-col-2-1">
+				<h2>选择语言：</h2>
+				<ul>
+					<li><a id="dw-mast-top-1-0" href="http://www.ibm.com/developerworks/" lang="en">English</a></li>
+					<li><a href="http://www.ibm.com/developerworks/cn/">中文</a></li>
+					<li><a href="http://www.ibm.com/developerworks/jp/" lang="ja">日本語</a></li>
+					<li><a href="http://www.ibm.com/developerworks/ru/" lang="ru">Русский</a></li>
+				</ul>
+			</div>
+			<div class="dw-mast-col-2-2">
+				<ul>
+					<li><a href="http://www.ibm.com/developerworks/br/" lang="pt">Português (Brasil)</a></li>
+					<li><a href="http://www.ibm.com/developerworks/ssa/" lang="es">Español</a></li>
+					<li><a href="http://www.ibm.com/developerworks/vn/" lang="vi">Việt</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="empty_div" class="dw-mast-columns" role="group"><!-- Authenticated --></div>		
+		<!-- IBM -->
+		<div id="ibmhome_div" class="dw-mast-columns" role="group">
+			<div class="dw-mast-col-2-1">
+				<ul>
+					<li><a id="dw-mast-top-3-0" href="http://www.ibm.com/cn/zh/">IBM 主页</a></li>
+					<li><a href="http://www.ibm.com/solutions/cn/zh/">解决方案</a></li>
+					<li><a href="http://www.ibm.com/software/cn/">软件</a></li>
+				</ul>
+			</div>
+			<div class="dw-mast-col-2-2 dw-mast-ibm">
+				<ul>
+							<li><a href="http://www.ibm.com/support/cn/zh/">支持门户</a></li>
+							<li><a href="http://www.ibm.com/support/documentation/cn/zh/">产品文档</a></li>
+							<li><a href="http://www.ibm.com/redbooks/">Redbooks（英文）</a></li>
+				</ul>
+			</div>	
+		</div>		
+	</div>
+		
+    <!-- BOTTOM ROW -->
+	<div id="ibm-universal-nav-dw" aria-label="Site map">
+		<ul id="ibm-unav-links-dw">
+			<li id="ibm-unav-home-dwlogo">
+				<a href="http://www.ibm.com/developerworks/cn/"><img src="//dw1.s81c.com/developerworks/i/mf/dwn-dw-wordmark.png" width="225" height="28" alt="developerWorks®" /></a>
+			</li>
+		</ul>
+		<ul id="ibm-menu-links-dw" class="ibm-menu-links-dw-cn" role="toolbar" aria-label="Site map">
+			<li id="dw-mast-nav-0" role="presentation"><a href="http://www.ibm.com/developerworks/cn/topics/" tabindex="0">技术主题</a></li>
+			<li id="dw-mast-nav-1" role="presentation"><a href="http://www.ibm.com/developerworks/cn/downloads/">软件下载</a></li>
+			<li id="dw-mast-nav-2" role="presentation"><a href="http://www.ibm.com/developerworks/community/?lang=zh">社区</a></li>
+			<li id="dw-mast-nav-3" role="presentation"><a href="https://www.ibm.com/developerworks/community/groups/service/html/communityview?communityUuid=6d7f9e5d-5f89-4767-a006-a81b8d186370&amp;lang=zh">技术讲座</a></li>
+		</ul>
+		<form id="ibm-search-form" action="//www.ibm.com/search/csass/search/" method="get" name="form1" aria-label="搜索 developerWorks" role="search">
+			<p>
+				<label for="q"><span class="ibm-access">搜索 developerWorks</span></label>
+				<input id="q" type="text" name="q" value="搜索 developerWorks" maxlength="100"/>
+				<input type="hidden" name="sn" value="dw" />
+				<input type="hidden" name="lang" value="zh" />
+				<input type="hidden" name="cc" value="CN" />
+				<input type="hidden" name="en" value="utf" />
+				<input type="hidden" name="hpp" value="20" />
+				<input type="hidden" name="dws" value="cndw" />
+				<input type="hidden" name="lo" value="zh" />
+				<input id="ibm-search" class="ibm-btn-search" type="submit" value="提交" />
+			</p>
+		</form>
+	</div>    
+	
+</div>
+<div id="fdiv" class="ibm-access"></div><!-- MASTHEAD_END -->
+	    
+<!-- LAYOUT -->
+<!-- LEADSPACE_BEGIN --> 
+<div id="ibm-leadspace-head">
+	<!-- LEADSPACE_BODY_BEGIN --> 
+	<div id="ibm-leadspace-body">
+		<!-- Navigation_Trail_BEGIN -->
+      <ul id="ibm-navigation-trail"><li><a href="http://www.ibm.com/developerworks/cn/">developerWorks 中国</a></li><li><a href="http://www.ibm.com/developerworks/cn/topics/">技术主题</a></li><li><a href="http://www.ibm.com/developerworks/cn/java/">Java technology</a></li><li><a href="http://www.ibm.com/developerworks/cn/views/java/libraryview.jsp">文档库</a></li></ul>
+		<!-- END_Navigation_Trail -->
+			<!-- Title_Subtitle -->
+			<h1>Java 性能优化之 String 篇
+		</h1>
+	</div>
+	<!-- LEADSPACE_BODY_END --> 
+	<!-- SUMMARY_BEGIN -->
+	<div id="dw-summary-area" class="dw-summary-columns">
+		<div class="ibm-col-6-4">
+		<p>String 方法用于文本分析及大量字符串处理时会对内存性能造成不可低估的影响。我们在一个大文本数据分析的项目中（我们统计一个约 300MB 的 csv 文件中所有单词出现的次数）发现，用于存放结果的 Collection 占用了几百兆的内存，远远超出唯一单词总数 20000 个。 本文将通过分析 String 在 JVM 中的存储结构，以及常见 String 操作对内存的影响阐述问题产生的原因及解决。.</p>
+		<p class="ibm-no-print ibm-ind-link">
+
+			
+			<span id="nCmts"></span>
+		</p>
+		</div>
+		<div class="ibm-col-6-2 dw-toc-margin">
+			<p class="dw-summary-author"><a href="#authorN1001A" class="ibm-popup-link" onclick="ibmweb.overlay.show('authorN1001A',this);return false;">杨 博文</a>, 软件工程师,  IBM</p>
+<div id="authorN1001A" class="ibm-common-overlay"><div class="ibm-head"><p><a href="#close" class="ibm-common-overlay-close">关闭 [x]</a></p></div><div class="ibm-body"><div class="ibm-main"><div class="ibm-title"><!--this is where the h2 usually goes--></div><div class="ibm-container ibm-alternate"><div class="ibm-container-body">
+<p><!--.-->
+杨博文来自 IBM 中国软件开发中心的 Global Process Service (GPS) 部门。目前主要从事 GPS 开发和测试工作。对 Java, 文本挖掘, 电子商务比较感兴趣。</p><br /><br /></div></div></div></div><div class="ibm-footer"><!----></div></div>
+<p class="dw-summary-author"><a href="#authorN1002A" class="ibm-popup-link" onclick="ibmweb.overlay.show('authorN1002A',this);return false;">应 乐年</a>, 软件工程师,  IBM</p>
+<div id="authorN1002A" class="ibm-common-overlay"><div class="ibm-head"><p><a href="#close" class="ibm-common-overlay-close">关闭 [x]</a></p></div><div class="ibm-body"><div class="ibm-main"><div class="ibm-title"><!--this is where the h2 usually goes--></div><div class="ibm-container ibm-alternate"><div class="ibm-container-body">
+<p><!--.-->
+应乐年来自 IBM 中国软件开发中心的 GPS 部门。目前主要从事 IBM Global Process Service (GPS) 开发和测试工作。对 Java, 文本挖掘, 各类算法等比较感兴趣。</p><br /><br /></div></div></div></div><div class="ibm-footer"><!----></div></div>
+<p class="dw-summary-author"><a href="#authorN1003A" class="ibm-popup-link" onclick="ibmweb.overlay.show('authorN1003A',this);return false;">杨 雯雯</a>, 技术文档工程师,  IBM</p>
+<div id="authorN1003A" class="ibm-common-overlay"><div class="ibm-head"><p><a href="#close" class="ibm-common-overlay-close">关闭 [x]</a></p></div><div class="ibm-body"><div class="ibm-main"><div class="ibm-title"><!--this is where the h2 usually goes--></div><div class="ibm-container ibm-alternate"><div class="ibm-container-body">
+<p><!--.-->
+杨雯雯来自 IBM 中国软件开发中心的 GPS 部门。目前从事 GPS 部门部分 solution 文档的开发。</p><br /><br /></div></div></div></div><div class="ibm-footer"><!----></div></div>
+			<p class="dw-summary-date">2012 年 5 月 14 日</p>
+			
+
+
+			<div aria-hidden="true" class="ibm-container" id="dw-toc"><div class="ibm-container-body"><ul class="ibm-twisty"><li><a href="#toggle" class="ibm-twisty-trigger"><img src="//www.ibm.com/i/c.gif" alt="-"/></a><span class="ibm-twisty-head">内容</span><div class="ibm-twisty-body"><ul style="font-size:0.8em" class="ibm-link-list">
+<li><a class="ibm-anchor-down-em-link" href="#String 在 JVM 的存储结构">String 在 JVM 的存储结构</a></li>
+<li><a class="ibm-anchor-down-em-link" href="#major1">案例分析</a></li>
+<li><a class="ibm-anchor-down-em-link" href="#major2">其他 String 使用的优化建议</a></li>
+<li><a class="ibm-anchor-down-em-link" href="#major3">结束语</a></li>
+<li><a class="ibm-anchor-down-em-link" href="#resources">参考资料 </a></li>
+<li><a class="ibm-anchor-down-em-link" href="#icomments">评论</a></li></ul></div></li></ul></div></div>
+		</div>
+	</div>
+	<!-- SUMMARY_END -->
+</div>
+<!-- LEADSPACE_END -->
+
+<div id="ibm-pcon">
+
+<!-- BEGIN_IBM-CONTENT -->
+<div id="ibm-content">
+
+<!-- BEGIN_IBM-CONTENT-BODY -->
+<div id="ibm-content-body">
+
+<!-- BEGIN_IBM-CONTENT-MAIN -->
+<div id="ibm-content-main">
+
+<!-- 1_1_COLUMN_BEGIN -->
+<div class="ibm-columns">
+<div class="ibm-col-1-1">
+
+<h2 id="String 在 JVM 的存储结构">String 在 JVM 的存储结构</h2><p>一般而言，Java 对象在虚拟机的结构如下：</p><ul class="ibm-bullet-list"><li>
+对象头（object header）：8 个字节</li><li>
+ Java 原始类型数据：如 int, float, char 等类型的数据，各类型数据占内存如 <a href="#_ 表 _1._Java">表 1. Java 各数据类型所占内存</a>.</li><li>
+引用（reference）：4 个字节</li><li>
+填充符（padding）</li></ul><a id="_ 表 _1._Java"></a><h5 id="N1006F">表 1. Java 各数据类型所占内存</h5><table border="0" cellpadding="0" cellspacing="0" class="ibm-data-table" summary="Java 各数据类型所占内存"><thead xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><tr><th>
+数据类型
+</th><th>
+占用内存（字节数）
+</th></tr></thead><tbody xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><tr><td>
+ boolean 
+</td><td rowspan="2">
+ 1 
+</td></tr><tr><td>
+ byte 
+</td></tr><tr><td>
+ char 
+</td><td rowspan="2">
+ 2 
+</td></tr><tr><td>
+ short 
+</td></tr><tr><td>
+ int 
+</td><td rowspan="2">
+ 4 
+</td></tr><tr><td>
+ float 
+</td></tr><tr><td>
+ long 
+</td><td rowspan="2">
+ 8 
+</td></tr><tr><td>
+ double 
+</td></tr></tbody></table><p>然而，一个 Java 对象实际还会占用些额外的空间，如：对象的 class 信息、ID、在虚拟机中的状态。在 Oracle JDK 的 Hotspot 虚拟机中，一个普通的对象需要额外 8 个字节。</p><p>如果对于 String（JDK 6）的成员变量声明如下：</p><div class="codesection"><pre class="displaycode">  private final char value[]; 
+  private final int offset; 
+  private final int count; 
+  private int hash;</pre></div><p>那么因该如何计算该 String 所占的空间？</p><p>首先计算一个空的 char 数组所占空间，在 Java 里数组也是对象，因而数组也有对象头，故一个数组所占的空间为对象头所占的空间加上数组长度，即 8 + 4 = 12 字节 , 经过填充后为 16 字节。</p><p>那么一个空 String 所占空间为：</p><p>对象头（8 字节）+ char 数组（16 字节）+ 3 个 int（3 × 4 = 12 字节）+1 个 char 数组的引用 (4 字节 ) = 40 字节。</p><p>因此一个实际的 String 所占空间的计算公式如下：</p><div class="codesection"><pre class="displaycode">8*( ( 8+2*n+4+12)+7 ) / 8 = 8*(int) ( ( ( (n) *2 )+43) /8 )</pre></div><p>其中，n 为字符串长度。</p><div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><h2 id="major1">案例分析</h2><p>在我们的大规模文本分析的案例中，程序需要统计一个 300MB 的 csv 文件所有单词的出现次数，分析发现共有 20,000 左右的唯一单词，假设每个单词平均包含 15 个字母，这样根据上述公式，一个单词平均占用 75 bytes. 那么这样 75 * 20,000 = 1500000，即约为 1.5M 左右。但实际发现有上百兆的空间被占用。 实际使用的内存之所以与预估的产生如此大的差异是因为程序大量使用 <code>String.split()</code> 或 <code>String.substring()</code>来获取单词。在 JDK 1.6 中 <code>String.substring(int, int)</code>的源码为：</p><div class="codesection"><pre class="displaycode"> public String substring(int beginIndex, int endIndex) { 
+      if (beginIndex &lt; 0) { 
+           throw new StringIndexOutOfBoundsException(beginIndex); 
+      } 
+      if (endIndex &gt; count) { 
+           throw new StringIndexOutOfBoundsException(endIndex); 
+      } 
+      if (beginIndex &gt; endIndex) { 
+           throw new StringIndexOutOfBoundsException(endIndex - beginIndex); 
+      } 
+      return ((beginIndex == 0) &amp;&amp; (endIndex == count)) ? this : 
+           new String(offset + beginIndex, endIndex - beginIndex, value); 
+ }</pre></div><p>调用的 String 构造函数源码为：</p><div class="codesection"><pre class="displaycode"> String(int offset, int count, char value[]) { 
+ this.value = value; 
+ this.offset = offset; 
+ this.count = count; 
+ }</pre></div><p>仔细观察粗体这行代码我们发现 <code>String.substring()</code>所返回的 String 仍然会保存原始 String, 这就是 20,000 个平均长度的单词竟然占用了上百兆的内存的原因。 一个 csv 文件中每一行都是一份很长的数据，包含了上千的单词，最后被 <code>String.split()</code> 或 <code>String.substring()</code>截取出的每一个单词仍旧包含了其原先所在的上下文中，因而导致了出乎意料的大量的内存消耗。</p><p>当然，JDK String 的源码设计当然有着其合理之处，对于通过 <code>String.split()</code>或 <code>String.substring()</code>截取出大量 String 的操作，这种设计在很多时候可以很大程度的节省内存，因为这些 String 都复用了原始 String，只是通过 int 类型的 start, end 等值来标识每一个 String。 而对于我们的案例，从一个巨大的 String 截取少数 String 为以后所用，这样的设计则造成大量冗余数据。 因此有关通过 <code>String.split()</code>或 <code>String.substring()</code>截取 String 的操作的结论如下：</p><ul class="ibm-bullet-list"><li>
+对于从大文本中截取少量字符串的应用，<code>String.substring()</code>将会导致内存的过度浪费。</li><li>
+对于从一般文本中截取一定数量的字符串，截取的字符串长度总和与原始文本长度相差不大，现有的 <code>String.substring()</code>设计恰好可以共享原始文本从而达到节省内存的目的。</li></ul><p>既然导致大量内存占用的根源是 <code>String.substring()</code>返回结果中包含大量原始 String，那么一个显而易见的减少内存浪费的的途径就是去除这些原始 String。办法有很多种，在此我们采取比较直观的一种，即再次调用 <code>newString</code>构造一个的仅包含截取出的字符串的 String，我们可调用 <code>String.</code><code>toCharArray</code><code>()</code>方法：</p><div class="codesection"><pre class="displaycode"> String newString = new String(smallString.toCharArray());</pre></div><p>举一个极端例子，假设要从一个字符串中获取所有连续的非空子串，字符串长度为 n，如果用 JDK 本身提供的 <code>String.substring() 方</code>法，则总共的连续非空子串个数为：</p><div class="codesection"><pre class="displaycode">n+(n-1)+(n-2)+ … +1 = n*(n+1)/2 =O(n<sup>2</sup>)</pre></div><p>由于每个子串所占的空间为常数，故空间复杂度也为 O(n<sup>2</sup>)。</p><p>如果用本文建议的方法，即构造一个内容相同的新的字符串，则所需空间正比于子串的长度，则所需空间复杂度为：</p><div class="codesection"><pre class="displaycode">1*n+2*(n-1)+3*(n-2)+ … +n*1 = (n<sup>3</sup>+3*n<sup>2</sup>+2*n)/6 = O(n<sup>3</sup>)</pre></div><p>所以，从以上定量的分析看来，当需要截取的字符串长度总和大于等于原始文本长度，本文所建议的方法带来的空间复杂度反而高了，而现有的 <code>String.substring()</code>设计恰好可以共享原始文本从而达到节省内存的目的。反之，当所需要截取的字符串长度总和远小于原始文本长度时，用本文所推荐的方法将在很大程度上节省内存，在大文本数据处理中其优势显而易见。</p><div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><h2 id="major2">其他 String 使用的优化建议</h2><p>以上我们描述了在我们的大量文本分析案例中调用 String 的 <code>subString</code><code>方法</code>导致内存消耗的问题，下面再列举一些其他将导致内存浪费的 String 的 API 的使用：</p><h3 id="minor2.1">String 拼接的方法选择</h3><p>在拼接静态字符串时，尽量用 +，因为通常编译器会对此做优化，如：</p><div class="codesection"><pre class="displaycode"> String test = "this " + "is " + "a " + "test " + "string"</pre></div><p>编译器会把它视为：</p><div class="codesection"><pre class="displaycode"> String test = "this is a test string"</pre></div><p>在拼接动态字符串时，尽量用 <code>StringBuffer</code> 或 <code>StringBuilder</code>的 <code>append</code>，这样可以减少构造过多的临时 String 对象。</p><h3 id="minor2.2">String 构造的方法选择</h3><p>常见的创建一个 String 可以用赋值操作符"=" 或用 new 和相应的构造函数。初学者一定会想这两种有何区别，举例如下：</p><div class="codesection"><pre class="displaycode"> String a1 = “Hello”; 
+ String a2 = new String(“Hello”);</pre></div><p>第一种方法创建字符串时 JVM 会查看内部的缓存池是否已有相同的字符串存在：如果有，则不再使用构造函数构造一个新的字符串，直接返回已有的字符串实例；若不存在，则分配新的内存给新创建的字符串。</p><p>第二种方法直接调用构造函数来创建字符串，如果所创建的字符串在字符串缓存池中不存在则调用构造函数创建全新的字符串，如果所创建的字符串在字符串缓存池中已有则再拷贝一份到 Java 堆中。</p><p>尽管这是一个简单明显的例子，然而在实际项目中编程者却不那么容易洞察因为这两种方式的选择而带来的性能问题。</p><h3 id="minor2.3">使用构造函数 string() 带来的内存性能隐患和缓解</h3><p>仍然以之前的从 csv 文件中截取 String 为例，先前我们通过用 new String() 去除返回的 String 中附带的原始 String 的方法优化了 <code>subString</code>导致的内存消耗问题。然而，当我们下意识地使用 <code>newString</code>去构造一个全新的字符串而不是用赋值符来创建（重用）一个字符串时，就导致了另一个潜在的性能问题，即：重复创建大量相同的字符串。说到这里，您也许会想到使用缓存池的技术来解决这一问题，大概有如下两种方法：</p><p>方法一，使用 String 的 <code>intern()</code>方法返回 JVM 对字符串缓存池里相应已存在的字符串引用，从而解决内存性能问题，但这个方法并不推荐！原因在于：首先，<code>intern()</code> 所使用的池会是 JVM 中一个全局的池，很多情况下我们的程序并不需要如此大作用域的缓存；其次，intern() 所使用的是 JVM heap 中 PermGen 相应的区域，在 JVM 中 PermGen 是用来存放装载类和创建类实例时用到的元数据。程序运行时所使用的内存绝大部分存放在 JVM heap 的其他区域，过多得使用 <code>intern()</code>将导致 PermGen 过度增长而最后返回 <code>OutOfMemoryError</code>，因为垃圾收集器不会对被缓存的 String 做垃圾回收。所以我们建议使用第二种方式。</p><p>方法二，用户自己构建缓存，这种方式的优点是更加灵活。创建 HashMap，将需缓存的 String 作为 key 和 value 存放入 HashMap。假设我们准备创建的字符串为 key，将 Map cacheMap 作为缓冲池，那么返回 key 的代码如下：</p><div class="codesection"><pre class="displaycode"> private String getCacheWord(String key) { 
+     String tmp = cacheMap.get(key); 
+     if(tmp != null) { 
+            return tmp; 
+     } else { 
+             cacheMap.put(key, key); 
+             return key; 
+     } 
+ }</pre></div><div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p><h2 id="major3">结束语</h2><p>本文通过一个实际项目中遇到的因使用 String 而导致的性能问题讲述了 String 在 JVM 中的存储结构，String 的 API 使用可能造成的性能问题以及解决方法。相信这些建议能对处理大文本分析的朋友有所帮助，同时希望文中提到的某些优化方法能被举一反三的应用在其他有关 String 的性能优化的场合。</p><!--CMA ID: 815518--><!--Site ID: 10--><!--XSLT stylesheet used to transform this file: dw-document-html-7.0.xsl-->
+
+
+</div>
+</div>
+<!-- 1_1_COLUMN_END -->
+
+<!-- SPLIT_COLUMNS_BEGIN -->
+<div class="ibm-columns">
+
+<!-- 6_4_COLUMN_BEGIN -->
+<div class="ibm-col-6-4">
+
+<h2 id="resources" class="ibm-rule">参考资料 </h2><h3 class="dw-resources-category-heading">学习</h3><ul class="ibm-bullet-list"><li><a href="http://www.javamex.com/tutorials/memory/string_memory_usage.shtml">Memory usage of Java Strings and string-related objects</a>：文章主要阐述了 Java 中字符串所占用的内存空间已经不合理使用某些字符串操作方法导致的内存增长隐患。
+			</li><li><a href="http://book.douban.com/subject/1138768/">深入 Java 虚拟机 ( 原书第 2 版 )</a>：书中详细探讨了 Java 对象在 JVM 中的生命周期及垃圾回收的原理，阅读此书可以使程序员在写代码时更注重性能问题。
+			</li><li><a href="http://www.ibm.com/developerworks/cn/java/" onmouseover="linkQueryAppend(this)">developerWorks Java 技术专区</a>：这里有数百篇关于 Java 编程各个方面的文章。
+</li></ul><h3 class="dw-resources-category-heading">讨论</h3><ul class="ibm-bullet-list"><li>加入 <a href="http://www.ibm.com/developerworks/cn/community/" onmouseover="linkQueryAppend(this)">developerWorks 中文社区</a>。查看开发人员推动的博客、论坛、组和维基，并与其他 developerWorks 用户交流。</li></ul>
+
+<!-- INLINE_COMMENTS_BEGIN -->
+<h2 id="icomments" class="ibm-alternate-rule ibm-no-print">条评论</h2>
+    
+<div class="ibm-no-print" id="dw-icomments-container">	
+	<div id="threadShow"></div>
+</div>
+<!-- Sign in OVERLAY STARTS HERE -->
+    
+<!-- Sign in OVERLAY STARTS HERE -->
+<div class="ibm-common-overlay" id="signin_overlay">
+<div class="ibm-head">
+<p><a class="ibm-common-overlay-close" href="#" onclick="dwsi.siInst.clearForm();">关闭 [x]</a></p>
+</div>
+<div class="ibm-body">
+<div class="ibm-main">
+
+ <div class="ibm-title">
+<h2>developerWorks: 登录</h2>
+<div id="ibm-overlay-error-signin" class="no-display"></div>
+</div>
+<div class="ibm-container ibm-alternate ibm-buttons-last">
+<div class="ibm-container-body">
+<p class="ibm-overlay-intro">标有星（<span class="ibm-required">*</span>）号的字段是必填字段。</p> 
+<form class="ibm-column-form" id="sFormId" action="" method="post" name="sForm" onsubmit="return false;">
+<p><label for="ibmid">IBM ID:<span class="ibm-required">*</span></label><span>
+    <input name="ibm-id" id="ibmid" size="25" value="" class="required" type="text" onkeypress="dwsi.siInst.handleEP(event,this.form);" />
+    <br /><a onclick="window.location='/developerworks/dwwi/DWAuthRouter?m=reg&amp;lang=zh_CN&amp;d='+encodeURIComponent(location.protocol + '//' + location.hostname + location.pathname + '#icomments'); return false;" href="#" class="ibm-forward-link">需要一个 IBM ID？</a> <br />
+    <a class="ibm-forward-link" href="/developerworks/dwwi/jsp/WSHelp.jsp?lang=zh_CN">忘记 IBM ID？</a> 
+</span>
+</p> 
+<p><label for="password">密码：<span class="ibm-required">*</span></label><span>
+    <input name="password" id="password" size="25" value="" class="required" type="password" onkeypress="dwsi.siInst.handleEP(event,this.form);" />
+    <br /><a class="ibm-forward-link" href="#" onclick="(function ()
+        {window.location='https://www.ibm.com/account/profile?page=forgot&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(dwsi.siInst.getAuthUrl())+'%3Fm%3Dloginpage%26lang%3Dzh_CN%26d%3D'+encodeURIComponent(location.href);})();">忘记密码？</a>
+    <br /><a class="ibm-forward-link" href="#" onclick="(function () {window.location='https://www.ibm.com/account/profile?page=chpw&amp;lang=zh_CN&amp;appname=ibm&amp;required=null&amp;d='+encodeURIComponent(location.href);})();">更改您的密码</a></span></p> 
+<p class="dw-perm-box">
+	<span><input id="perm" type="checkbox" name="perm_name"/><label for="perm"> 保持登录。</label></span>
+</p>
+<p>单击提交则表示您同意developerWorks 的条款和条件。 <a
+    href="/developerworks/community/terms?lang=zh">查看条款和条件</a>。</p>
+<div class="ibm-buttons-row">
+   <p><input class="ibm-btn-arrow-pri" name="ibm-submit" value="提交" onclick="dwsi.siInst.signin();return false;" type="submit" /><span class="ibm-sep">&nbsp;</span>
+<input value="取消" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="dwsi.siInst.clearForm();ibmweb.overlay.hide('signin_overlay');return false;"/></p>
+</div>
+</form>
+ <div class="ibm-overlay-rule"><hr /></div> 
+
+<p>在您首次登录 developerWorks 时，会为您创建一份个人概要。<strong>您的个人概要中的信息（您的姓名、国家/地区，以及公司名称）是公开显示的，而且会随着您发布的任何内容一起显示，除非您选择隐藏您的公司名称。</strong>您可以随时更新您的 IBM 帐户。</p>
+<div><p class="dw-c-overlay-secure">所有提交的信息确保安全。</p></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ibm-footer"></div>
+</div>
+<!-- Display name OVERLAY STARTS HERE -->
+<div class="ibm-common-overlay" id="displayname_overlay">
+<div class="ibm-head">
+<p><a class="ibm-common-overlay-close" href="#" onclick="dwsi.siInst.clearForm();">关闭 [x]</a></p>
+</div>
+<div class="ibm-body">
+<div class="ibm-main">
+<div class="ibm-title">
+<h2>选择您的昵称</h2><br /><br />
+<div id="ibm-overlay-error-dname" class="no-display"></div>
+</div>
+<div class="ibm-container ibm-alternate ibm-buttons-last">
+<div class="ibm-container-body">
+<p class="ibm-overlay-intro">当您初次登录到 developerWorks 时，将会为您创建一份概要信息，您需要指定一个昵称。您的昵称将和您在 developerWorks 发布的内容显示在一起。</p><p><strong>昵称长度在 3 至 31 个字符之间</strong>。 
+    您的昵称在 developerWorks 社区中必须是唯一的，并且出于隐私保护的原因，不能是您的电子邮件地址。</p>
+<p class="ibm-overlay-intro">标有星（<span class="ibm-required">*</span>）号的字段是必填字段。</p> 
+<form id="dFormId" method="post" action="" name="dForm" onsubmit="return false;" class="ibm-column-form">
+<p><label for="displayname">昵称：<span class="ibm-required">*</span></label><span>
+    <input name="displayname" id="displayname" size="25" value="" type="text" onkeypress="dwsi.siInst.handleEP(event,this.form);" /></span>
+    <span class="ibm-form-note">(昵称长度在 3 至 31 个字符之间)</span>
+</p>
+<p>单击<strong>提交</strong>则表示您同意developerWorks 的条款和条件。 <a href="/developerworks/community/terms?lang=zh">查看条款和条件</a>.</p>
+<div class="ibm-buttons-row">
+   <p><input class="ibm-btn-arrow-pri" name="ibm-submit" value="提交" onclick="dwsi.siInst.signin();return false;" type="submit" /><span class="ibm-sep">&nbsp;</span>
+<input value="取消" type="button" name="ibm-cancel" class="ibm-btn-cancel-sec" onclick="dwsi.siInst.clearForm();ibmweb.overlay.hide('displayname_overlay');return false;" /></p>
+</div>
+</form>
+<div class="ibm-overlay-rule"><hr /></div>
+<div><p class="dw-c-overlay-secure">所有提交的信息确保安全。</p></div>
+</div>
+</div>
+</div>
+</div>
+<div class="ibm-footer"></div>
+</div>
+
+
+<!-- INLINE_COMMENTS_END -->
+
+</div>
+<!-- 6_4_COLUMN_END -->
+
+<!-- 6_2_COLUMN_BEGIN -->
+<div class="ibm-col-6-2">
+
+<!-- Next_Steps -->
+<!-- Dig_Deeper -->
+
+
+<!-- Promotion_Module -->
+    
+<!-- PROMOTION_MODULE_START -->
+<div class="ibm-alternate-rule"><hr /></div>
+<ul class="ibm-portrait-module-list">
+<li><img height="60" width="60" src="//www.ibm.com/developerworks/i/sm-f-cl-puresystems70.jpg" alt=""/>
+<h3><a class="ibm-feature-link"
+    href="http://www.ibm.com/developerworks/cn/puresystems/">IBM PureSystems</a></h3>
+<p>IBM PureSystems™ 系列解决方案是一个专家集成系统</p></li>
+<li><img height="60" width="60" src="//www.ibm.com/developerworks/i/sm-f-knowledgepath50.jpg" alt=""/>
+<h3><a class="ibm-feature-link" href="http://www.ibm.com/developerworks/cn/views/global/libraryview.jsp?type_by=Knowledge+paths">developerWorks 学习路线图</a></h3>
+<p>通过学习路线图系统掌握软件开发技能</p></li>
+<li><img height="60" width="60" src="//www.ibm.com/developerworks/i/sm-f-evaluationsoftware60.png" alt=""/>
+<h3><a class="ibm-feature-link" href="http://www.ibm.com/developerworks/cn/downloads/">软件下载资源中心</a></h3>
+<p>软件下载、试用版及云计算</p></li>
+</ul>
+<!-- PROMOTION_MODULE_END -->
+
+</div>
+<!-- 6_2_COLUMN_END -->
+
+</div>
+<!-- SPLIT_COLUMNS_END -->
+
+<!-- BOTTOM_BACK_TO_TOP -->
+<div class="ibm-columns">
+<div class="ibm-col-1-1">
+	<div class="ibm-alternate-rule"><hr/></div><p class="ibm-ind-link ibm-back-to-top"><a href="#ibm-pcon" class="ibm-anchor-up-link">回页首</a></p>
+</div>
+</div>
+
+<!-- Rating_Meta_BEGIN -->
+<!--Rating_Meta_BEGIN--><div class="metavalue">static.content.url=http://www.ibm.com/developerworks/js/artrating/</div><div class="metavalue">SITE_ID=10</div><div class="metavalue">Zone=Java technology</div><div class="metavalue">ArticleID=815518</div><div class="metavalue">ArticleTitle=Java 性能优化之 String 篇
+		</div><div class="metavalue">publish-date=05142012</div><script language="javascript" type="text/javascript">document.write('<div class="metavalue">url='+location.href.replace(/</g,  '%3C')+'</div>');</script><!--Rating_Meta_END-->
+<!-- Rating_Meta_END -->
+
+</div>
+<!-- END_IBM_CONTENT_MAIN -->
+
+</div>
+<!-- END_IBM_CONTENT_BODY -->
+
+</div>
+<!-- END_IBM_CONTENT -->
+
+</div>
+<!-- END_IBM_PCON -->
+<!-- FOOTER_BEGIN -->
+<!-- FOOTER_BEGIN -->
+<div id="ibm-footer"><!-- IBM footer container; disabled --></div>
+
+<div id="ibm-footer-module-dwwrapper" role="contentinfo" aria-label="developerWorks Footer">
+
+<div id="ibm-footer-module-dw">
+	<div class="dw-footer-columns">
+		<div class="dw-footer-col-5-1">
+			<ul>
+                <li><a href="https://www.ibm.com/developerworks/secure/feedback.jsp?domain=dwchina">帮助</a></li>
+				<li><a href="http://www.ibm.com/developerworks/cn/author/">联系编辑</a></li>
+				<li><a href="https://www.ibm.com/developerworks/secure/myideas2.jsp?domain=dwchina&start=true">提交内容</a></li>
+				<li><a href="http://www.ibm.com/developerworks/cn/rss/">订阅源</a></li>
+			</ul>
+        </div>
+		<div class="dw-footer-col-5-2">
+			<ul>
+			<li><a href="http://www.ibm.com/vrm/newsletter/10104?S_TACT=105AGX52&S_CMP=dwcntop">在线浏览每周时事通讯</a></li>
+				<li><a class="dwcn-sina-link" href="http://weibo.com/ibmdw/" target="_blank">新浪微博</a></li>
+				<li><a href="https://www.ibm.com/developerworks/community/report?lang=zh">报告滥用</a></li>
+				<li><a href="https://www.ibm.com/developerworks/community/terms?lang=zh">使用条款</a></li>
+				<li><a href="https://www.ibm.com/developerworks/cn/community/terms/thirdparty/">第三方提示</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-5-3">
+			<ul>
+				<li><a href="http://www.ibm.com/privacy/cn/zh/">隐私条约</a></li>
+				<li><a href="http://www.ibm.com/ibm/accessibility/cn/">浏览辅助</a></li>
+				<li><a href="http://www.ibm.com/developerworks/cn/academic/">IBM 教育学院教育培养计划</a></li><li><a href="http://www.ibm.com/developerworks/cn/gep/">IBM 创业企业全球扶持计划</a></li><li><a href="http://www.ibm.com/partnerworld/isv/">ISV 资源 (英语)</a></li>
+			</ul>
+		</div>
+		<div class="dw-footer-col-5-4">
+		
+ 
+			<ul>
+				<li><a href="//www.ibm.com/developerworks/cn/newsletter/">dW 中国每周时事通讯</a><br /> 
+				
+				</li>
+			</ul>
+			</form>
+		</div>
+		<div class="dw-footer-col-5-5">
+			<img width="223" height="46" alt="IBM®" src="//dw1.s81c.com/developerworks/i/mf/dwn-ibm-logo-v17.png">
+			<img class="dw-preload" src="//1.www.s81c.com/i/v17/icons/ibm_sprite_social_blue_ON.png" alt="" width="1" height="1"/>
+		</div>
+	</div>
+	<!-- Language selector no-script -->
+	<noscript>
+	<div id="dw-footer-selectlang">
+		<h2><a name="SELECTLANG">选择语言：</a></h2>
+		<ul>
+			<li><a href="http://www.ibm.com/developerworks/" lang="en">English</a></li>
+			<li><a href="http://www.ibm.com/developerworks/cn/">中文</a></li>
+			<li><a href="http://www.ibm.com/developerworks/jp/" lang="ja">日本語</a></li>
+			<li><a href="http://www.ibm.com/developerworks/ru/" lang="ru">Русский</a></li>
+			<li><a href="http://www.ibm.com/developerworks/br/" lang="pt">Português (Brasil)</a></li>
+			<li><a href="http://www.ibm.com/developerworks/ssa/" lang="es">Español</a></li>
+			<li><a href="http://www.ibm.com/developerworks/vn/" lang="vi">Việt</a></li>
+		</ul>
+	</div>
+	</noscript>
+</div>
+
+</div><!-- FOOTER_END --><!-- FOOTER_END -->
+
+<!-- END_IBM-TOP -->
+</div>
+
+<!-- SCRIPTS_INCLUDE_BEGIN -->
+<script type="text/javascript" src="/developerworks/js/v17/dw-comments.js">//</script>
+<script type="text/javascript" language="JavaScript">
+		dojo.ready(function(){
+		rBHash = null;
+		rBHash = new Object();
+		rBHash['viperLang'] = 'zh';
+		rBHash['urlLang'] = 'cn';
+		
+		dwsi.siInst = new dwweb.dynnav.dwsi();
+		dwsi.siInst.initSI();		
+
+		// construct the comment widget
+dwc.cmts = '条评论';
+dwc.signInPreText = '请';
+dwc.signIn = '登录';
+dwc.or = '或';
+dwc.register = '注册';
+dwc.signInPostText = '';
+dwc.leaveCmt = '后发表评论。';
+dwc.view = '查看';
+dwc.totalCmts = '共有评论';
+dwc.postYourCmt = '添加您的评论';
+dwc.show = '显示：';
+dwc.recentCmts = '最新评论';
+dwc.allCmts = '所有评论';
+dwc.tooLongCmt = '您的评论超过了 1000 字符限制';
+dwc.numCharsLeft = '剩余 <span id="charCount">{1}</span> 字符';
+dwc.reportAbuse = '报告滥用';
+dwc.notifyMsg = '有新评论时提醒我';
+dwc.htmlWarning = '注意：评论中不支持 HTML 语法'; 
+dwc.cmt = '评论：';
+dwc.addCmts = '添加评论';
+dwc.addCmt = '添加评论';
+dwc.doNotErase = '--在下方添加评论--'; 
+dwc.viewOrAddCmts = '查看或添加评论';
+dwc.reportInapprCont = '举报不良信息';
+dwc.reportInapprContLink = 'http://www.ibm.com/developerworks/forums/forum.jspa?forumID=1834';
+dwc.postingCmt = '正在发布评论……';
+dwc.noCmt = '快来添加第一条评论';
+dwc.netwkErr = '在检索评论时出错，请稍后刷新。';
+dwc.addACmt = '添加评论';
+dwc.instructCmt = '标有星号（<span class="ibm-required">*</span>）的是必填项目。';
+dwc.btnPost = '发布';
+dwc.btnPostAnon = '匿名发布';
+dwc.btnClrCmt = '清除评论';
+dwc.btnCancel = '取消';
+dwc.showRecent = '显示最新的 {1} 条评论'; // {1} is the count to be substituted
+dwc.showNext = '显示后 {1} 条评论'; // {1} is the count to be substituted
+dwc.showAllCmts = '显示所有评论';
+dwc.enterCmt = '请输入评论内容。';
+dwc.loginErr = '暂时无法验证您的登录状态，请稍后再试。';
+dwc.postErr = '暂时无法发布您的评论，请稍后再试。';
+dwc.postBy = '由 <strong>{1}</strong>  于 {2} '; // {1} is the author to be substituted; {2} is the date
+dwc.siteId = 10;
+dwc.lang = 'zh_CN';
+dwc.viperLang = 'zh';
+//dwc.abuseHref =  null;
+dwc.maxChars = 1000;
+dwc.cmtTxt =  '评论：';
+dwc.cmtsTxt =  '评论：';  
+		dwc && new dwc.comments('threadShow','95%',5,'nCmts','icomments');
+		});
+</script>
+
+
+
+<!-- BEGIN: Use this section to set page specific variables for the Unica Page Tag -->
+<script language="JavaScript">var NTPT_PGEXTRA="ibmSkillLevel=4&ibmCmaId=815518&ibmContentAreas=java";</script>
+<!--END --><!-- SCRIPTS_INCLUDE_END -->
+
+<div id="ibm-metrics">
+<script src="//dw1.s81c.com/common/stats/stats.js" type="text/javascript">//</script>
+</div>
+
+</body>
+</html>
